@@ -1,0 +1,29 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Teste do personagem PHANTOM (aprovação): corredor de concreto com luz verde, ele de pé com a maleta. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:6}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as T from '../../lib/tgp.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), vista = q.get('v') || 'corpo';
+  const CAMS = { corpo: [[.5, 1.15, 3.3], [.1, .95, 0], 34], rosto: [[.12, 1.6, .75], [0, 1.6, 0], 30], meio: [[-.5, 1.4, 1.7], [.05, 1.3, 0], 34] };
+  const [cam, alvo, fov] = CAMS[vista];
+  const S = P.palco({ fov, cam, alvo, fundo: '#020604', nevoa: { cor: T.SOMBRA, perto: 3, longe: 11 },
+    luz: { keyDir: [-.3, .8, .6], keyCor: '#dfeedd', fillDir: [.8, .1, .3], fillCor: '#1d6f3c', amb: '#2a4433' } });
+  const conc = P.TEX.concreto({ cor: '#56645a', junta: '#3a463e' });
+  S.scene.add(P.caixa(8, .1, 10, P.mat({ mapa: conc, rep: [8, 10] }), { pos: [0, -.05, -2], sx: 10, sz: 12 }));
+  S.scene.add(P.caixa(8, 3, .1, P.mat({ mapa: conc, rep: [6, 2] }), { pos: [0, 1.5, -2.2], sx: 8, sy: 4 }));
+  S.scene.add(P.caixa(1.6, .08, .05, P.mat({ cor: T.VERDE, semLuz: true }), { pos: [0, 2.5, -2.1] }));
+  const F = await T.phantom(); S.scene.add(F.obj);
+  F.corpo.braco('L', [.16, -1, .04], [.08, -1, .12]); F.corpo.braco('R', [-.16, -1, .04], [-.06, -1, .1]);
+  const mal = T.maleta(); S.scene.add(mal);
+  const hw = new THREE.Vector3(); F.corpo.osso('f_middle.01.R').getWorldPosition(hw);
+  mal.position.set(hw.x - .02, hw.y - mal.alca - .04, hw.z + .02); mal.rotation.y = Math.PI / 2;
+  window.F = F;
+  S.update = t => { F.animar(t, { boca: t > 2 && t < 4 ? .5 + .5 * Math.sin(t * 7) : 0, pisca: P.clamp(1 - Math.abs((t % 3) - 2.6) / .25), pont: q.get('pont') ? +q.get('pont') : undefined }); mal.pulsar(t); };
+};
+</script></body></html>
