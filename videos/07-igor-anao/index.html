@@ -1,7 +1,8 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- PLANO 7 · IGOR ANÃO (19,5 s): (0–2) sala escura, a lâmpada acende e revela Igor · (2–6) zoom lento · (6–11) Phantom entra pela esquerda e põe a maleta na mesa; Igor fala
-     · (11–13,5) Igor abre a maleta, brilho verde · (13,5–16) close na fita VHS · (16–19,5) a mão de Igor pega a fita. -->
-<script>VIDEO={w:1920,h:1080,fps:30,dur:19.5}</script>
+<!-- PLANO 7 · IGOR ANÃO (18 s): (0–3,5) plano geral: a porta abre, a lâmpada acende sobre a mesa, Phantom entra de costas e Igor já está lá, esperando
+     · (3,5–11) plano médio: Phantom chega pela esquerda e põe a maleta na mesa; Igor fala · (9–11,5) Igor abre a maleta, brilho verde
+     · (11,5–14) close na fita VHS (fala 2) · (14–18) a mão de Igor pega a fita. Tempo interno t = T − 0,3 a partir do corte. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:17}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
 <div id="stage"></div>
@@ -13,56 +14,60 @@ import * as T from "../../lib/tgp.js";
 import * as K from "../../lib/terminal.js";
 const { THREE } = P;
 window.SETUP = async () => {
-  const S = P.palco({ fov: 36, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 2.4, longe: 8 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const S = P.palco({ fov: 36, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 11 }, luz: F.LUZ_SALA }), cena = S.scene;
   const { I, c, Y, lamp } = await F.salaIgor(cena);
-  const Ph = await T.phantom(); cena.add(Ph.obj); Ph.obj.rotation.y = Math.PI / 2; const pc = Ph.corpo; pc.guardar();
+  const Ph = await T.phantom(); cena.add(Ph.obj); const pc = Ph.corpo; pc.guardar();
   const mal = T.maleta(); cena.add(mal); const fita = await T.fitaVHS(); mal.dentro.add(fita);
-  const env = await fetch('../../material/voz-igor.json').then(r => r.ok ? r.json() : null).catch(() => null);   // volume da voz por quadro (tools/som.py)
-  window.I = I; window.S = S;
-  const R = 2, FALA = 4.4, MESA = new THREE.Vector3(-.3, Y, .46), chi = F.chiadoVerde();
-  const boca = t => { const q = Math.round((t - FALA) * 30); return env && q >= 0 && q < env.length ? env[q] : 0; };
-  const V3 = (x, y, z) => new THREE.Vector3(x, y, z); let fpos = null, FP = null;
-  // de onde a maleta sai da mão (pose final da caminhada) — calculado uma vez, pra qualquer quadro dar o mesmo resultado
-  Ph.obj.position.set(-.8, 0, .12); pc.repor(); pc.braco('L', [0, -1, -.1], [0, -1, .05]); pc.braco('R', [0, -1, .1], [0, -1, .15]); mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); const INI = mal.position.clone();
-  mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));       // onde a fita descansa, com a maleta na mesa
+  const VOZ = await fetch('../../material/voz-igor.json').then(r => r.ok ? r.json() : null).catch(() => null);   // volume da voz por quadro (tools/som.py)
+  const G = 3.5, MESA = new THREE.Vector3(-.3, Y, .46), chi = F.chiadoVerde(), V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const boca = TT => { let v = 0; for (const f of VOZ?.p7 ?? []) { const q = Math.round((TT - f.t) * 30); if (q >= 0 && q < f.env.length) v = Math.max(v, f.env[q]); } return v; };
+  // de onde a maleta sai da mão (pose final da caminhada) e onde a fita descansa — calculados uma vez
+  Ph.obj.rotation.y = Math.PI / 2; Ph.obj.position.set(-.8, 0, .12); pc.repor(); pc.braco('L', [0, -1, -.1], [0, -1, .05]); pc.braco('R', [0, -1, .1], [0, -1, .15]); mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); const INI = mal.position.clone();
+  mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));
+  // luz da porta aberta no chão (atrás da câmera do plano geral)
+  const porta = P.malha(new THREE.PlaneGeometry(1.1, 3.4, 2, 6), P.mat({ cor: '#7dffa0', opac: .16, aditivo: true, semLuz: true, lados: THREE.DoubleSide }), { pos: [-.7, .02, 3.6], rot: [-Math.PI / 2, 0, 0] }); cena.add(porta);
   S.update = TT => {
-    const t = TT - R, close = t >= 11.5, pega = t >= 14;
-    const liga = TT < 1.2 ? 0 : TT < 1.26 ? 1 : TT < 1.34 ? .25 : 1;                             // a lâmpada estala e acende
-    // Phantom: entra andando (4–6,2), pousa a maleta (6,2–7,4), recolhe o braço
-    const u = P.clamp((t - 4) / 2.2), x = P.lerp(-2.6, -.8, u), fase = u * 1.8 * 3.9, pousa = P.suave(6.2, 7.3, t), solta = P.suave(7.4, 8.2, t);
-    Ph.obj.visible = t >= 3.9 && !close; pc.repor();
-    const sobe = u < 1 ? F.andar(pc, fase, { maleta: true }) : (pc.braco('L', [0, -1, -.1], [0, -1, .05]), pc.braco('R', [0, -1, .1], [0, -1, .15]), 0);
-    Ph.obj.position.set(x, sobe, .12); Ph.obj.rotation.y = Math.PI / 2 - .6 * P.suave(6, 7, t);
-    if (pousa <= 0) { mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); mal.visible = t >= 3.9; }
-    else {
-      mal.visible = true; mal.position.lerpVectors(INI, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .22; mal.deitar(P.suave(.25, .9, pousa));
-      if (solta < 1) pc.alcancar('R', mal.position.clone().add(V3(-.12, .12 + .1 * pousa, 0)).toArray(), [0, -.3, 1], .12);
+    const geral = TT < G, t = TT - .3, close = !geral && t >= 11.5, pega = t >= 14;
+    const liga = TT < .9 ? 0 : TT < .96 ? 1 : TT < 1.05 ? .25 : 1;                                // a lâmpada estala e acende
+    porta.visible = geral; porta.scale.x = P.suave(0, .7, TT);
+    const pousa = P.suave(6.2, 7.3, t), solta = P.suave(7.4, 8.2, t);
+    pc.repor(); mal.visible = true;
+    if (geral) {                                                                                  // Phantom entra de costas, andando até a mesa
+      const d = Math.max(0, TT - .5) * 1.0, sobe = F.andar(pc, d * 3.9, { maleta: true });
+      Ph.obj.visible = true; Ph.obj.rotation.y = Math.PI + .12; Ph.obj.position.set(-.7 - d * .1, sobe, 4.1 - d); mal.rotation.y = Math.PI / 2; mal.deitar(0); F.segurar(pc, mal);
+    } else {                                                                                      // plano médio: chega pela esquerda (4–6,2), pousa a maleta (6,2–7,4)
+      const u = P.clamp((t - 3.4) / 2.8), x = P.lerp(-2.3, -.8, u), fase = u * 1.5 * 3.9;
+      const sobe = u < 1 ? F.andar(pc, fase, { maleta: true }) : (pc.braco('L', [0, -1, -.1], [0, -1, .05]), pc.braco('R', [0, -1, .1], [0, -1, .15]), 0);
+      Ph.obj.visible = !close; Ph.obj.position.set(x, sobe, .12); Ph.obj.rotation.y = Math.PI / 2 - .6 * P.suave(6, 7, t);
+      if (pousa <= 0) { mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); }
+      else { mal.rotation.y = 0; mal.position.lerpVectors(INI, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .22; mal.deitar(P.suave(.25, .9, pousa));
+        if (solta < 1) pc.alcancar('R', mal.position.clone().add(V3(-.12, .12 + .1 * pousa, 0)).toArray(), [0, -.3, 1], .12); }
     }
-    Ph.animar(t, { pisca: (t % 3.3) < .12 ? 1 : 0, pont: .36 + .05 * Math.sin(t * 2.1) });
-    // Igor: escuta, fala (a mão acompanha), abre a maleta, pega a fita
-    const abre = P.suave(10.25, 11.3, t), maos = P.suave(9.0, 9.6, t) * (1 - P.suave(11.4, 11.6, t)), fala = boca(t), gesto = P.suave(4.4, 4.8, t) * (1 - P.suave(8.9, 9.4, t));
-    const f0 = fita.getWorldPosition(V3(0, 0, 0));
+    Ph.animar(TT, { pisca: (TT % 3.3) < .12 ? 1 : 0, pont: (geral ? .5 : .36) + .05 * Math.sin(TT * 2.1) });
+    // Igor: espera, olha quem chega, fala (a mão acompanha), abre a maleta, pega a fita
+    const abre = P.suave(10.25, 11.3, t), maos = P.suave(9.0, 9.6, t) * (1 - P.suave(11.4, 11.9, t)), fala = boca(TT), gesto = geral ? 0 : P.suave(4.4, 4.9, t) * (1 - P.suave(8.3, 8.9, t));
     const m = {};
-    if (gesto > 0 && maos <= 0) m.R = [-.02 + .05 * gesto, Y + .045 + gesto * (.07 + .05 * fala + .02 * Math.sin(t * 6)), .33 + .04 * gesto];
-    if (maos > 0) { m.R = [P.lerp(-.02, MESA.x - .13, maos), Y + .13, P.lerp(.33, MESA.z - .03, maos)]; m.L = [P.lerp(.27, MESA.x + .13, maos), Y + .13, P.lerp(.27, MESA.z - .03, maos)]; }
-    if (pega) { const a = P.suave(14, 15, t), s = P.suave(15.25, 16.9, t);                                 // desce a mão, fecha na fita, sobe com ela
-      if (t < 15.2) { mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); } fpos = FR; const mao = V3(P.lerp(-.02, fpos.x, a), P.lerp(Y + .3, fpos.y + .05, a) + s * .34, P.lerp(.3, fpos.z, a) - s * .3);
-      m.R = mao.toArray(); m.poloR = [-.8, .2, -.5]; m.L = [.3, Y + .04, .1];
+    if (gesto > 0) { m.R = [.04, Y + .14 + .05 * fala + .015 * Math.sin(t * 6), .36]; m.kR = gesto * (.55 + .45 * Math.min(1, fala * 1.5)); }
+    if (maos > 0) { m.R = [MESA.x - .13, Y + .135, MESA.z - .03]; m.L = [MESA.x + .13, Y + .135, MESA.z - .03]; m.kR = m.kL = maos; }
+    if (pega) { const a = P.suave(14, 15, t), s = P.suave(15.25, 16.9, t);                         // desce a mão, fecha na fita, sobe com ela
+      const mao = V3(P.lerp(-.02, FR.x, a), P.lerp(Y + .3, FR.y + .05, a) + s * .34, P.lerp(.3, FR.z, a) - s * .3);
+      m.R = mao.toArray(); m.poloR = [-.8, .2, -.5]; m.kR = P.suave(14, 14.5, t);
       if (t >= 15.2) { cena.attach(fita); fita.position.set(mao.x, mao.y - .05, mao.z + .03); fita.rotation.set(-Math.PI / 2 + s * .4, 0, .12 * s); } }
-    else if (fita.parent !== mal.dentro) { mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); fpos = null; }
+    if (!pega || t < 15.2) { if (fita.parent !== mal.dentro) mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); }
     m.inclina = .16 * P.suave(8.9, 9.6, t); I.pose(TT, m); I.animar(TT, { boca: fala, pisca: (TT % 4.1) > 3.95 ? 1 : 0 });
-    // pra onde ele olha: Phantom chegando → a maleta pousando → de volta pro Phantom enquanto fala → desce o olhar pra maleta e fica nela
-    const praPh = P.suave(4.2, 5.0, t) * (1 - P.suave(6.3, 6.9, t)) + P.suave(7.7, 8.2, t) * (1 - P.suave(8.7, 9.2, t)), praMala = P.suave(6.4, 7.0, t) * (1 - P.suave(7.6, 8.1, t)) + P.suave(8.8, 9.5, t);
+    // pra onde ele olha: quem entra → a maleta pousando → de volta pro Phantom enquanto fala → desce o olhar pra maleta e fica nela
+    const praPh = geral ? P.suave(1.4, 2.2, TT) * .5 : P.suave(3.3, 3.9, t) * (1 - P.suave(6.3, 6.9, t)) + P.suave(7.7, 8.2, t) * (1 - P.suave(8.7, 9.2, t)), praMala = geral ? 0 : P.suave(6.4, 7.0, t) * (1 - P.suave(7.6, 8.1, t)) + P.suave(8.8, 9.5, t);
     I.cabeca.rotation.x += .52 * praMala + .05 * fala - .06 * praPh; I.cabeca.rotation.y += -.42 * praPh - .3 * praMala; I.cabeca.position.z += .03 * praMala; I.cabeca.position.y -= .02 * praMala;
-    mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(t);
+    mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(TT);
     lamp.acender(liga, S.camera);
     const g = abre * (.75 + .25 * Math.sin(t * 9));
-    if (g > 0) P.luz({ ...F.LUZ_SALA, fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#1d5f37').lerp(new THREE.Color('#39ff6a'), g * .8).getHexString() });
-    if (!close) { S.camera.up.set(0, 1, 0); const zo = P.clamp(TT / 13.5); S.camera.fov = 36; S.camera.position.set(0, 1.02 + .02 * zo, 2.0 - .5 * zo); S.camera.lookAt(-.1 * P.suave(4, 7, t), 1.04 - .03 * P.suave(9, 11, t), 0); }
+    if (g > 0) P.luz({ ...F.LUZ_SALA, fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#1d5f37').lerp(new THREE.Color('#39ff6a'), g * .4).getHexString() });
     S.camera.up.set(0, close ? 0 : 1, close ? -1 : 0);
-    if (close) { const q = P.clamp((t - 11.5) / 6); S.camera.fov = 34; S.camera.position.set(FR.x + .01, FR.y + .5 - q * .08, FR.z + .05); S.camera.lookAt(FR.x, FR.y, FR.z); }
+    if (geral) { S.camera.fov = 42; S.camera.position.set(.25, 1.5, 5.2 - TT * .12); S.camera.lookAt(0, .95, 0); }
+    else if (!close) { const zo = P.clamp((t - 3.2) / 8.3); S.camera.fov = 36; S.camera.position.set(.06, 1.04 + .02 * zo, 2.45 - .65 * zo); S.camera.lookAt(.04 - .12 * P.suave(4, 7, t), 1.0 - .03 * P.suave(9, 11, t), 0); }
+    else { const q = P.clamp((t - 11.5) / 6); S.camera.fov = 34; S.camera.position.set(FR.x + .01, FR.y + .5 - q * .08, FR.z + .05); S.camera.lookAt(FR.x, FR.y, FR.z); }
     S.camera.updateProjectionMatrix();
-    I.cabeca.visible = !close; I.pescoco.visible = !close;
+    I.cabeca.visible = !close; I.pescoco.visible = !close; lamp.visible = !close;
     chi.desenha(Math.round(TT * 30), close ? .1 : 0, { dens: .25 });
   };
 };

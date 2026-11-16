@@ -1,5 +1,5 @@
 {
- "dur": 100,
+ "dur": 97.5,
  "bpm": 120,
  "fps": 30,
  "music": {
@@ -15,7 +15,7 @@
   {
    "type": "drone",
    "t": 46,
-   "d": 28,
+   "d": 25.5,
    "root": 31,
    "gain": -2
   },
@@ -429,402 +429,347 @@
    "t": 53.02
   },
   {
+   "type": "whoosh_slow",
+   "t": 54,
+   "gain": -6
+  },
+  {
    "type": "lamp_click",
-   "t": 55.2,
+   "t": 54.9,
    "gain": 6
   },
   {
    "type": "lampada",
-   "t": 55.2,
-   "d": 18.3,
+   "t": 54.9,
+   "d": 16,
    "rede": 60,
    "pisca": 0,
    "gain": -9
   },
   {
    "type": "passo",
-   "t": 60.1,
+   "t": 54.8,
+   "gain": -3
+  },
+  {
+   "type": "passo",
+   "t": 55.36,
+   "gain": -3
+  },
+  {
+   "type": "passo",
+   "t": 55.92,
+   "gain": -3
+  },
+  {
+   "type": "passo",
+   "t": 56.48,
+   "gain": -3
+  },
+  {
+   "type": "passo",
+   "t": 57.04,
+   "gain": -3
+  },
+  {
+   "type": "passo",
+   "t": 57.8,
    "gain": -8
   },
   {
    "type": "passo",
-   "t": 60.66,
+   "t": 58.36,
    "gain": -8
   },
   {
    "type": "passo",
-   "t": 61.22,
+   "t": 58.92,
    "gain": -8
   },
   {
    "type": "passo",
-   "t": 61.78,
+   "t": 59.48,
+   "gain": -8
+  },
+  {
+   "type": "passo",
+   "t": 60.04,
    "gain": -8
   },
   {
    "type": "cut",
-   "t": 63.2,
+   "t": 61.5,
    "gain": -10
   },
   {
    "type": "click",
-   "t": 65.7,
+   "t": 64.0,
    "gain": 5
   },
   {
    "type": "click",
-   "t": 66.05,
+   "t": 64.35,
    "gain": 5
   },
   {
    "type": "whoosh_slow",
-   "t": 66.3,
+   "t": 64.6,
    "gain": -10
   },
   {
    "type": "chiado",
-   "t": 67.5,
-   "d": 6,
-   "gain": -2
+   "t": 65.8,
+   "d": 5.2,
+   "gain": -4
   },
   {
    "type": "paper",
-   "t": 71.25,
+   "t": 69.55,
    "gain": 4
   },
   {
    "type": "cut",
-   "t": 76.15,
+   "t": 73.65,
    "gain": -7
   },
   {
    "type": "turbina",
-   "t": 76.2,
+   "t": 73.7,
    "d": 1.3,
    "gain": -9
   },
   {
    "type": "ui_blip",
-   "t": 76.7
+   "t": 74.2
   },
   {
    "type": "lamp_click",
-   "t": 77.2,
+   "t": 74.7,
    "gain": 2
   },
   {
    "type": "rede",
-   "t": 77.2,
+   "t": 74.7,
    "d": 10.5,
    "gain": -6
   },
   {
    "type": "type",
-   "t": 78.2,
+   "t": 75.7,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 78.425,
+   "t": 75.925,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 78.604,
+   "t": 76.104,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 78.766,
+   "t": 76.266,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 78.942,
+   "t": 76.442,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 79.107,
+   "t": 76.607,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 79.281,
+   "t": 76.781,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 79.448,
+   "t": 76.948,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 79.62,
+   "t": 77.12,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 79.788,
+   "t": 77.288,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 79.959,
+   "t": 77.459,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 80.128,
+   "t": 77.628,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 80.299,
+   "t": 77.799,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 80.467,
+   "t": 77.967,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 80.638,
+   "t": 78.138,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 80.807,
+   "t": 78.307,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 80.978,
+   "t": 78.478,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 81.147,
+   "t": 78.647,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 81.317,
+   "t": 78.817,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 81.487,
+   "t": 78.987,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 81.657,
+   "t": 79.157,
    "gain": 3
   },
   {
    "type": "type",
-   "t": 81.826,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 81.996,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 82.166,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 82.336,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 82.506,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 82.676,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 82.845,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 83.015,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 83.185,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 83.355,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 83.525,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 83.694,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 83.864,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 84.034,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 84.204,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 84.374,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 84.543,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 84.713,
-   "gain": 3
-  },
-  {
-   "type": "type",
-   "t": 84.883,
+   "t": 79.326,
    "gain": 3
   },
   {
    "type": "ui_blip",
-   "t": 85.1
+   "t": 82.6
   },
   {
    "type": "ui_blip",
-   "t": 85.9
+   "t": 83.4
+  },
+  {
+   "type": "ui_blip",
+   "t": 84.2
+  },
+  {
+   "type": "ui_blip",
+   "t": 85.0
+  },
+  {
+   "type": "chiado",
+   "t": 82.5,
+   "d": 3,
+   "gain": -3
+  },
+  {
+   "type": "ui_blip",
+   "t": 85.8
   },
   {
    "type": "ui_blip",
    "t": 86.7
   },
   {
-   "type": "ui_blip",
-   "t": 87.5
-  },
-  {
-   "type": "chiado",
-   "t": 85.0,
-   "d": 3,
-   "gain": -3
-  },
-  {
-   "type": "ui_blip",
-   "t": 88.3
-  },
-  {
-   "type": "ui_blip",
-   "t": 89.2
-  },
-  {
    "type": "click",
-   "t": 91.0,
+   "t": 88.5,
    "gain": 6
   },
   {
    "type": "ui_blip",
-   "t": 91.45
+   "t": 88.95
   },
   {
    "type": "chiado",
-   "t": 88,
+   "t": 85.5,
    "d": 6,
    "gain": -4
   },
   {
    "type": "tick",
-   "t": 91.5
+   "t": 89.0
   },
   {
    "type": "tick",
-   "t": 91.72
+   "t": 89.22
   },
   {
    "type": "tick",
-   "t": 91.94
+   "t": 89.44
   },
   {
    "type": "tick",
-   "t": 92.16
+   "t": 89.66
   },
   {
    "type": "tick",
-   "t": 92.38
+   "t": 89.88
   },
   {
    "type": "tick",
-   "t": 92.6
+   "t": 90.1
   },
   {
    "type": "tick",
-   "t": 92.82
+   "t": 90.32
   },
   {
    "type": "tick",
-   "t": 93.04
+   "t": 90.54
   },
   {
    "type": "tick",
-   "t": 93.26
+   "t": 90.76
   },
   {
    "type": "tick",
-   "t": 93.48
+   "t": 90.98
   },
   {
    "type": "tick",
-   "t": 93.7
+   "t": 91.2
   },
   {
    "type": "chiado_sobe",
-   "t": 94,
+   "t": 91.5,
    "d": 5.0
   },
   {
    "type": "estrondo",
-   "t": 99.0,
+   "t": 96.5,
    "d": 0.9
   },
   {
    "type": "boom",
-   "t": 99.0,
+   "t": 96.5,
    "gain": 2
   },
   {
    "type": "chiado",
-   "t": 99.05,
+   "t": 96.55,
    "d": 0.83,
    "gain": 14
   }

@@ -21,10 +21,8 @@ window.SETUP = async () => {
 
   // textos
   const preto = F.camada('background:#000'), chi = F.chiadoVerde();
-  const tit = F.camada(); tit.innerHTML = `<div style="position:absolute;left:0;right:0;top:300px;text-align:center;${F.TITULO}font-size:170px;color:${F.VERDE};text-shadow:0 0 0 #000,6px 6px 0 #03220f" id="t1"></div>
-    <div style="position:absolute;left:0;right:0;top:505px;text-align:center;${F.TERMINAL}font-size:44px;color:#b9ffc9;text-shadow:3px 3px 0 #03220f" id="t2"></div>`;
-  const ficha = F.camada(); ficha.innerHTML = `<div id="fx" style="position:absolute;right:110px;top:250px;width:640px;padding:34px 40px;background:rgba(2,12,6,.82);border:3px solid ${F.VERDE};${F.TERMINAL}font-size:40px;line-height:1.55;color:${F.VERDE};white-space:pre"></div>`;
-  const TXT = 'REGISTRO\n────────────────\nNOME: PHANTOM\nIDADE: 19 ANOS\nCONDIÇÃO: MUDO\nFUNÇÃO: ';
+  // título e ficha entram na edição final (Remotion: edicao/src/Filme.tsx), nítidos por cima
+  const TXT = '';
   for (let i = 0; i < 14; i++) if ('THE GREEN PATH'[i] !== ' ') cue('key', 3 + i * .12);
   for (let i = 0; i < TXT.length; i += 2) cue('type', 6.05 + i / 62);
 
@@ -34,12 +32,6 @@ window.SETUP = async () => {
     S.camera.position.set(x + 2.6, .62, 7.4); S.camera.lookAt(x + 1.1, .95, 0);
     for (const p of postes) P.encarar(p.halo, S.camera), p.halo.quaternion.premultiply(p.getWorldQuaternion(new THREE.Quaternion()).invert());
     preto.style.opacity = t < 1.5 ? 1 : 0; chi.desenha(Math.round(t * 30), t < 1.5 ? .22 : 0, { dens: .35 });
-    const on = t >= 3 && t < 6; tit.style.opacity = on ? 1 : 0;
-    document.getElementById('t1').textContent = F.digitado('THE GREEN PATH', t, 3, 1 / .12);
-    document.getElementById('t2').textContent = t >= 4.9 ? 'feito por Igor Anão' : '';
-    ficha.style.opacity = t >= 6 ? 1 : 0;
-    const n = Math.floor((t - 6.05) * 62), pisca = Math.floor(t * 5) % 2;
-    document.getElementById('fx').innerHTML = TXT.slice(0, Math.max(0, n)) + (n >= TXT.length ? `<span style="opacity:${pisca ? 1 : .12}">????</span>` : '▮');
   };
 };
 </script></body></html>
