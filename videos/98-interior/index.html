@@ -1,0 +1,18 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as M from '../../lib/modelo.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), cam = (q.get('cam') || '3,2,4').split(',').map(Number), alvo = (q.get('alvo') || '0,.8,0').split(',').map(Number);
+  const S = P.palco({ fundo: '#30363a', fov: +(q.get('fov') || 60), cam, alvo, luz: { amb: '#a0a0a0' }, tremor: 0 });
+  const m = await M.carregar('material/modelos/' + (q.get('arq') || 'itch/carros/hey-sedan-blue.glb'), { texMax: 256, mat: { lados: THREE.DoubleSide } }); S.scene.add(m.obj); window.m = m;
+  for (const n of (q.get('fora') || '').split(',').filter(Boolean)) { const o = m.achar(n); if (o) o.visible = false; }
+  window.THREE = THREE; window.raio = (o, d) => { const r = new THREE.Raycaster(new THREE.Vector3(...o), new THREE.Vector3(...d).normalize()); r.firstHitOnly = false; const h = r.intersectObject(m.obj, true); return h.slice(0, 4).map(k => +k.distance.toFixed(2) + ":" + k.object.name.replace("sedan_blue", "").slice(0, 8)); };
+  m.obj.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(m.obj); window.bb = [b.min.toArray(), b.max.toArray()];
+};
+</script></body></html>

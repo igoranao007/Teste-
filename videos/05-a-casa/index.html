@@ -24,8 +24,8 @@ window.SETUP = async () => {
   const car = await F.carro(); ext.add(car);
   const curva = new THREE.CatmullRomCurve3([[0, 0, 26], [0, 0, 8], [.6, 0, -2], [4, 0, -5.6], [10, 0, -6], [18, 0, -6], [24.5, 0, -6.6]].map(p => new THREE.Vector3(...p)));
   // dentro do carro
-  const dash = F.interiorCarro(); inte.add(dash);
-  const Ph = await T.phantom(); inte.add(Ph.obj); Ph.obj.position.set(-.34, -.4, .04); const c = Ph.corpo; c.sentar(); c.braco('L', [.14, -.8, .6], [-.25, -.02, 1]); c.guardar();
+  const dash = await F.interiorCarro(); inte.add(dash);
+  const Ph = await T.phantom({ esc: .84 }); inte.add(Ph.obj); Ph.obj.position.set(.35, -.2, .2); const c = Ph.corpo; c.sentar(); c.alcancar('L', [dash.volante.x + .13, dash.volante.y + .05, dash.volante.z - .03], [.5, -.8, -.2], .1); c.guardar();
   const B = new THREE.Vector3(); dash.botao.getWorldPosition(B);
 window.Ph = Ph; window.S = S;
   const preto = F.camada('background:#000');
@@ -40,12 +40,12 @@ window.Ph = Ph; window.S = S;
       casa.halo.quaternion.copy(S.camera.quaternion).premultiply(casa.getWorldQuaternion(new THREE.Quaternion()).invert());
       poste.halo.quaternion.copy(S.camera.quaternion).premultiply(poste.getWorldQuaternion(new THREE.Quaternion()).invert());
     } else if (t < 6) {
-      P.nevoa({ perto: 3, longe: 20 }); P.luz({ keyDir: [-.6, .5, .5], keyCor: '#9cc4a8', fillDir: [.2, -.3, .9], fillCor: '#2a8a48', amb: '#1c3324' });
+      P.nevoa({ perto: 3, longe: 20 }); P.luz({ keyDir: [-.5, .6, -.6], keyCor: '#b4d8be', fillDir: [.2, -.3, .9], fillCor: '#2a8a48', amb: '#3a5a44' });
       const u = t - 4, aperta = P.suave(.25, .9, u), fundo = P.suave(.95, 1.1, u) * (1 - P.suave(1.25, 1.45, u));
-      Ph.obj.position.set(-.34 + .1 * aperta, -.4, .04 + .12 * aperta); c.repor(); dash.volante.visible = false; c.alcancar('R', [P.lerp(-.1, B.x, aperta), P.lerp(.72, B.y, aperta), P.lerp(.3, B.z - .03 + fundo * .02, aperta)], [.6, -.8, -.2], .17);
-      dash.botao.position.z = .55 + fundo * .012; dash.led.material.uniforms.uCor.value.set(u > 1.05 ? F.VERDE : '#0f3a1c');
+      c.repor(); c.alcancar('R', [P.lerp(.22, B.x, aperta), P.lerp(.72, B.y, aperta), P.lerp(.42, B.z - .04 + fundo * .02, aperta)], [-.6, -.8, -.2], .1);
+      dash.botao.position.z = .598 + fundo * .012; dash.led.material.uniforms.uCor.value.set(u > 1.05 ? F.VERDE : '#0f3a1c');
       Ph.animar(t, { pont: .66 });
-      S.camera.fov = 34; S.camera.updateProjectionMatrix(); S.camera.position.set(.22, 1.04 - u * .01, .2); S.camera.lookAt(-.13, .88, .55);
+      S.camera.fov = 46; S.camera.updateProjectionMatrix(); S.camera.position.set(-.12, 1.06 - u * .01, .2); S.camera.lookAt(.1, .8, .6);
     }
   };
 };
