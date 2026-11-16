@@ -10,10 +10,10 @@ import * as T from '../../lib/tgp.js';
 const { THREE } = P;
 window.SETUP = async () => {
   const q = new URLSearchParams(location.search), vista = q.get('v') || 'corpo';
-  const CAMS = { corpo: [[.5, 1.15, 3.3], [.1, .95, 0], 34], rosto: [[.12, 1.6, .75], [0, 1.6, 0], 30], meio: [[-.5, 1.4, 1.7], [.05, 1.3, 0], 34] };
+  const CAMS = { corpo: [[.5, 1.15, 3.3], [.1, .95, 0], 34], rosto: [[.1, 1.62, .7], [0, 1.62, 0], 30], meio: [[-.5, 1.4, 1.7], [.05, 1.3, 0], 34], maleta: [[-.8, .6, 1.2], [-.3, .45, 0], 34] };
   const [cam, alvo, fov] = CAMS[vista];
   const S = P.palco({ fov, cam, alvo, fundo: '#020604', nevoa: { cor: T.SOMBRA, perto: 3, longe: 11 },
-    luz: { keyDir: [-.3, .8, .6], keyCor: '#dfeedd', fillDir: [.8, .1, .3], fillCor: '#1d6f3c', amb: '#2a4433' } });
+    luz: { keyDir: [-.25, .45, .85], keyCor: '#f0eee6', fillDir: [.8, .1, .3], fillCor: '#3a4a40', amb: '#5a5d5a' } });
   const conc = P.TEX.concreto({ cor: '#56645a', junta: '#3a463e' });
   S.scene.add(P.caixa(8, .1, 10, P.mat({ mapa: conc, rep: [8, 10] }), { pos: [0, -.05, -2], sx: 10, sz: 12 }));
   S.scene.add(P.caixa(8, 3, .1, P.mat({ mapa: conc, rep: [6, 2] }), { pos: [0, 1.5, -2.2], sx: 8, sy: 4 }));

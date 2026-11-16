@@ -1,0 +1,29 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Catálogo: mostra vários modelos lado a lado, normalizados. ?arq=a.glb,b.glb (a partir de material/modelos/) &cols=5 &rot=0.6 -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}.rot{position:absolute;color:#fff;font:700 22px monospace;text-shadow:2px 2px 0 #000;transform:translateX(-50%)}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as M from '../../lib/modelo.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), arqs = (q.get('arq') || '').split(',').filter(Boolean), cols = +(q.get('cols') || 5), rot = +(q.get('rot') ?? .6);
+  const rows = Math.ceil(arqs.length / cols), cw = 2.4, ch = 2.4;
+  const S = P.palco({ fundo: '#30363a', fov: 30, cam: [0, 0, 10], alvo: [0, 0, 0], luz: { amb: '#909090' }, tremor: 0 });
+  const H = rows * ch, W = cols * cw; S.camera.position.z = Math.max(H / 2 / Math.tan(15 * Math.PI / 180), W / 2 / Math.tan(15 * Math.PI / 180) / (16 / 9)) * 1.02;
+  const st = document.getElementById('stage');
+  for (const [i, a] of arqs.entries()) {
+    const cx = (i % cols - (cols - 1) / 2) * cw, cy = ((rows - 1) / 2 - Math.floor(i / cols)) * ch;
+    try {
+      const m = await M.carregar('material/modelos/' + a, { texMax: 256 });
+      const g = new THREE.Group(); g.add(m.obj); m.obj.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(m.obj), t = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+      m.obj.position.sub(c); g.scale.setScalar(1.9 / Math.max(t.x, t.y, t.z)); g.rotation.y = rot; g.rotation.x = .15; g.position.set(cx, cy + .1, 0); S.scene.add(g);
+    } catch (e) { console.error(a, e.message); }
+    const v = new THREE.Vector3(cx, cy - ch / 2 + .25, 0).project(S.camera), d = document.createElement('div');
+    d.className = 'rot'; d.textContent = `${i + 1} ${a.split('/').pop().replace('.glb', '')}`; d.style.left = (v.x + 1) / 2 * 1920 + 'px'; d.style.top = (1 - v.y) / 2 * 1080 + 'px'; st.appendChild(d);
+  }
+};
+</script></body></html>
