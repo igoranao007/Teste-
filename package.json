@@ -1,30 +1,23 @@
 {
-  "name": "ps1-lab-animation",
-  "version": "0.1.0",
+  "name": "the-green-path",
   "private": true,
-  "description": "Animação estilo PS1 (Three.js) editada no Remotion e exportada em MP4",
+  "description": "THE GREEN PATH — vídeo low-poly PS1 (three.js + Playwright + ffmpeg); Remotion em edicao/ pra edição final",
   "scripts": {
-    "studio": "remotion studio src/index.ts",
-    "render": "remotion render src/index.ts Main out/video.mp4 --codec=h264",
-    "still": "remotion still src/index.ts Main out/frame.png --frame=60",
-    "mix": "bash scripts/mix-audio.sh"
+    "preview": "node render.mjs --preview=12",
+    "render": "node render.mjs",
+    "studio": "remotion studio edicao/src/index.ts"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.9",
-    "@react-three/fiber": "^9.8.2",
-    "@remotion/captions": "^4.0.544",
-    "@remotion/cli": "^4.0.544",
-    "@remotion/media-utils": "^4.0.544",
-    "@remotion/three": "^4.0.544",
-    "@remotion/transitions": "^4.0.544",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "remotion": "^4.0.544",
-    "three": "^0.187.0"
+    "gsap": "^3.15.0",
+    "playwright": "1.63.0",
+    "three": "^0.186.1",
+    "remotion": "4.0.544",
+    "@remotion/cli": "4.0.544",
+    "@remotion/transitions": "4.0.544",
+    "@remotion/captions": "4.0.544",
+    "@remotion/media-utils": "4.0.544",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
-  "devDependencies": {
-    "@types/react": "^19.3.0",
-    "@types/three": "^0.187.0",
-    "typescript": "^7.0.2"
-  }
+  "devDependencies": { "typescript": "^5.6.0", "@types/react": "^19.0.0" }
 }

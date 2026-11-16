@@ -1,0 +1,100 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Exemplo 2 · roteiro "como o veneno de cobra vira remédio": jararaca de perfil cravando as presas na membrana
+     do copo, o veneno pinga dentro; mesa de laboratório na sala de teste. Paleta neutra, 1 acento (amarelo do veneno). -->
+<script>VIDEO={w:1080,h:1920,fps:30,dur:5}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+const { THREE, clamp, lerp } = P;
+
+const S = P.palco({
+  chaoY: -.98,                                    // pé da mesa no chão da sala de teste
+  fov: 40, cam: [.66, .74, 3.35], alvo: [.2, .2, 0],
+  luz: { keyDir: [-.4, .85, .55], keyCor: '#ece6dc', fillDir: [.8, .15, .3], fillCor: '#5b626e', amb: '#585a60' },
+});
+const cena = S.scene;
+
+// jararaca: marrom-oliva, dorso mais escuro, barriga creme e manchas em trapézio nos flancos,
+// alternadas dos 2 lados (zigue-zague). v .25 = dorso, v .75 = barriga; com flipY, y = (1 - v)·h
+const jararaca = P.textura(32, 32, (x, w, h, r) => {
+  x.fillStyle = '#8b7553'; x.fillRect(0, 0, w, h);
+  x.fillStyle = '#7a6545'; x.fillRect(0, Math.round(h * .68), w, Math.round(h * .14));
+  x.fillStyle = '#d6cba6'; x.fillRect(0, Math.round(h * .13), w, Math.round(h * .24));
+  x.fillStyle = '#3a2a1c';
+  const trap = (cx, yDorso, yBase) => { const n = Math.abs(yBase - yDorso), sg = Math.sign(yBase - yDorso); for (let i = 0; i <= n; i++) { const lw = Math.round(3 + i / n * 11); x.fillRect(cx - (lw >> 1), yDorso + sg * i, lw, 1); } };
+  trap(8, Math.round(h * .70), Math.round(h * .42));
+  trap(24, Math.round(h * .80), h - 1); x.fillRect(17, 0, 14, 3);
+  for (let i = 0; i < 40; i++) { x.fillStyle = r() < .5 ? 'rgba(0,0,0,.10)' : 'rgba(255,240,200,.08)'; x.fillRect(Math.floor(r() * w), Math.floor(r() * h), 1, 1); }
+}, { seed: 9 });
+const mdf = P.textura(16, 16, (x, w, h, r) => {
+  x.fillStyle = '#b89b72'; x.fillRect(0, 0, w, h);
+  for (let i = 0; i < 70; i++) { x.fillStyle = ['#8f7450', '#d2b88e', '#a3865e'][Math.floor(r() * 3)]; x.fillRect(Math.floor(r() * w), Math.floor(r() * h), 1 + Math.floor(r() * 2), 1); }
+}, { seed: 5 });
+
+const corpo = P.mat({ mapa: jararaca, rep: [24, 1] });
+const cabecaM = P.mat({ cor: '#6f5b3f' }), queixoM = P.mat({ cor: '#cbbf9b' });
+const bocaM = P.mat({ cor: '#c98a88' }), presaM = P.mat({ cor: '#f7f4ea', semLuz: true });
+const olhoM = P.mat({ cor: '#140f0a' }), faixaM = P.mat({ cor: '#2e2116' });
+const vidro = P.mat({ cor: '#dcedf3', opac: .3, lados: THREE.DoubleSide });
+const borda = P.mat({ cor: '#eef7fa', opac: .6, semLuz: true });
+const membrana = P.mat({ cor: '#f1eee4', opac: .62, lados: THREE.DoubleSide });
+const veneno = P.mat({ cor: '#e6c344', semLuz: true }), venenoPoca = P.mat({ cor: '#d9b237', opac: .9 });
+const tampa = P.mat({ cor: '#9da3a8' }), soro = P.mat({ cor: '#efe6c2', opac: .85 }), metal = P.mat({ cor: '#8e9499' });
+
+// ── mesa de laboratório: tampo de fórmica cortado (miolo de aglomerado) e, se tiver chão, pernas ──
+const lado = P.mat({ mapa: mdf, rep: [8, 1] });
+cena.add(P.caixa(1.3, .12, 1.15, [lado, lado, P.mat({ mapa: P.TEX.plastico({ cor: '#c8cbc9' }), rep: [6, 6] }), P.mat({ mapa: mdf, rep: [6, 6] }), lado, lado], { pos: [.1, -.06, -.05], sx: 4, sz: 4 }));
+for (const [x, z] of [[-.47, -.55], [.67, -.55], [-.47, .45], [.67, .45]]) cena.add(P.caixa(.06, .86, .06, metal, { pos: [x, -.55, z] }));
+
+// ── copo com membrana ──
+const G = [-.15, 0, .12], RV = .17, HV = .4;
+cena.add(P.cilindro(RV, RV, HV, vidro, { pos: [G[0], HV / 2, G[2]], seg: 14, aberto: true }));
+cena.add(P.disco(RV, vidro, { pos: [G[0], .004, G[2]], rot: [-Math.PI / 2, 0, 0], seg: 14 }));
+cena.add(P.cilindro(RV * 1.03, RV * 1.03, .014, borda, { pos: [G[0], HV, G[2]], seg: 14, aberto: true }));
+cena.add(P.disco(RV, membrana, { pos: [G[0], HV - .006, G[2]], rot: [-Math.PI / 2, 0, 0], seg: 14 }));
+cena.add(P.cilindro(RV * .92, RV * .92, .035, venenoPoca, { pos: [G[0], .02, G[2]], seg: 14 }));
+const gotas = [0, 1, 2, 3].map(() => { const g = P.esfera(.013, veneno, { seg: 5, segV: 4 }); cena.add(g); return g; });
+for (const [x, z] of [[.24, .4], [.36, .3]]) {                       // ampolas de soro
+  cena.add(P.cilindro(.038, .038, .14, soro, { pos: [x, .07, z], seg: 8 }));
+  cena.add(P.cilindro(.041, .041, .032, tampa, { pos: [x, .155, z], seg: 8 }));
+}
+
+// ── cabeça de víbora de perfil: achatada, triangular, olho na lateral (focinho em +x local) ──
+const cab = new THREE.Group(); cab.position.set(G[0] + .1, .5, G[2]); cab.rotation.y = -2.89; cena.add(cab);
+const inc = new THREE.Group(); inc.rotation.z = -.36; cab.add(inc);
+const cranioG = new THREE.SphereGeometry(1, 10, 6); cranioG.scale(.14, .036, .1);
+const pp = cranioG.attributes.position;
+for (let i = 0; i < pp.count; i++) { const xx = pp.getX(i); pp.setZ(i, pp.getZ(i) * (xx > 0 ? 1 - .55 * clamp(xx / .14) : 1 + .12 * clamp(-xx / .14))); }
+cranioG.computeVertexNormals();
+inc.add(P.malha(cranioG, cabecaM, { pos: [.03, .015, 0] }));
+const mand = new THREE.Group(); mand.position.set(-.05, -.012, 0); mand.rotation.z = -.5; inc.add(mand);
+mand.add(P.malha(new THREE.SphereGeometry(1, 8, 5).scale(.1, .018, .068), queixoM, { pos: [.07, -.012, 0] }));
+mand.add(P.malha(new THREE.SphereGeometry(1, 8, 5).scale(.088, .01, .054), bocaM, { pos: [.07, .004, 0] }));
+inc.add(P.malha(new THREE.SphereGeometry(1, 8, 5).scale(.1, .012, .064), bocaM, { pos: [.05, -.01, 0] }));
+for (const s of [-1, 1]) {
+  inc.add(P.cilindro(0, .011, .09, presaM, { pos: [.105, -.05, s * .03], rot: [0, 0, .2], seg: 5 }));
+  inc.add(P.esfera(.016, olhoM, { pos: [.055, .02, s * .074], seg: 6, segV: 4 }));
+  inc.add(P.caixa(.085, .01, .006, faixaM, { pos: [-.005, .01, s * .088], rot: [0, s * .12, 0] }));
+}
+// encaixa a cabeça pra ponta das presas tocar a membrana
+cena.updateMatrixWorld(true);
+const ponta = new THREE.Vector3(.11, -.095, 0); inc.localToWorld(ponta);
+cab.position.y += (HV + .01) - ponta.y; cena.updateMatrixWorld(true);
+ponta.set(.11, -.095, 0); inc.localToWorld(ponta);
+const nuca = new THREE.Vector3(-.06, .006, 0); inc.localToWorld(nuca);   // ponta do pescoço escondida dentro do crânio
+
+// ── corpo: rodilha atrás à direita → sobe em coluna → arqueia e entra na nuca (nunca passa atrás do vidro) ──
+const C = [.4, .075, -.3], a1 = 2.3, voltas = 1.4, pts = [];
+for (let i = 0; i <= 56; i++) { const k = i / 56, a = a1 - (1 - k) * voltas * Math.PI * 2, r = lerp(.13, .37, k); pts.push([C[0] + Math.cos(a) * r, C[1], C[2] + Math.sin(a) * r]); }
+pts.push([.17, .2, .05], [.2, .38, .09], [nuca.x + .15, nuca.y + .07, nuca.z], nuca.toArray());
+const raio = u => { const t = clamp(u / .1), pesc = 1 - .4 * P.suave(.88, 1, u); return { x: .075 * Math.sqrt(t) * pesc, y: .062 * Math.sqrt(t) * pesc }; };
+cena.add(P.varrer(pts, raio, corpo, { segs: 120, rad: 7 }));
+
+S.update = t => {
+  gotas.forEach((g, i) => { const k = (t * .7 + i / 4) % 1; g.position.set(ponta.x, lerp(ponta.y - .01, .05, k * k), ponta.z); g.scale.setScalar(1 - k * .3); });
+};
+
+P.legenda([{ t: 0, txt: 'veneno' }], { y: 1500 });
+</script></body></html>

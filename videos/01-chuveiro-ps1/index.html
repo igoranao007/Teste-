@@ -1,0 +1,99 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Exemplo 1 · roteiro "por que o chuveiro só esquenta quando a água passa": pedaço de banheiro em corte,
+     chuveiro aberto ao meio com a resistência incandescente, na sala de teste. Paleta neutra, 1 acento (laranja). -->
+<script>VIDEO={w:1080,h:1920,fps:30,dur:5}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+const { THREE, rng } = P;
+
+const S = P.palco({
+  chaoY: -1.21,                                   // a base do piso cortado encosta no chão da sala de teste
+  fov: 46, cam: [1.35, .15, 3.9], alvo: [.09, .1, 0],
+  luz: { keyDir: [-.5, .8, .6], keyCor: '#ece6dc', fillDir: [.8, .1, .3], fillCor: '#5b626e', amb: '#585a60' },
+});
+const cena = S.scene, cam = S.camera, R = rng(21);
+
+// ── materiais ──
+const azulejo = P.mat({ mapa: P.TEX.azulejo(), rep: [5, 8.7] });
+const faixa = P.mat({ mapa: P.TEX.azulejo({ cor: '#a9b6be', rejunte: '#7f8b92' }), rep: [10, 1] });
+const piso = P.mat({ mapa: P.TEX.piso(), rep: [3, 2.6] });
+const tij = (u, v) => P.mat({ mapa: P.TEX.tijolo(), rep: [u, v] });
+const plastico = P.mat({ mapa: P.TEX.plastico(), rep: [2, 1], interior: '#b4bbc1' });
+const bordaCorte = P.mat({ cor: '#56606a' });
+const crivo = P.mat({ mapa: P.TEX.crivo() });
+const cano = P.mat({ cor: '#c4c6c4' });
+const borracha = P.mat({ cor: '#2c2c30' });
+const cobre = P.mat({ cor: '#c47a3a' });
+const ceramica = P.mat({ cor: '#e3d8c4' });
+const fioVerm = P.mat({ cor: '#b3322b' }), fioPreto = P.mat({ cor: '#26262a' });
+const resist = P.mat({ cor: '#ff7426', semLuz: true });
+const brilho = (cor, op) => P.mat({ mapa: P.TEX.disco(), cor, opac: op, aditivo: true, semLuz: true, lados: THREE.DoubleSide });
+const agua = P.mat({ cor: '#9fd1ec', opac: .5, semLuz: true });
+const gota = P.mat({ cor: '#d2efff', opac: .75, semLuz: true });
+const aguaCamara = P.mat({ cor: '#4c9fd0', opac: .2, lados: THREE.DoubleSide });
+const sombra = P.mat({ cor: '#000000', opac: .12, semLuz: true });
+
+// ── pedaço de banheiro em corte: parede + piso, com o tijolo aparecendo nas bordas ──
+// ordem das faces da caixa: +x, -x, +y, -y, +z, -z
+cena.add(P.caixa(1.5, 2.6, .2, [tij(.6, 8), tij(.6, 8), tij(5, .6), tij(5, .6), azulejo, tij(5, 8)], { pos: [0, .25, -.35], sx: 4, sy: 6 }));
+cena.add(P.caixa(1.5, .09, .012, faixa, { pos: [0, -.25, -.244] }));                       // faixa decorativa
+cena.add(P.caixa(1.5, .16, 1.3, [tij(4, .5), tij(4, .5), piso, tij(5, 4), tij(5, .5), tij(5, .5)], { pos: [0, -1.13, .3], sx: 4, sz: 4 }));
+cena.add(P.caixa(.17, .012, .17, P.mat({ mapa: P.TEX.crivo({ cor: '#8d9095' }) }), { pos: [.42, -1.044, .62] }));   // ralo
+// (sem sombra na parede: o PS1 quase nunca tinha, e o disco lia como um prato)
+
+// ── chuveiro aberto ao meio (corte virado pra câmera) ──
+const ch = new THREE.Group(); ch.position.set(0, 0, .2); cena.add(ch);
+const tc = Math.atan2(cam.position.x - 0, cam.position.z - .2);                            // ângulo da câmera
+const corte = { ini: tc + Math.PI / 2, arco: Math.PI };                                      // fica só a metade de trás
+const perfil = [[0, .4], [.2, .4], [.24, .46], [.25, .62], [.24, .82], [.2, .92], [.12, .98], [0, 1]];
+ch.add(P.tornear(perfil, plastico, { seg: 14, ...corte }));
+ch.add(P.tornear(perfil.map(([r, y]) => [r * .9, y]), aguaCamara, { seg: 14, ...corte }));
+for (const a of [corte.ini, corte.ini + corte.arco]) ch.add(P.tubo(perfil.map(([r, y]) => [Math.sin(a) * r, y, Math.cos(a) * r]), .014, bordaCorte, { seg: 20, lados: 4 }));   // água dentro da câmara
+ch.add(P.cilindro(.46, .44, .07, [plastico, plastico, crivo], { pos: [0, .37, 0], seg: 16 }));
+ch.add(P.cilindro(.05, .05, .25, cano, { pos: [0, .95, -.32], rot: [Math.PI / 2, 0, 0], seg: 8 }));   // cano que sai da parede
+// miolo: suporte de cerâmica, resistência em espiral, diafragma e os 2 contatos
+ch.add(P.cilindro(.045, .045, .38, ceramica, { pos: [0, .65, 0], seg: 6 }));
+ch.add(P.espiral({ raio: .14, de: .49, ate: .82, voltas: 5.5, fio: .019 }, resist));
+const halo = P.disco(.27, brilho('#ff6a14', .35), { pos: [0, .66, .05] });   // raio pequeno: não vaza da parede pro céu ch.add(halo);
+ch.add(P.cilindro(.17, .17, .035, borracha, { pos: [0, .9, 0], seg: 12 }));
+for (const s of [-1, 1]) ch.add(P.caixa(.05, .035, .05, cobre, { pos: [s * .045, .945, 0] }));
+const faisca = P.disco(.07, brilho('#fff2a0', .9), { pos: [0, .95, .06] }); ch.add(faisca);
+// chave inverno/verão do lado
+const ak = tc + Math.PI / 2 + .45;
+ch.add(P.cilindro(.05, .05, .05, plastico, { pos: [Math.sin(ak) * .25, .72, Math.cos(ak) * .25], rot: [Math.PI / 2, 0, -ak], seg: 8 }));
+// fiação aparente entrando na parede
+ch.add(P.tubo([[.03, .99, 0], [.05, 1.14, -.05], [.07, 1.24, -.25], [.08, 1.27, -.54]], .014, fioVerm, { lados: 4 }));
+ch.add(P.tubo([[-.03, .99, 0], [-.05, 1.15, -.06], [-.06, 1.25, -.26], [-.06, 1.28, -.54]], .014, fioPreto, { lados: 4 }));
+
+// ── água: filetes, gotas, poça e vapor ──
+const quedas = [];
+for (let i = 0; i < 24; i++) {
+  const a = R() * Math.PI * 2, r = Math.sqrt(R()) * .36, x = Math.cos(a) * r, z = Math.sin(a) * r + .2;
+  const f = P.caixa(.014, 1.38, .014, agua, { pos: [x * 1.12, -.36, z + (z - .2) * .12] });
+  f.rotation.set((z - .2) * .1, 0, -x * .1); cena.add(f); quedas.push([x, z]);
+}
+const gotas = [];
+for (let i = 0; i < 46; i++) {
+  const [x, z] = quedas[i % quedas.length], g = P.esfera(.012 + R() * .012, gota, { seg: 4, segV: 3 });
+  cena.add(g); gotas.push([g, x * 1.12, z + (z - .2) * .12, R()]);
+}
+cena.add(P.disco(.62, P.mat({ cor: '#86b9d4', opac: .35, semLuz: true }), { pos: [0, -1.044, .24], rot: [-Math.PI / 2, 0, 0], seg: 14 }));
+const respingos = [];
+for (let i = 0; i < 18; i++) { const g = P.esfera(.014, gota, { seg: 4, segV: 3 }); cena.add(g); respingos.push([g, R() * Math.PI * 2, .3 + R() * .3, R()]); }
+const vapor = [];
+for (let i = 0; i < 4; i++) { const v = P.disco(.16 + R() * .12, brilho('#ffffff', .045 + R() * .03), { seg: 10 }); cena.add(v); vapor.push([v, (i % 2 ? 1 : -1) * (.3 + R() * .1), .22 + R() * .22, R() * .1, R()]); }   // colado no azulejo: longe da borda, não aparece contra o céu
+
+for (const o of [halo, faisca, ...vapor.map(v => v[0])]) P.encarar(o, cam);
+
+S.update = t => {
+  for (const [g, x, z, f] of gotas) { const k = (t * .9 + f) % 1; g.position.set(x, .32 - k * 1.36, z); }
+  for (const [g, a, rr, f] of respingos) { const k = (t * 1.6 + f) % 1; g.position.set(Math.cos(a) * rr, -1.04 + Math.sin(k * Math.PI) * .16, .24 + Math.sin(a) * rr * .8); }
+  for (const [v, x, y, z, f] of vapor) v.position.set(x + Math.sin(t * .6 + f * 6) * .05, y + ((t * .12 + f) % 1) * .4, z);
+  faisca.visible = Math.floor(t * 30) % 3 !== 0;
+};
+
+P.legenda([{ t: 0, txt: 'resistência' }], { y: 1440 });
+</script></body></html>

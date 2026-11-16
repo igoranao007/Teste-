@@ -1,0 +1,20 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Exemplo 5 · fita de evidência (A.evidencia em lib/arh.js): o material REAL em 4:3 numa TV de tubo, com REC,
+     timecode e a origem escrita na tela. Aqui o "real" é uma foto SINTÉTICA de teste (material/teste-sintetico.jpg);
+     num vídeo do canal entra a foto de arquivo, ou o clipe (bash tools/quadros.sh clipe.mp4 material/clipe → quadros: 'material/clipe'). -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:8}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as A from '../../lib/arh.js';
+
+A.evidencia({
+  foto: 'material/teste-sintetico.jpg',
+  fonte: 'SOURCE: TEST IMAGE (SYNTHETIC)',          // a origem é obrigatória: sem ela a função recusa
+  data: 'OCT 31 1997', tc0: 2 * 3600 + 14 * 60 + 9,
+  zoom: [1.04, 1.16], foco: [.5, .4],                // aproximação lenta no portão
+  falhas: [5.2],                                     // um tranco de tracking, casado com o glitch do som
+});
+cue('chiado', 0, { d: 8 }); cue('glitch', 0, { d: .4 }); cue('glitch', 5.2, { d: .25 });
+</script></body></html>
