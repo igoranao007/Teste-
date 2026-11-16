@@ -1,6 +1,7 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- PLANO 8 · 1:08–1:18 · O COMPUTADOR: (0–4) por cima do ombro de Igor, mãos nas teclas · (4–5,5) Igor iluminado de verde pela tela · (5,5–7) Phantom atrás, quase invisível · (7–10) código verde rolando, ACESSANDO... -->
-<script>VIDEO={w:1920,h:1080,fps:30,dur:10}</script>
+<!-- PLANO 8 · O COMPUTADOR (14,5 s): (0–1,7) Igor leva a fita até o videocassete · (1,7–4,5) close: a fita entra, o LED acende, o monitor liga
+     · (4,5–8,5) por cima do ombro, mãos nas teclas · (8,5–10) Igor iluminado de verde · (10–11,5) Phantom atrás, quase invisível · (11,5–14,5) código rolando, ACESSANDO... -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:14.5}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
 <div id="stage"></div>
@@ -13,28 +14,38 @@ import * as K from "../../lib/terminal.js";
 const { THREE } = P;
 window.SETUP = async () => {
   const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 2.4, longe: 8 }, luz: F.LUZ_SALA }), cena = S.scene;
-  const { I, c, Y, copo, cel } = await F.salaIgor(cena); copo.position.x = .95; cel.visible = false;
-  const pc = F.computador(); pc.position.set(0, Y, .64); cena.add(pc);
+  const { I, c, Y, copo, cel, lamp } = await F.salaIgor(cena); copo.position.x = .95; cel.visible = false;
+  const vcr = F.videocassete(); vcr.position.set(0, Y, .64); cena.add(vcr);
+  const pc = F.computador(); pc.position.set(0, Y + .09, .64); pc.teclado.position.y = -.09; cena.add(pc);
+  const fita = await T.fitaVHS(); cena.add(fita); fita.rotation.set(-Math.PI / 2, 0, 0);
   const Ph = await T.phantom(); cena.add(Ph.obj); Ph.obj.position.set(.55, 0, -.85); const fc = Ph.corpo; fc.braco('L', [.1, -1, .02], [.04, -1, .08]); fc.braco('R', [-.1, -1, .02], [-.04, -1, .06]); fc.guardar();
-  const term = K.terminal();
-  for (let t = .2; t < 6.9; t += .13 + (Math.sin(t * 37) + 1) * .05) cue('type', t);
-  for (const t of [7.1, 7.9, 8.7, 9.5]) cue('ui_blip', t);
-  S.update = t => {
-    F.telaCodigo(pc, t);
-    const tremor = .75 + .25 * Math.sin(t * 23) * Math.sin(t * 7);
-    c.repor(); const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .018;
-    c.alcancar('R', [-.1 + Math.sin(t * 5.1) * .04, Y + .075 + tk(0), .3], [-.7, -.6, -.2], .1); c.alcancar('L', [.1 + Math.sin(t * 4.3 + 1) * .04, Y + .075 + tk(2), .3], [.7, -.6, -.2], .1);
-    I.assentar(); I.animar(t, { pisca: (t % 4.1) > 3.95 ? 1 : 0 }); I.cabeca.rotation.x += .1;
-    Ph.animar(t, { pisca: (t % 3) < .12 ? 1 : 0, pont: t >= 5.5 && t < 7 ? .26 + .04 * Math.sin(t * 2.1) : .2 });
+  const term = K.terminal(), D = 4.5, B = vcr.boca.clone().add(vcr.position);
+  S.update = TT => {
+    const t = TT - D, ligada = TT >= 3.7 ? 1 : 0;
+    F.telaCodigo(pc, TT, ligada); vcr.led(TT >= 3.2);
+    const tremor = ligada * (.75 + .25 * Math.sin(TT * 23) * Math.sin(TT * 7));
+    lamp.acender(1, S.camera);
+    const m = {};
+    if (TT < D) {                                                                       // a fita vai da mão pra boca do videocassete
+      const leva = P.suave(.1, 1.5, TT), entra = P.suave(1.7, 2.7, TT), sai = P.suave(2.8, 3.5, TT);
+      const fz = P.lerp(B.z - .5, B.z - .075, leva) + entra * .16, fy = P.lerp(Y + .3, B.y, leva), fx = P.lerp(-.2, B.x, leva);
+      fita.visible = true; fita.position.set(fx, fy, fz); fita.rotation.set(-Math.PI / 2, 0, 0);
+      m.R = [fx - .0, fy + .03 + sai * .1, fz - .1 - sai * .2]; m.poloR = [-.8, -.2, -.5];
+    } else { fita.visible = false; const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .018;
+      m.R = [-.1 + Math.sin(t * 5.1) * .04, Y + .05 + tk(0), .2]; m.L = [.1 + Math.sin(t * 4.3 + 1) * .04, Y + .05 + tk(2), .2]; }
+    I.pose(TT, m); I.animar(TT, { pisca: (TT % 4.1) > 3.95 ? 1 : 0 }); I.cabeca.rotation.x += .12;
+    Ph.animar(TT, { pisca: (TT % 3) < .12 ? 1 : 0, pont: t >= 5.5 && t < 7 ? .26 + .04 * Math.sin(t * 2.1) : .2 });
     const tela = { ...F.LUZ_SALA, keyDir: [0, .1, 1], keyCor: '#' + new THREE.Color('#39ff6a').multiplyScalar(tremor).getHexString(), fillDir: [-.6, .6, -.4], fillCor: '#16321f', amb: '#12241a' };
-    if (t < 4) { P.luz({ ...tela, keyDir: [0, .2, 1], amb: '#1a2c20' }); S.camera.fov = 46; S.camera.position.set(-.72 + t * .015, 1.5, -1.05); S.camera.lookAt(.05, Y + .16, .42); }
-    else if (t < 5.5) { P.luz(tela); S.camera.fov = 32; S.camera.position.set(.14, 1.16, 1.15 - (t - 4) * .04); S.camera.lookAt(0, 1.17, 0); }
-    else { P.luz(tela); S.camera.fov = 34; S.camera.position.set(-.3, 1.5, .75); S.camera.lookAt(.45, 1.5, -.85); }
+    if (TT < 1.7) { S.camera.fov = 44; S.camera.position.set(-1.25, 1.3, .55); S.camera.lookAt(-.02, Y + .24, .32); }
+    else if (TT < D) { S.camera.fov = 34; S.camera.position.set(.4, Y + .2 - (TT - 1.7) * .01, .1); S.camera.lookAt(B.x + .02, B.y + .03, B.z); }
+    else if (t < 4) { P.luz({ ...tela, keyDir: [0, .2, 1], amb: '#1a2c20' }); S.camera.fov = 46; S.camera.position.set(-.72 + t * .015, 1.6, -1.05); S.camera.lookAt(.05, Y + .22, .42); }
+    else if (t < 5.5) { P.luz(tela); S.camera.fov = 32; S.camera.position.set(.14, 1.28, 1.2 - (t - 4) * .04); S.camera.lookAt(0, 1.3, 0); }
+    else { P.luz(tela); S.camera.fov = 34; S.camera.position.set(-.55, 1.66, .9); S.camera.lookAt(.5, 1.5, -.85); }
     S.camera.updateProjectionMatrix();
-    pc.visible = t < 4;
+    pc.visible = vcr.visible = t < 4; lamp.visible = t < 4;
     const cod = t >= 7; term.el.style.opacity = cod ? 1 : 0;
     if (cod) { const u = t - 7; term.limpar(); term.codigo(u, { vel: 70 }); term.caixa(110, 108, 260, 54, '#010a04'); term.moldura(110, 108, 260, 54);
-      term.txt('ACESSANDO' + '.'.repeat(1 + Math.floor(u * 3) % 3), 240, 122, 22, K.CLARO, { alinhar: 'center', peso: 800 }); term.pixelar(); term.sinal(Math.round(t * 30), .04); }
+      term.txt('ACESSANDO' + '.'.repeat(1 + Math.floor(u * 3) % 3), 240, 122, 22, K.CLARO, { alinhar: 'center', peso: 800 }); term.pixelar(); term.sinal(Math.round(TT * 30), .04); }
   };
 };
 </script></body></html>

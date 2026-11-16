@@ -1,6 +1,7 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- PLANO 7 · 0:54–1:08 · IGOR ANÃO: (0–4) Igor sentado, zoom lento · (4–9) Phantom entra pela esquerda e põe a maleta na mesa; Igor fala · (9–11,5) Igor abre a maleta, brilho verde · (11,5–14) close na fita VHS. -->
-<script>VIDEO={w:1920,h:1080,fps:30,dur:14}</script>
+<!-- PLANO 7 · IGOR ANÃO (19,5 s): (0–2) sala escura, a lâmpada acende e revela Igor · (2–6) zoom lento · (6–11) Phantom entra pela esquerda e põe a maleta na mesa; Igor fala
+     · (11–13,5) Igor abre a maleta, brilho verde · (13,5–16) close na fita VHS · (16–19,5) a mão de Igor pega a fita. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:19.5}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
 <div id="stage"></div>
@@ -9,45 +10,58 @@ import * as P from "../../lib/ps1.js";
 import * as A from "../../lib/arh.js";
 import * as F from "../../lib/filme.js";
 import * as T from "../../lib/tgp.js";
+import * as K from "../../lib/terminal.js";
 const { THREE } = P;
 window.SETUP = async () => {
   const S = P.palco({ fov: 36, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 2.4, longe: 8 }, luz: F.LUZ_SALA }), cena = S.scene;
-  const { I, c, Y } = await F.salaIgor(cena);
+  const { I, c, Y, lamp } = await F.salaIgor(cena);
   const Ph = await T.phantom(); cena.add(Ph.obj); Ph.obj.rotation.y = Math.PI / 2; const pc = Ph.corpo; pc.guardar();
   const mal = T.maleta(); cena.add(mal); const fita = await T.fitaVHS(); mal.dentro.add(fita);
   const env = await fetch('../../material/voz-igor.json').then(r => r.ok ? r.json() : null).catch(() => null);   // volume da voz por quadro (tools/som.py)
-  const FALA = 4.4, MESA = new THREE.Vector3(-.3, Y, .46);
-  const chi = F.chiadoVerde();
-  cue('click', 9.7); cue('click', 10.05); cue('tick', 1.6);
+  window.I = I; window.S = S;
+  const R = 2, FALA = 4.4, MESA = new THREE.Vector3(-.3, Y, .46), chi = F.chiadoVerde();
   const boca = t => { const q = Math.round((t - FALA) * 30); return env && q >= 0 && q < env.length ? env[q] : 0; };
-  S.update = t => {
-    const close = t >= 11.5;
+  const V3 = (x, y, z) => new THREE.Vector3(x, y, z); let fpos = null, FP = null;
+  // de onde a maleta sai da mão (pose final da caminhada) — calculado uma vez, pra qualquer quadro dar o mesmo resultado
+  Ph.obj.position.set(-.8, 0, .12); pc.repor(); pc.braco('L', [0, -1, -.1], [0, -1, .05]); pc.braco('R', [0, -1, .1], [0, -1, .15]); mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); const INI = mal.position.clone();
+  mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));       // onde a fita descansa, com a maleta na mesa
+  S.update = TT => {
+    const t = TT - R, close = t >= 11.5, pega = t >= 14;
+    const liga = TT < 1.2 ? 0 : TT < 1.26 ? 1 : TT < 1.34 ? .25 : 1;                             // a lâmpada estala e acende
     // Phantom: entra andando (4–6,2), pousa a maleta (6,2–7,4), recolhe o braço
-    const u = P.clamp((t - 4) / 2.2), x = P.lerp(-2.6, -.74, u), fase = u * 1.86 * 3.9, pousa = P.suave(6.2, 7.3, t), solta = P.suave(7.4, 8.2, t);
-    Ph.obj.visible = t >= 3.9; pc.repor();
+    const u = P.clamp((t - 4) / 2.2), x = P.lerp(-2.6, -.8, u), fase = u * 1.8 * 3.9, pousa = P.suave(6.2, 7.3, t), solta = P.suave(7.4, 8.2, t);
+    Ph.obj.visible = t >= 3.9 && !close; pc.repor();
     const sobe = u < 1 ? F.andar(pc, fase, { maleta: true }) : (pc.braco('L', [0, -1, -.1], [0, -1, .05]), pc.braco('R', [0, -1, .1], [0, -1, .15]), 0);
-    Ph.obj.position.set(x, sobe, .1); Ph.obj.rotation.y = Math.PI / 2 - .5 * P.suave(6, 7, t);
-    if (pousa <= 0) { mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); }
+    Ph.obj.position.set(x, sobe, .12); Ph.obj.rotation.y = Math.PI / 2 - .6 * P.suave(6, 7, t);
+    if (pousa <= 0) { mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); mal.visible = t >= 3.9; }
     else {
-      const a = new THREE.Vector3(); pc.osso('f_middle.01.R').getWorldPosition(a); const ini = mal.userData.ini ?? (mal.userData.ini = mal.position.clone());
-      mal.position.lerpVectors(ini, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .22; mal.deitar(P.suave(.25, .9, pousa));
-      if (solta < 1) { const alvo = mal.position.clone().add(new THREE.Vector3(-.12, .12 + .1 * pousa, .0)); const rep = alvo.clone().lerp(a, 0); pc.alcancar('R', rep.toArray(), [0, -.3, 1], .12); }
+      mal.visible = true; mal.position.lerpVectors(INI, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .22; mal.deitar(P.suave(.25, .9, pousa));
+      if (solta < 1) pc.alcancar('R', mal.position.clone().add(V3(-.12, .12 + .1 * pousa, 0)).toArray(), [0, -.3, 1], .12);
     }
-    if (t < 4) { mal.userData.ini = null; }
-    Ph.animar(t, { pisca: (t % 3.3) < .12 ? 1 : 0, pont: .34 + .05 * Math.sin(t * 2.1) });
-    // Igor: fala, depois abre a maleta
-    const abre = P.suave(10.25, 11.3, t), maos = P.suave(9.0, 9.6, t);
-    c.repor();
-    if (maos > 0) { c.alcancar('R', [P.lerp(-.1, MESA.x - .13, maos), Y + .13, P.lerp(.3, MESA.z - .02, maos)], [-.6, -.7, -.2], .1); c.alcancar('L', [P.lerp(.2, MESA.x + .13, maos), Y + .13, P.lerp(.3, MESA.z - .02, maos)], [.6, -.7, -.2], .1); }
-    I.assentar(); I.animar(t, { boca: boca(t), pisca: (t % 4.1) > 3.95 ? 1 : 0 });
-    I.cabeca.rotation.x += .18 * P.suave(9.2, 10.2, t); I.cabeca.rotation.y += -.22 * P.suave(4.6, 5.6, t) * (1 - P.suave(8.6, 9.4, t));
+    Ph.animar(t, { pisca: (t % 3.3) < .12 ? 1 : 0, pont: .36 + .05 * Math.sin(t * 2.1) });
+    // Igor: escuta, fala (a mão acompanha), abre a maleta, pega a fita
+    const abre = P.suave(10.25, 11.3, t), maos = P.suave(9.0, 9.6, t) * (1 - P.suave(11.4, 11.6, t)), fala = boca(t), gesto = P.suave(4.4, 4.8, t) * (1 - P.suave(8.9, 9.4, t));
+    const f0 = fita.getWorldPosition(V3(0, 0, 0));
+    const m = {};
+    if (gesto > 0 && maos <= 0) m.R = [-.02 + .05 * gesto, Y + .045 + gesto * (.07 + .05 * fala + .02 * Math.sin(t * 6)), .33 + .04 * gesto];
+    if (maos > 0) { m.R = [P.lerp(-.02, MESA.x - .13, maos), Y + .13, P.lerp(.33, MESA.z - .03, maos)]; m.L = [P.lerp(.27, MESA.x + .13, maos), Y + .13, P.lerp(.27, MESA.z - .03, maos)]; }
+    if (pega) { const a = P.suave(14, 15, t), s = P.suave(15.25, 16.9, t);                                 // desce a mão, fecha na fita, sobe com ela
+      if (t < 15.2) { mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); } fpos = FR; const mao = V3(P.lerp(-.02, fpos.x, a), P.lerp(Y + .3, fpos.y + .05, a) + s * .34, P.lerp(.3, fpos.z, a) - s * .3);
+      m.R = mao.toArray(); m.poloR = [-.8, .2, -.5]; m.L = [.3, Y + .04, .1];
+      if (t >= 15.2) { cena.attach(fita); fita.position.set(mao.x, mao.y - .05, mao.z + .03); fita.rotation.set(-Math.PI / 2 + s * .4, 0, .12 * s); } }
+    else if (fita.parent !== mal.dentro) { mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); fpos = null; }
+    I.pose(TT, m); I.animar(TT, { boca: fala, pisca: (TT % 4.1) > 3.95 ? 1 : 0 });
+    I.cabeca.rotation.x += .2 * P.suave(9.2, 10.2, t) + .05 * fala; I.cabeca.rotation.y += -.3 * P.suave(4.2, 5.2, t) * (1 - P.suave(8.6, 9.4, t));
     mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(t);
+    lamp.acender(liga, S.camera);
     const g = abre * (.75 + .25 * Math.sin(t * 9));
-    P.luz({ ...F.LUZ_SALA, fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#1d5f37').lerp(new THREE.Color('#39ff6a'), g * .8).getHexString() });
-    if (!close) { const zo = t / 11.5; S.camera.fov = 36; S.camera.position.set(0, 1 + .02 * zo, 1.75 - .28 * zo); S.camera.lookAt(-.08 * P.suave(4, 7, t), 1.02 - .03 * P.suave(9, 11, t), 0); }
-    else { const q = (t - 11.5) / 2.5, f = fita.getWorldPosition(new THREE.Vector3()); S.camera.fov = 30; S.camera.position.set(f.x + .02, f.y + .36 - q * .08, f.z - .15 + q * .02); S.camera.lookAt(f.x, f.y, f.z - .005); }
-    I.obj.visible = !close; Ph.obj.visible = Ph.obj.visible && !close; S.camera.updateProjectionMatrix();
-    chi.desenha(Math.round(t * 30), close ? .1 : 0, { dens: .25 });
+    if (g > 0) P.luz({ ...F.LUZ_SALA, fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#1d5f37').lerp(new THREE.Color('#39ff6a'), g * .8).getHexString() });
+    if (!close) { S.camera.up.set(0, 1, 0); const zo = P.clamp(TT / 13.5); S.camera.fov = 36; S.camera.position.set(0, 1.02 + .02 * zo, 2.0 - .5 * zo); S.camera.lookAt(-.1 * P.suave(4, 7, t), 1.04 - .03 * P.suave(9, 11, t), 0); }
+    S.camera.up.set(0, close ? 0 : 1, close ? -1 : 0);
+    if (close) { const q = P.clamp((t - 11.5) / 6); S.camera.fov = 34; S.camera.position.set(FR.x + .01, FR.y + .5 - q * .08, FR.z + .05); S.camera.lookAt(FR.x, FR.y, FR.z); }
+    S.camera.updateProjectionMatrix();
+    I.cabeca.visible = !close; I.pescoco.visible = !close;
+    chi.desenha(Math.round(TT * 30), close ? .1 : 0, { dens: .25 });
   };
 };
 </script></body></html>
