@@ -1,0 +1,12 @@
+{
+ "dur": 8,
+ "bpm": 120,
+ "fps": 30,
+ "music": null,
+ "cues": [
+  {
+   "type": "click",
+   "t": 6
+  }
+ ]
+}

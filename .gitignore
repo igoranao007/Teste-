@@ -5,3 +5,5 @@ out/
 __pycache__/
 audio/.venv/
 material/modelos/itch/
+audio/00-filme.wav
+previas/

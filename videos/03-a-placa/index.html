@@ -1,0 +1,31 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 3 · 0:20–0:28 · A PLACA: de cima, em diagonal; o carro passa sob a placa amarela CASMIRON CITY; depois zoom lento e firme até as letras encherem a tela. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:8}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 44, perto: 14, longe: 60, luz: { keyDir: [.2, .8, .6], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } }), cena = S.scene, R = P.rng(14);
+  cena.add(A.chaoA({ w: 160, d: 90, seg: 80, mapa: F.TEX.capim(), rep: [50, 28] }));
+  cena.add(A.chaoA({ w: 160, d: 7.5, seg: 60, mapa: F.TEX.terra(), rep: [44, 2], y: .02 }));
+  F.mata(cena, R, { x0: -60, x1: 70, z0: -8, z1: -38, n: 70, h: 6 }); F.mata(cena, R, { x0: -60, x1: 70, z0: 9, z1: 38, n: 50, h: 6 });
+  const postes = [-28, 14, 44].map(x => F.posteVerde(x, -7, { rot: Math.PI / 2 })); postes.forEach(p => cena.add(p));
+  const placa = F.placaCidade(); cena.add(placa);
+  A.assar(cena, postes.map(p => p.luz()), '#1b3524');
+  const car = await F.carro(); car.rotation.y = Math.PI / 2; cena.add(car);
+  for (const t of [0, 2, 4, 6]) cue('heart', t);
+  S.update = t => {
+    car.position.set(-34 + t * 11, .02, .3); car.encarar(S.camera);
+    const z = P.suave(2.8, 8, t), e = z * z * (3 - 2 * z) * 0 + z;
+    S.camera.position.set(P.lerp(-13, -19, e), P.lerp(9, 6.2, e), P.lerp(9.5, 2.2, e));
+    S.camera.fov = P.lerp(44, 4.6, Math.pow(e, .8)); S.camera.updateProjectionMatrix(); S.camera.lookAt(P.lerp(-3, 0, P.suave(1.5, 3.4, t)), P.lerp(2.2, 4.9, P.suave(1.5, 3.4, t)), 0);
+    for (const p of postes) p.halo.quaternion.copy(S.camera.quaternion).premultiply(p.getWorldQuaternion(new THREE.Quaternion()).invert());
+  };
+};
+</script></body></html>

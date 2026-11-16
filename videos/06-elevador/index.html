@@ -1,0 +1,34 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 6 · 0:46–0:54 · ELEVADOR: corredor subterrâneo de concreto, fluorescente verde piscando; ding, as portas abrem, Phantom e a maleta vêm devagar até a câmera. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:8}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 44, fundo: '#020604', perto: 5, longe: 24, cam: [.25, 1.25, 2.4], alvo: [0, 1.25, -8] }), cena = S.scene;
+  const co = F.corredor({ comp: 10.5, lamps: [-.6, -5] }); cena.add(co);
+  const Ph = await T.phantom(); cena.add(Ph.obj); const c = Ph.corpo; c.guardar();
+  const mal = T.maleta(); mal.rotation.y = Math.PI / 2; cena.add(mal);
+  const PISCA = [.35, .5, 2.9, 3.05, 3.2, 5.6, 5.72, 7.1];
+  cue('ding', 1); cue('lampada', 0, { d: 8, rede: 60, pisca: PISCA });
+  let passo = -1;
+  for (let k = 0; k < 9; k++) cue('tom', 2.7 + k * .59, { f: 70 });
+  S.update = t => {
+    const pis = PISCA.some(q => t >= q && t < q + .09), k = pis ? .12 : 1 - .05 * Math.sin(t * 120);
+    const ab = P.suave(1.25, 2.5, t); co.portas(ab);
+    A.assar(co, co.luzes(k, ab), '#07130b');
+    P.luz({ keyDir: [0, .9, .3], keyCor: pis ? '#1a2a1e' : '#a9d4b4', fillDir: [0, .1, -1], fillCor: '#3b8a52', amb: pis ? '#0a140d' : '#1d3324' });
+    const d = Math.max(0, t - 2.4) * 1.36, z = co.zf - 1 + d;                                    // sai da cabine em ~2,6 s e anda 1,05 m/s
+    c.repor(); const sobe = d > 0 ? F.andar(c, d * 3.9, { maleta: true }) : (c.braco('L', [.1, -1, .02], [.04, -1, .08]), c.braco('R', [-.1, -1, .02], [-.04, -1, .06]), 0);
+    Ph.obj.position.set(0, sobe, z); F.segurar(c, mal); mal.pulsar(t);
+    Ph.animar(t, { pisca: (t % 3.1) < .12 ? 1 : 0, pont: (pis ? .3 : .46) + .05 * Math.sin(t * 2.1) });
+    S.camera.position.set(.25, 1.25 + Math.sin(t * .8) * .01, 2.4); S.camera.lookAt(0, 1.2, -8);
+  };
+};
+</script></body></html>

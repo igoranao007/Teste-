@@ -317,6 +317,45 @@ SFX = {
  'bark': (lambda p: fx_bark(p.get('f', 560), p.get('n', 1)), -8, False), 'boing': (lambda p: fx_boing(), -13, False), 'squeak': (lambda p: fx_squeak(p.get('f', 1300)), -15, False),
 }
 
+# ── sons do filme THE GREEN PATH (acrescentados no projeto) ──
+def fx_motor(d=6.0, abafado=0, rpm=1.0):   # motor de carro: pulsos graves + ronco, com leve variação de giro
+    t = tt(d); f = 46 * rpm * (1 + .04 * np.sin(2 * np.pi * .23 * t) + .02 * np.sin(2 * np.pi * 1.1 * t)); ph = 2 * np.pi * np.cumsum(f) / SR
+    x = sat(np.sin(ph) + .6 * np.sin(2 * ph + .5) + .35 * np.sign(np.sin(ph * .5)), 2.0) * .6 + .25 * lp(noise(d), 240)
+    x = lp(x, 260 if abafado else 900) + (0 if abafado else .12 * bp(noise(d), 900, 3000))
+    return x * _janela(t, d, .5, .6)
+def fx_pneus(d=6.0):                        # pneus na terra: ruído granulado com pedrinhas
+    t = tt(d); x = bp(pink(d), 250, 2400) * (.7 + .3 * np.sin(2 * np.pi * 3.1 * t) * np.sin(2 * np.pi * .7 * t))
+    for _ in range(int(d * 9)):
+        i = N(R.uniform(0, d)); c = bp(noise(.03), 1500, 6000) * np.exp(-tt(.03) / .006) * R.uniform(.5, 2.5); j = min(len(x), i + len(c)); x[i:j] += c[:j - i]
+    return x * _janela(t, d, .5, .6)
+def fx_grilos(d=6.0):                       # grilos: trinados agudos em pulsos, dois "bichos" em tempos diferentes
+    t = tt(d); x = np.zeros(len(t))
+    for f, taxa, fase in ((4300, 2.3, 0), (4750, 1.7, .4), (5200, 2.9, .2)):
+        g = (np.sin(2 * np.pi * taxa * t + fase * 6) > .35) * (.5 + .5 * np.sin(2 * np.pi * 38 * t)) ** 2
+        x += np.sin(2 * np.pi * f * t) * g * .33
+    return bp(x, 3500, 7000) * _janela(t, d, .8, .8)
+def fx_passo():                             # passo no concreto com eco de corredor
+    d = 1.1; t = tt(d); x = lp(noise(d), 500) * np.exp(-t / .03) + .5 * bp(noise(d), 900, 2600) * np.exp(-t / .012)
+    return reverb(x, 2.2, .5)
+def fx_radio(d=6.0):                        # estática fraca de rádio fora de estação
+    t = tt(d); x = bp(noise(d), 1200, 4200) * (.5 + .5 * np.abs(np.sin(2 * np.pi * .37 * t))) + .2 * np.sin(2 * np.pi * (700 + 200 * np.sin(2 * np.pi * .21 * t)) * t) * (np.sin(2 * np.pi * .13 * t) > .6)
+    return x * _janela(t, d, .6, .8)
+def fx_estrondo(d=1.0):                     # estrondo grave e distorcido
+    t = tt(d); x = sat((osc('sin', 34 + 60 * np.exp(-t / .12), d) * 1.4 + .8 * lp(noise(d), 300) + .4 * osc('saw', 41, d)) * np.exp(-t / .5), 4.0)
+    return x + .3 * reverb(lp(noise(d), 900) * np.exp(-t / .2), 2.0, .7)[0][:len(t)]
+def fx_sobe(d=8.0, root=31, sem=5):         # drone que sobe de tom (suspense)
+    t = tt(d); m = root + sem * (t / d) ** 1.3; f = mtof(m); ph = 2 * np.pi * np.cumsum(f) / SR
+    x = lp(np.sign(np.sin(ph)) * .3 + np.sin(ph) + .5 * np.sin(1.498 * ph), 500) * (.4 + .6 * t / d)
+    return reverb(x * _janela(t, d, 1.0, .08), 2.5, .35)
+def fx_chiado_sobe(d=6.0):                  # chiado que cresce até o máximo
+    x = fx_chiado(d, 1); t = tt(d); return x * (.06 + .94 * (t / d) ** 2.2) * np.clip((d - t) / .01, 0, 1)
+SFX.update({
+ 'motor': (lambda p: fx_motor(p.get('d', 6.0), p.get('abafado', 0), p.get('rpm', 1.0)), -17, False), 'pneus': (lambda p: fx_pneus(p.get('d', 6.0)), -24, True),
+ 'grilos': (lambda p: fx_grilos(p.get('d', 6.0)), -27, True), 'passo': (lambda p: fx_passo(), -14, False), 'radio': (lambda p: fx_radio(p.get('d', 6.0)), -32, False),
+ 'estrondo': (lambda p: fx_estrondo(p.get('d', 1.0)), -1, False), 'sobe': (lambda p: fx_sobe(p.get('d', 8.0), p.get('root', 31), p.get('sem', 5)), -15, True),
+ 'chiado_sobe': (lambda p: fx_chiado_sobe(p.get('d', 6.0)), -5, True),
+})
+
 # ════════════════ TRILHAS ════════════════
 def chord(root, scale, deg, n=3, inv=0):
     notes = []
@@ -448,7 +487,7 @@ def build(name):
     vdir = os.path.join(ROOT, 'videos', name); cj = json.load(open(os.path.join(vdir, 'cues.json')))
     D, bpm = cj['dur'], cj.get('bpm', 120); music = cj.get('music') or {}; C = cj.get('cues', [])
     if not music:
-        page = open(os.path.join(vdir, 'index.html')).read(); m = re.search(r"music:\s*(\{[^}]*\})", page)
+        ih = os.path.join(vdir, 'index.html'); page = open(ih).read() if os.path.exists(ih) else ''; m = re.search(r"music:\s*(\{[^}]*\})", page)
         if m: music = json.loads(re.sub(r"(\w+):", r'"\1":', m.group(1)).replace("'", '"'))
     mix = Bus(D)
     style = music.get('style')

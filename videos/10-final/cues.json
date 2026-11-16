@@ -1,0 +1,17 @@
+{
+ "dur": 6,
+ "bpm": 120,
+ "fps": 30,
+ "music": null,
+ "cues": [
+  {
+   "type": "boom",
+   "t": 5
+  },
+  {
+   "type": "braam",
+   "t": 5,
+   "d": 1
+  }
+ ]
+}

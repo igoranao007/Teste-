@@ -1,0 +1,45 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 1 · 0:00–0:08 · ESTRADA: preto com chiado verde → estrada de terra à noite, travelling lateral com o carro; título e ficha digitados. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:8}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as A from '../../lib/arh.js';
+import * as F from '../../lib/filme.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 40, perto: 8, longe: 38, luz: { keyDir: [.2, .8, .6], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } }), cena = S.scene, R = P.rng(4);
+  cena.add(A.chaoA({ w: 220, d: 70, seg: 90, mapa: F.TEX.capim(), rep: [70, 22], z: -6 }));
+  const estrada = A.chaoA({ w: 220, d: 7.5, seg: 70, mapa: F.TEX.terra(), rep: [60, 2], y: .02 }); cena.add(estrada);
+  F.mata(cena, R, { x0: -60, x1: 110, z0: -7, z1: -30, n: 90, h: 6 });
+  F.mata(cena, R, { x0: -60, x1: 110, z0: 4.6, z1: 5.4, n: 6, h: 4 });
+  const postes = [-30, -6, 18, 42, 66, 90].map(x => F.posteVerde(x, -9.5, { rot: Math.PI / 2 })); postes.forEach(p => cena.add(p));
+  A.assar(cena, postes.map(p => p.luz()), '#1b3524');
+  const car = await F.carro(); car.rotation.y = Math.PI / 2; cena.add(car);
+
+  // textos
+  const preto = F.camada('background:#000'), chi = F.chiadoVerde();
+  const tit = F.camada(); tit.innerHTML = `<div style="position:absolute;left:0;right:0;top:300px;text-align:center;${F.TITULO}font-size:170px;color:${F.VERDE};text-shadow:0 0 0 #000,6px 6px 0 #03220f" id="t1"></div>
+    <div style="position:absolute;left:0;right:0;top:505px;text-align:center;${F.TERMINAL}font-size:44px;color:#b9ffc9;text-shadow:3px 3px 0 #03220f" id="t2"></div>`;
+  const ficha = F.camada(); ficha.innerHTML = `<div id="fx" style="position:absolute;right:110px;top:250px;width:640px;padding:34px 40px;background:rgba(2,12,6,.82);border:3px solid ${F.VERDE};${F.TERMINAL}font-size:40px;line-height:1.55;color:${F.VERDE};white-space:pre"></div>`;
+  const TXT = 'REGISTRO\n────────────────\nNOME: PHANTOM\nIDADE: 19 ANOS\nCONDIÇÃO: MUDO\nFUNÇÃO: ';
+  for (let i = 0; i < 14; i++) if ('THE GREEN PATH'[i] !== ' ') cue('key', 3 + i * .12);
+  for (let i = 0; i < TXT.length; i += 2) cue('type', 6.05 + i / 62);
+
+  S.update = t => {
+    const tc = Math.max(0, t - 1.5), x = -16 + tc * 8.2;
+    car.position.set(x, .02, .4 + Math.sin(tc * 9) * .01); car.position.y += Math.abs(Math.sin(tc * 13)) * .012; car.encarar(S.camera);
+    S.camera.position.set(x + 2.6, .62, 7.4); S.camera.lookAt(x + 1.1, .95, 0);
+    for (const p of postes) P.encarar(p.halo, S.camera), p.halo.quaternion.premultiply(p.getWorldQuaternion(new THREE.Quaternion()).invert());
+    preto.style.opacity = t < 1.5 ? 1 : 0; chi.desenha(Math.round(t * 30), t < 1.5 ? .22 : 0, { dens: .35 });
+    const on = t >= 3 && t < 6; tit.style.opacity = on ? 1 : 0;
+    document.getElementById('t1').textContent = F.digitado('THE GREEN PATH', t, 3, 1 / .12);
+    document.getElementById('t2').textContent = t >= 4.9 ? 'feito por Igor Anão' : '';
+    ficha.style.opacity = t >= 6 ? 1 : 0;
+    const n = Math.floor((t - 6.05) * 62), pisca = Math.floor(t * 5) % 2;
+    document.getElementById('fx').innerHTML = TXT.slice(0, Math.max(0, n)) + (n >= TXT.length ? `<span style="opacity:${pisca ? 1 : .12}">????</span>` : '▮');
+  };
+};
+</script></body></html>

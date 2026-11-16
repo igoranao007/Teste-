@@ -1,0 +1,24 @@
+{
+ "dur": 8,
+ "bpm": 120,
+ "fps": 30,
+ "music": null,
+ "cues": [
+  {
+   "type": "heart",
+   "t": 0
+  },
+  {
+   "type": "heart",
+   "t": 2
+  },
+  {
+   "type": "heart",
+   "t": 4
+  },
+  {
+   "type": "heart",
+   "t": 6
+  }
+ ]
+}

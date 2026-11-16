@@ -1,0 +1,53 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 7 · 0:54–1:08 · IGOR ANÃO: (0–4) Igor sentado, zoom lento · (4–9) Phantom entra pela esquerda e põe a maleta na mesa; Igor fala · (9–11,5) Igor abre a maleta, brilho verde · (11,5–14) close na fita VHS. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:14}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 36, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 2.4, longe: 8 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const { I, c, Y } = await F.salaIgor(cena);
+  const Ph = await T.phantom(); cena.add(Ph.obj); Ph.obj.rotation.y = Math.PI / 2; const pc = Ph.corpo; pc.guardar();
+  const mal = T.maleta(); cena.add(mal); const fita = await T.fitaVHS(); mal.dentro.add(fita);
+  const env = await fetch('../../material/voz-igor.json').then(r => r.ok ? r.json() : null).catch(() => null);   // volume da voz por quadro (tools/som.py)
+  const FALA = 4.4, MESA = new THREE.Vector3(-.3, Y, .46);
+  const chi = F.chiadoVerde();
+  cue('click', 9.7); cue('click', 10.05); cue('tick', 1.6);
+  const boca = t => { const q = Math.round((t - FALA) * 30); return env && q >= 0 && q < env.length ? env[q] : 0; };
+  S.update = t => {
+    const close = t >= 11.5;
+    // Phantom: entra andando (4–6,2), pousa a maleta (6,2–7,4), recolhe o braço
+    const u = P.clamp((t - 4) / 2.2), x = P.lerp(-2.6, -.74, u), fase = u * 1.86 * 3.9, pousa = P.suave(6.2, 7.3, t), solta = P.suave(7.4, 8.2, t);
+    Ph.obj.visible = t >= 3.9; pc.repor();
+    const sobe = u < 1 ? F.andar(pc, fase, { maleta: true }) : (pc.braco('L', [0, -1, -.1], [0, -1, .05]), pc.braco('R', [0, -1, .1], [0, -1, .15]), 0);
+    Ph.obj.position.set(x, sobe, .1); Ph.obj.rotation.y = Math.PI / 2 - .5 * P.suave(6, 7, t);
+    if (pousa <= 0) { mal.rotation.y = 0; mal.deitar(0); F.segurar(pc, mal); }
+    else {
+      const a = new THREE.Vector3(); pc.osso('f_middle.01.R').getWorldPosition(a); const ini = mal.userData.ini ?? (mal.userData.ini = mal.position.clone());
+      mal.position.lerpVectors(ini, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .22; mal.deitar(P.suave(.25, .9, pousa));
+      if (solta < 1) { const alvo = mal.position.clone().add(new THREE.Vector3(-.12, .12 + .1 * pousa, .0)); const rep = alvo.clone().lerp(a, 0); pc.alcancar('R', rep.toArray(), [0, -.3, 1], .12); }
+    }
+    if (t < 4) { mal.userData.ini = null; }
+    Ph.animar(t, { pisca: (t % 3.3) < .12 ? 1 : 0, pont: .34 + .05 * Math.sin(t * 2.1) });
+    // Igor: fala, depois abre a maleta
+    const abre = P.suave(10.25, 11.3, t), maos = P.suave(9.0, 9.6, t);
+    c.repor();
+    if (maos > 0) { c.alcancar('R', [P.lerp(-.1, MESA.x - .13, maos), Y + .13, P.lerp(.3, MESA.z - .02, maos)], [-.6, -.7, -.2], .1); c.alcancar('L', [P.lerp(.2, MESA.x + .13, maos), Y + .13, P.lerp(.3, MESA.z - .02, maos)], [.6, -.7, -.2], .1); }
+    I.assentar(); I.animar(t, { boca: boca(t), pisca: (t % 4.1) > 3.95 ? 1 : 0 });
+    I.cabeca.rotation.x += .18 * P.suave(9.2, 10.2, t); I.cabeca.rotation.y += -.22 * P.suave(4.6, 5.6, t) * (1 - P.suave(8.6, 9.4, t));
+    mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(t);
+    const g = abre * (.75 + .25 * Math.sin(t * 9));
+    P.luz({ ...F.LUZ_SALA, fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#1d5f37').lerp(new THREE.Color('#39ff6a'), g * .8).getHexString() });
+    if (!close) { const zo = t / 11.5; S.camera.fov = 36; S.camera.position.set(0, 1 + .02 * zo, 1.75 - .28 * zo); S.camera.lookAt(-.08 * P.suave(4, 7, t), 1.02 - .03 * P.suave(9, 11, t), 0); }
+    else { const q = (t - 11.5) / 2.5, f = fita.getWorldPosition(new THREE.Vector3()); S.camera.fov = 30; S.camera.position.set(f.x + .02, f.y + .36 - q * .08, f.z - .15 + q * .02); S.camera.lookAt(f.x, f.y, f.z - .005); }
+    I.obj.visible = !close; Ph.obj.visible = Ph.obj.visible && !close; S.camera.updateProjectionMatrix();
+    chi.desenha(Math.round(t * 30), close ? .1 : 0, { dens: .25 });
+  };
+};
+</script></body></html>

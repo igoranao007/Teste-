@@ -1,0 +1,20 @@
+{
+ "dur": 14,
+ "bpm": 120,
+ "fps": 30,
+ "music": null,
+ "cues": [
+  {
+   "type": "click",
+   "t": 9.7
+  },
+  {
+   "type": "click",
+   "t": 10.05
+  },
+  {
+   "type": "tick",
+   "t": 1.6
+  }
+ ]
+}

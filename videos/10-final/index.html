@@ -1,0 +1,23 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 10 · 1:24–1:30 · FINAL: o carregamento perde o sinal — chiado verde, tracking, rasgos — cada vez mais forte; em 5,0 s estrondo e 2 quadros de flash verde-branco; preto seco no fim. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:6}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+import * as K from "../../lib/terminal.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const term = K.terminal(), flash = F.camada('background:#d8ffe2'), preto = F.camada('background:#000');
+  cue('boom', 5.0); cue('braam', 5.0, { d: 1.0 });
+  window.onTick(t => {
+    const q = Math.round(t * 30), f = t < 5 ? .08 + .92 * Math.pow(t / 5, 1.6) : 1;
+    term.limpar(); K.carregando(term, .46 + .53 * P.clamp(t / 5), t); term.pixelar(); term.sinal(q, f);
+    flash.style.opacity = q >= 150 && q < 152 ? 1 : 0; preto.style.opacity = q >= 177 ? 1 : 0;
+  });
+};
+</script></body></html>

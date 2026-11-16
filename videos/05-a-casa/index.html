@@ -1,0 +1,52 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 5 · 0:38–0:46 · A CASA: (0–4) o carro vira à direita no caminho de terra até a casa com uma janela verde · (4–6) a mão de Phantom aperta o botão do painel, LED verde · (6–8) clique e preto. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:8}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 40, perto: 14, longe: 70, luz: { keyDir: [.3, .8, .5], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } }), cena = S.scene, R = P.rng(41);
+  const ext = new THREE.Group(), inte = new THREE.Group(); cena.add(ext, inte);
+  ext.add(A.chaoA({ w: 140, d: 140, seg: 90, mapa: F.TEX.capim(), rep: [44, 44] }));
+  ext.add(A.chaoA({ w: 7, d: 140, seg: 50, mapa: F.TEX.terra(), rep: [2, 40], y: .02 }));                            // estrada (ao longo de z)
+  const cam2 = A.chaoA({ w: 26, d: 3.6, seg: 24, mapa: F.TEX.terra(), rep: [8, 1], y: .025, x: 15, z: -6 }); ext.add(cam2);   // caminho de terra até a casa
+  const casa = F.casa(); casa.position.set(31, 0, -9); casa.rotation.y = -Math.PI / 2 + .25; ext.add(casa);
+  for (let i = 0; i < 40; i++) { const a = F.arvore(R, { h: 6 }); let x, z; do { x = P.lerp(-50, 60, R()); z = P.lerp(-50, 30, R()); } while ((Math.abs(x) < 6) || (x > 2 && x < 40 && Math.abs(z + 7) < 7)); a.position.set(x, 0, z); ext.add(a); }
+  const c1 = F.cerca(5, 26, -2.6); ext.add(c1);
+  const poste = F.posteVerde(-5.5, 12, {}); ext.add(poste);
+  A.assar(ext, [casa.luz(), poste.luz()], '#24402c');
+  const car = await F.carro(); ext.add(car);
+  const curva = new THREE.CatmullRomCurve3([[0, 0, 26], [0, 0, 8], [.6, 0, -2], [4, 0, -5.6], [10, 0, -6], [18, 0, -6], [24.5, 0, -6.6]].map(p => new THREE.Vector3(...p)));
+  // dentro do carro
+  const dash = F.interiorCarro(); inte.add(dash);
+  const Ph = await T.phantom(); inte.add(Ph.obj); Ph.obj.position.set(-.34, -.4, .04); const c = Ph.corpo; c.sentar(); c.braco('L', [.14, -.8, .6], [-.25, -.02, 1]); c.guardar();
+  const B = new THREE.Vector3(); dash.botao.getWorldPosition(B);
+window.Ph = Ph; window.S = S;
+  const preto = F.camada('background:#000');
+  cue('click', 6);
+  S.update = t => {
+    const fora = t < 4; ext.visible = fora; inte.visible = !fora && t < 6; preto.style.opacity = t >= 6 ? 1 : 0;
+    if (fora) {
+      P.nevoa({ perto: 14, longe: 70 }); P.luz({ keyDir: [.3, .8, .5], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' });
+      const u = P.clamp(t / 3.6), e = 1 - (1 - u) ** 2.2, p = curva.getPointAt(Math.min(1, e)), q = curva.getTangentAt(Math.min(1, e));
+      car.position.copy(p).setY(.02); car.rotation.y = Math.atan2(q.x, q.z); car.encarar(S.camera);
+      S.camera.fov = 40; S.camera.updateProjectionMatrix(); S.camera.position.set(-6, 7, 14); S.camera.lookAt(P.lerp(4, 15, P.suave(0, 4, t)), 1.2, -4);
+      casa.halo.quaternion.copy(S.camera.quaternion).premultiply(casa.getWorldQuaternion(new THREE.Quaternion()).invert());
+      poste.halo.quaternion.copy(S.camera.quaternion).premultiply(poste.getWorldQuaternion(new THREE.Quaternion()).invert());
+    } else if (t < 6) {
+      P.nevoa({ perto: 3, longe: 20 }); P.luz({ keyDir: [-.6, .5, .5], keyCor: '#9cc4a8', fillDir: [.2, -.3, .9], fillCor: '#2a8a48', amb: '#1c3324' });
+      const u = t - 4, aperta = P.suave(.25, .9, u), fundo = P.suave(.95, 1.1, u) * (1 - P.suave(1.25, 1.45, u));
+      Ph.obj.position.set(-.34 + .1 * aperta, -.4, .04 + .12 * aperta); c.repor(); dash.volante.visible = false; c.alcancar('R', [P.lerp(-.1, B.x, aperta), P.lerp(.72, B.y, aperta), P.lerp(.3, B.z - .03 + fundo * .02, aperta)], [.6, -.8, -.2], .17);
+      dash.botao.position.z = .55 + fundo * .012; dash.led.material.uniforms.uCor.value.set(u > 1.05 ? F.VERDE : '#0f3a1c');
+      Ph.animar(t, { pont: .66 });
+      S.camera.fov = 34; S.camera.updateProjectionMatrix(); S.camera.position.set(.22, 1.04 - u * .01, .2); S.camera.lookAt(-.13, .88, .55);
+    }
+  };
+};
+</script></body></html>

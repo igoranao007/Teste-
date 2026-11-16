@@ -1,0 +1,24 @@
+{
+ "dur": 6,
+ "bpm": 120,
+ "fps": 30,
+ "music": null,
+ "cues": [
+  {
+   "type": "ui_blip",
+   "t": 0.3
+  },
+  {
+   "type": "ui_blip",
+   "t": 1.2
+  },
+  {
+   "type": "click",
+   "t": 3
+  },
+  {
+   "type": "ui_blip",
+   "t": 3.45
+  }
+ ]
+}

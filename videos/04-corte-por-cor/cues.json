@@ -1,0 +1,16 @@
+{
+ "dur": 10,
+ "bpm": 120,
+ "fps": 30,
+ "music": null,
+ "cues": [
+  {
+   "type": "boom",
+   "t": 0
+  },
+  {
+   "type": "whoosh_in",
+   "t": 9.3
+  }
+ ]
+}

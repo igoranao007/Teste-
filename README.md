@@ -1,33 +1,22 @@
-# Animação PS1 → MP4
+# THE GREEN PATH — feito por Igor Anão
 
-Ferramentas instaladas (ainda sem cena; as cenas vêm do roteiro).
+Vídeo 16:9, 1920×1080, 30 fps, 90 s, estilo PS1 (skill `video-lowpoly-ps1` em `.claude/skills/`).
 
-| Ferramenta | Pra quê |
-|---|---|
-| **Three.js** + `@react-three/fiber` | cena 3D com visual PS1 (`src/ps1/`) |
-| **Remotion** (+ transitions, captions, three) | edição final, textos, legendas, transições → MP4 |
-| **Blender 5.3** (`blender`) | converter e limpar modelos (FBX/OBJ → GLB), low-poly |
-| **ffmpeg** | juntar vídeo e áudio, tratar a voz |
-| **faster-whisper** | legendas automáticas a partir da sua voz |
-
-## Pastas
-- `public/models/` – modelos PSX baixados (.glb de preferência)
-- `public/textures/` – texturas
-- `audio/voz/` – sua voz gravada
-- `audio/musica/`, `audio/sfx/` – música e efeitos (ElevenLabs etc.)
-
-## Utilitários PS1 (`src/ps1/`)
-- `ps1Material.ts` – vertex snapping, texturas sem filtro, cor 15-bit com dither
-- `PS1Canvas.tsx` – renderiza em 320px e amplia pixelado
-- `Model.tsx` – carrega .glb de `public/models/` já com visual PS1
-- `CameraRig.tsx` – câmera por keyframes
-
-## Comandos
+## Montar o filme
 ```bash
-npm run studio                                   # prévia no navegador
-npm run render                                   # out/video.mp4
-bash scripts/voice-clean.sh bruto.m4a audio/voz/voz.wav
-python3 scripts/transcribe.py audio/voz/voz.wav src/captions.json
-bash scripts/mix-audio.sh out/video.mp4 audio/voz/voz.wav audio/musica/musica.mp3
-blender -b -P script.py                          # Blender sem interface
+npm install
+bash tools/baixar-itch.sh        # modelos gratuitos do itch.io (ficam fora do git) — precisa do Blender
+python3 -m venv audio/.venv && audio/.venv/bin/pip install numpy scipy pillow
+bash tools/filme.sh              # som + render dos 10 planos + junta → out/the-green-path.mp4
+PLANOS="07" bash tools/filme.sh  # refaz só um plano e junta de novo
+node render.mjs 03 --at=1,4,7    # preview de um plano → previews/
 ```
+
+## Onde está cada coisa
+- `videos/01-estrada … 10-final/` — um plano por pasta (tudo é função de `t`).
+- `lib/ps1.js`, `lib/arh.js` — motor da skill (com esqueleto, pontilhado de 1 bit e casca de contorno acrescentados).
+- `lib/modelo.js` — carrega GLB/FBX e troca os materiais por `P.mat`.
+- `lib/tgp.js` — Igor, Phantom, maleta, fita VHS, mesa. `lib/filme.js` — carro, estrada, placa, casa, corredor, computador. `lib/terminal.js` — telas verdes e perda de sinal.
+- `tools/som.py` — roteiro de som (cues + voz) → `audio/synth.py` sintetiza. `tools/clonar_voz.py` — clona a voz localmente (Chatterbox).
+- `material/` — floppa.jpg, logo, modelos convertidos pra GLB, créditos. `audio/voz/` — voz original e a fala gerada.
+- `edicao/` — projeto Remotion (vazio) caso queira edição extra por cima do MP4.

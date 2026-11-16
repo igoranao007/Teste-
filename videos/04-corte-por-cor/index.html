@@ -1,0 +1,37 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 4 · 0:28–0:38 · CORTE POR COR: (0–2) o amarelo da placa enche a tela, pontilhado · (2–10) o amarelo vira os faróis do carro chegando na zona rural; a cidade ao fundo; o carro passa rente. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:10}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 42, perto: 16, longe: 230, luz: { keyDir: [.3, .8, .5], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } }), cena = S.scene, R = P.rng(23);
+  cena.add(A.chaoA({ w: 160, d: 240, seg: 90, mapa: F.TEX.capim(), rep: [50, 76], z: -80 }));
+  const est = A.chaoA({ w: 7.5, d: 240, seg: 60, mapa: F.TEX.terra(), rep: [2, 66], y: .02, z: -80 }); cena.add(est);
+  for (const s of [-1, 1]) { const c = F.cerca(-120, 30, 0); c.rotation.y = Math.PI / 2; c.position.x = s * 5.2; c.position.z = -40; cena.add(c); }
+  F.mata(cena, R, { x0: -60, x1: -14, z0: -110, z1: 10, n: 26, h: 6 }); F.mata(cena, R, { x0: 14, x1: 60, z0: -110, z1: 10, n: 26, h: 6 });
+  const postes = [[-7, -22], [7.5, -62], [-7, -104]].map(([x, z]) => F.posteVerde(x, z, { rot: x < 0 ? 0 : Math.PI })); postes.forEach(p => cena.add(p));
+  const cid = F.cidade(R); cid.position.set(10, 0, -135); cena.add(cid);
+  A.assar(cena, postes.map(p => p.luz()), '#24402c');
+  const car = await F.carro(); cena.add(car);
+  // o amarelo que enche a tela (pontilhado pelo degradê de 15 bits)
+  const am = P.malha(new THREE.PlaneGeometry(2, 2, 1, 8), P.mat({ semLuz: true, corVertice: true }), {}); am.material.depthTest = false; am.renderOrder = 99; am.frustumCulled = false;
+  { const g = am.geometry, n = g.attributes.position.count, c = new Float32Array(n * 3), a = new THREE.Color('#ffe168'), b = new THREE.Color('#e8a400'); for (let i = 0; i < n; i++) { const k = (g.attributes.position.getY(i) + 1) / 2, q = b.clone().lerp(a, k); c.set([q.r, q.g, q.b], i * 3); } g.setAttribute('color', new THREE.BufferAttribute(c, 3)); }
+  S.camera.add(am); am.position.z = -1; am.scale.set(2, 1.2, 1); cena.add(S.camera);
+  cue('boom', 0); cue('whoosh_in', 9.3);
+  S.update = t => {
+    am.visible = t < 2; for (const o of cena.children) if (o !== S.camera) o.visible = t >= 2; P.nevoa(t < 2 ? { perto: 9e3, longe: 1e4 } : { perto: 16, longe: 230 });
+    const u = Math.max(0, t - 2), z = -36 + u * 5.5;                       // vem de frente e passa rente à câmera em ~t=9,2
+    car.position.set(-.6, .02, z); car.position.y += Math.abs(Math.sin(u * 13)) * .012; car.encarar(S.camera);
+    const k = 1 + 70 * (1 - P.suave(0, .8, u)) ** 2; car.farois.forEach(h => h.scale.setScalar(k));   // o amarelo "vira" os dois faróis
+    S.camera.position.set(1.7, 1.0 + Math.sin(t * 2) * .01, 6.5); S.camera.lookAt(-.4 + P.suave(6.4, 7.8, u) * 1.5, 1.6 - P.suave(6, 7.6, u) * .5, -30 + P.suave(6, 7.8, u) * 34);
+    for (const p of postes) p.halo.quaternion.copy(S.camera.quaternion).premultiply(p.getWorldQuaternion(new THREE.Quaternion()).invert());
+  };
+};
+</script></body></html>

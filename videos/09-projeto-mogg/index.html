@@ -1,0 +1,37 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- PLANO 9 · 1:18–1:24 · PROJETO MOGG: título, menu > INICIAR / SAIR com cursor · (2,6–3,4) a mão de Igor aperta Enter · CARREGANDO... com barra de blocos. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:6}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+import * as K from "../../lib/terminal.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 34, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 2.4, longe: 8 }, luz: { ...F.LUZ_SALA, keyDir: [0, .5, 1], keyCor: '#7dffa0', amb: '#1a3022' } }), cena = S.scene;
+  const { I, c, Y, cel } = await F.salaIgor(cena); cel.visible = false;
+  const pc = F.computador(); pc.position.set(0, Y, .64); cena.add(pc);
+  const E = new THREE.Vector3(); pc.enter.getWorldPosition(E);
+  const term = K.terminal();
+  cue('ui_blip', .3); cue('ui_blip', 1.2); cue('click', 3.0); cue('ui_blip', 3.45);
+  S.update = t => {
+    const mao = t >= 2.6 && t < 3.4; term.el.style.opacity = mao ? 0 : 1;
+    if (mao) {
+      const u = t - 2.6, desce = P.suave(.2, .4, u) * (1 - P.suave(.5, .7, u));
+      F.telaCodigo(pc, t); c.repor(); c.alcancar('R', [E.x - .0, E.y + .075 - desce * .03, E.z - .03], [-.7, -.5, -.3], .1); c.alcancar('L', [.14, Y + .08, .3], [.7, -.6, -.2], .1); I.assentar(); I.animar(t);
+      pc.enter.position.y = .038 - desce * .008;
+      S.camera.position.set(-.42, Y + .3, .0); S.camera.lookAt(E.x, E.y, E.z);
+    } else {
+      term.limpar();
+      if (t < 2.6) { term.txt(F.digitado('PROJETO MOGG', t, .15, 22), 240, 58, 40, K.VERDE, { alinhar: 'center', peso: 800 });
+        if (t > 1.0) { term.txt('> INICIAR', 190, 150, 18, K.CLARO); if (Math.floor(t * 3) % 2) term.caixa(296, 152, 10, 16, K.CLARO); } if (t > 1.2) term.txt('  SAIR', 190, 178, 18, '#1f9a45'); }
+      else K.carregando(term, P.clamp((t - 3.4) / 2.6 * .46), t);
+      term.pixelar(); term.sinal(Math.round(t * 30), .03);
+    }
+  };
+};
+</script></body></html>
