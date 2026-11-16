@@ -50,8 +50,10 @@ window.SETUP = async () => {
       m.R = mao.toArray(); m.poloR = [-.8, .2, -.5]; m.L = [.3, Y + .04, .1];
       if (t >= 15.2) { cena.attach(fita); fita.position.set(mao.x, mao.y - .05, mao.z + .03); fita.rotation.set(-Math.PI / 2 + s * .4, 0, .12 * s); } }
     else if (fita.parent !== mal.dentro) { mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); fpos = null; }
-    I.pose(TT, m); I.animar(TT, { boca: fala, pisca: (TT % 4.1) > 3.95 ? 1 : 0 });
-    I.cabeca.rotation.x += .2 * P.suave(9.2, 10.2, t) + .05 * fala; I.cabeca.rotation.y += -.3 * P.suave(4.2, 5.2, t) * (1 - P.suave(8.6, 9.4, t));
+    m.inclina = .16 * P.suave(8.9, 9.6, t); I.pose(TT, m); I.animar(TT, { boca: fala, pisca: (TT % 4.1) > 3.95 ? 1 : 0 });
+    // pra onde ele olha: Phantom chegando → a maleta pousando → de volta pro Phantom enquanto fala → desce o olhar pra maleta e fica nela
+    const praPh = P.suave(4.2, 5.0, t) * (1 - P.suave(6.3, 6.9, t)) + P.suave(7.7, 8.2, t) * (1 - P.suave(8.7, 9.2, t)), praMala = P.suave(6.4, 7.0, t) * (1 - P.suave(7.6, 8.1, t)) + P.suave(8.8, 9.5, t);
+    I.cabeca.rotation.x += .52 * praMala + .05 * fala - .06 * praPh; I.cabeca.rotation.y += -.42 * praPh - .3 * praMala; I.cabeca.position.z += .03 * praMala; I.cabeca.position.y -= .02 * praMala;
     mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(t);
     lamp.acender(liga, S.camera);
     const g = abre * (.75 + .25 * Math.sin(t * 9));
