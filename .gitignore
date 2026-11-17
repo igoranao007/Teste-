@@ -15,3 +15,4 @@ material/producao/modelos-pagos/**/*.fbx
 material/producao/modelos-pagos/**/*.glb
 material/producao/personagens/vegetti_v4/*.blend
 material/producao/personagens/vegetti_v4/*.glb
+*.blend1
