@@ -18,3 +18,7 @@ material/producao/personagens/vegetti_v4/*.glb
 *.blend1
 material/producao/personagens/vegetti_folha/*.blend
 material/producao/personagens/vegetti_folha/*.glb
+material/producao/modelos-pagos/simple_character_psx/model/
+material/producao/modelos-pagos/simple_character_psx/texture/
+material/producao/modelos-pagos/simple_character_psx/*.blend
+material/producao/personagens/vegetti_jashi/texturas/
