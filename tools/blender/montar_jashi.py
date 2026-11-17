@@ -25,4 +25,20 @@ for v in bm.verts:
         v.co = inv @ (C + d * f)
 bm.to_mesh(h.data); bm.free()
 print('OCULOS removidos:', len(fora))
+import os
+if os.environ.get('CALCA', '0') == '1':   # bermuda larga -> calça reta (perna do mesmo volume da coxa)
+    b = bpy.data.objects['body']; mw = b.matrix_world; inv = mw.inverted()
+    print('SHAPEKEYS', b.data.shape_keys)
+    pernas = [mw @ v.co for v in b.data.vertices if 0.15 < (mw @ v.co).z < 0.45]
+    cx = sum(abs(w.x) for w in pernas) / max(1, len(pernas)); cy = sum(w.y for w in pernas) / max(1, len(pernas))
+    n = 0
+    for v in b.data.vertices:
+        w = mw @ v.co
+        if abs(w.x) > 0.32 or w.z > 0.97 or w.z < 0.12: continue
+        sx = 1 if w.x > 0 else -1
+        if w.z <= 0.50: f = 1.0 + 0.30 * max(0.0, min(1.0, (w.z - 0.12) / 0.12))                 # canela mais grossa
+        else: f = 0.74 + 0.26 * max(0.0, min(1.0, (w.z - 0.60) / 0.35)) ** 1.5                     # bermuda mais fina
+        w.x = sx * (cx + (abs(w.x) - cx) * f); w.y = cy + (w.y - cy) * f
+        v.co = inv @ w; n += 1
+    print('CALCA', n, 'centro perna', round(cx, 3), round(cy, 3))
 bpy.ops.wm.save_as_mainfile(filepath=OUT)

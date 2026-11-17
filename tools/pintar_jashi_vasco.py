@@ -8,6 +8,7 @@ from rasterizar_texels import texels
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 TRIS, ORIG, FOTO, OUT = sys.argv[1:5]; N = 1024
 orig = Image.open(ORIG).convert('RGB').resize((N, N), Image.NEAREST); O = orig.load()
+OB = orig.filter(ImageFilter.GaussianBlur(9)).load()   # só as dobras grandes (sem estampa)
 L = [t for t in json.load(open(TRIS)) if t['mat'] != 'glass']
 def lum(c): return (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255
 def ss(a, b, v): return max(0.0, min(1.0, (v - a) / (b - a)))
@@ -21,7 +22,10 @@ def interp(pts, v):
         if a[1] <= v <= b[1]: return a[0] + (v - a[1]) * (b[0] - a[0]) / (b[1] - a[1])
     a, b = (pts[0], pts[1]) if v < pts[0][1] else (pts[-2], pts[-1])
     return a[0] + (v - a[1]) * (b[0] - a[0]) / (b[1] - a[1])
-foto = Image.open(FOTO).convert('RGB').filter(ImageFilter.MedianFilter(3)); F = foto.load(); FW, FH = foto.size
+import os
+ROUPA = os.environ.get('ROUPA', 'vasco')
+from PIL import ImageEnhance
+foto = ImageEnhance.Contrast(Image.open(FOTO).convert('RGB').filter(ImageFilter.GaussianBlur(0.5))).enhance(1.25).filter(ImageFilter.UnsharpMask(2, 90, 2)); F = foto.load(); FW, FH = foto.size
 QUENTE = (1.0, 0.93, 0.82)
 def amostra(mx, my):
     d = abs(mx - 256); fx = min(max(interp(PX, 256 - d), 0), FW - 1); fy = min(max(interp(PY, my), 0), FH - 1)
@@ -32,6 +36,7 @@ PELE = [sum(c[i] for c in am) / len(am) for i in range(3)]
 FONTE = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'; FONTE_C = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
 PRETO, BRANCO, VERM, CAB = (22, 22, 25), (226, 226, 222), (196, 30, 36), (48, 33, 22)
 EM = 1000
+PULSO = 0.84
 def tela(): return Image.new('RGBA', (900, 1900), (0, 0, 0, 0))     # x -0,45..0,45 ; z 1,9..0
 def pm(xm, zm): return (int((xm + 0.45) * EM), int((1.9 - zm) * EM))
 def escrever(im, txt, xm, zm, alt, larg=None, fonte=FONTE):
@@ -59,6 +64,12 @@ def regiao(t, p, o):
     X, Y, Z = p; ax = abs(X); h, s, v = colorsys.rgb_to_hsv(*[q / 255 for q in o])
     if t['obj'] == 'head':
         return 'cabelo' if v < 0.33 and not (0.0 <= h < 0.12 and s > 0.35 and v > 0.25) else 'pele_cab'
+    if ROUPA == 'terno':
+        if t['obj'] == 'arms': return 'manga' if ax < PULSO else 'pele'
+        if Z > 0.96:
+            if Z > 1.69 and (0.0 <= h < 0.12 and s > 0.2): return 'pele'
+            return 'paleto'
+        return 'calca' if Z > 0.115 else 'chuteira'
     if t['obj'] == 'arms': return 'manga' if ax < 0.43 else 'pele'
     if Z > 0.96:
         if Z > 1.69 and (0.0 <= h < 0.12 and s > 0.2): return 'pele'      # pescoço
@@ -72,10 +83,37 @@ lista = list(texels(L, N))
 for x, y, p, t in lista: grupos.setdefault(regiao(t, p, O[x, y]), []).append(lum(O[x, y]))
 media = {k: sum(v) / len(v) for k, v in grupos.items()}; print({k: (len(v), round(media[k], 2)) for k, v in grupos.items()})
 def dobra(o, k, forca=1.0):
-    f = 1 + (lum(o) / max(media[k], 0.05) - 1) * forca; return max(0.55, min(1.35, f))
+    f = 1 + (lum(o) / max(media[k], 0.05) - 1) * forca
+    lo = 0.80 if (ROUPA == 'terno' and k in ('paleto', 'manga')) else 0.55   # tira a estampa da camiseta original
+    return max(lo, min(1.35, f))
 tex = Image.new('RGB', (N, N), (0, 0, 0)); T = tex.load(); feito = set()
+VERDE, VERDE_L, CAM, GRAV = (26, 78, 48), (34, 96, 60), (20, 20, 23), (48, 48, 54)
+def cor_terno(k, p, n, o):
+    X, Y, Z = p; ax = abs(X); frente = n[1] < -0.2
+    if k == 'manga':
+        if ax > PULSO - 0.035: return [q * dobra(o, k) for q in (CAM if ax > PULSO - 0.012 else (20, 62, 38))]   # punho
+        return [q * dobra(o, k) for q in VERDE]
+    if k == 'calca':
+        return [q * dobra(o, k, 0.25) for q in (22, 22, 25)]
+    if k == 'paleto':
+        if frente:
+            v = 0.105 * ss(1.28, 1.72, Z)                          # abertura em V
+            if ax < v:
+                if ax < 0.022 and Z > 1.30: return [q * dobra(o, k, 0.6) for q in GRAV] if Z < 1.68 else [q * 0.8 for q in GRAV]   # gravata + nó
+                return [q * dobra(o, k, 0.7) for q in CAM]
+            if ax < v + 0.032 and Z > 1.40: return [q * dobra(o, k) * (1.0 if ax > v + 0.004 else 0.6) for q in VERDE_L]   # lapela
+            if Z < 1.30 and ax < 0.010: return [q * 0.55 for q in VERDE]                      # fecho
+            if any(abs(Z - bz) < 0.012 for bz in (1.23, 1.12)) and abs(ax - 0.028) < 0.011: return [14, 14, 16]   # botões
+            if abs(Z - 1.06) < 0.008 and 0.07 < ax < 0.19: return [q * 0.55 for q in VERDE]     # bolsos
+            if abs(Z - 1.52) < 0.006 and 0.11 < X < 0.19: return [q * 0.6 for q in VERDE]      # bolso do peito
+        elif n[1] > 0.2 and ax < 0.006 and Z < 1.55: return [q * 0.6 for q in VERDE]            # costura das costas
+        if Z > 1.70 and n[1] > -0.2: return [q * dobra(o, k) for q in CAM]                     # gola da camisa atrás
+        return [q * dobra(o, k) for q in VERDE]
+    return [q * dobra(o, k, 0.8) for q in (24, 24, 27)]
 for x, y, p, t in lista:
     o = O[x, y]; k = regiao(t, p, o); X, Y, Z = p; ax = abs(X); n = t['n']
+    if ROUPA == 'terno' and k in ('manga', 'calca', 'paleto', 'chuteira'):
+        T[x, y] = tuple(max(0, min(255, int(v))) for v in cor_terno(k, p, n, OB[x, y] if k in ('paleto', 'manga') else o)); feito.add((x, y)); continue
     if k == 'pele_cab':
         mx, my = X / ESC * 512 + 256, (CZ - Z) / ESC * 512 + 256
         w = max(0.0, min(1.0, (1 - math.hypot((mx - 256) / 88, (my - 285) / 150)) / 0.3)) * (ss(-0.1, -0.55, n[1]) if n[1] > -0.55 else 1)
