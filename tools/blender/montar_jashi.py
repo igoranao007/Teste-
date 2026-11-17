@@ -57,7 +57,7 @@ if os.environ.get('AFRO'):   # black power: volume grande e fofo em volta da cab
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1, location=(0, 0, 0))
     o = bpy.context.object; o.name = 'afro'
     bm = bmesh.new(); bm.from_mesh(o.data)
-    C = Vector((0.0, 0.03, 1.97)); R = Vector((0.29, 0.26, 0.235)) * ESC
+    C = Vector((0.0, 0.03, 1.96)); R = Vector((0.25, 0.23, 0.21)) * ESC
     for v in bm.verts:
         n = v.co.normalized(); j = 1 + 0.10 * (random.random() - 0.5)          # contorno fofo/irregular
         v.co = C + Vector((n.x * R.x, n.y * R.y, n.z * R.z)) * j
@@ -83,6 +83,30 @@ if os.environ.get('AFRO'):   # black power: volume grande e fofo em volta da cab
     viz = {w for v in borda for e in v.link_edges for w in e.verts} - borda
     for v in borda: encostar(v, 1.0)
     for v in viz: encostar(v, 0.45)
+    # tufos: bolinhas irregulares de tamanhos variados por cima da base (quebra o contorno de capacete)
+    TUFOS = int(os.environ.get('AFRO_TUFOS', '48'))
+    base = [f for f in bm.faces]
+    pts = []
+    for f in random.sample(base, min(len(base), TUFOS * 3)):
+        c = f.calc_center_median(); n = (c - C).normalized()
+        if c.y < 0.04 and c.z < 2.02 and abs(c.x) < 0.19: continue      # não cobre a testa/rosto
+        if c.z < 1.83: continue
+        if any((c - q).length < 0.055 for q in pts): continue
+        pts.append(c)
+        if len(pts) >= TUFOS: break
+    for c in pts:
+        n = (c - C).normalized(); r = random.uniform(0.038, 0.062) * ESC
+        g = bmesh.ops.create_icosphere(bm, subdivisions=1, radius=r)
+        for v in g['verts']:
+            v.co = v.co * (1 + 0.22 * (random.random() - 0.5)) + c - n * (r * 0.30)
+    print('TUFOS', len(pts))
+    # sombra pintada por vértice: claro em cima, escuro embaixo e no fundo entre os tufos
+    ca = bm.loops.layers.color.new('sombra')
+    for f in bm.faces:
+        for l in f.loops:
+            p = l.vert.co; up = max(0.0, min(1.0, (p.z - 1.80) / 0.40)); dist = (p - C).length / 0.30
+            k = 0.45 + 0.55 * up; k *= 0.75 + 0.25 * min(1.0, dist)
+            l[ca] = (k, k, k, 1.0)
     uvl = bm.loops.layers.uv.new('UVMap')
     for f in bm.faces:
         for l in f.loops:
@@ -91,7 +115,10 @@ if os.environ.get('AFRO'):   # black power: volume grande e fofo em volta da cab
     for p in o.data.polygons: p.use_smooth = True
     mt = bpy.data.materials.new('afro'); mt.use_nodes = True; nt = mt.node_tree; b = nt.nodes['Principled BSDF']
     ti = nt.nodes.new('ShaderNodeTexImage'); ti.image = bpy.data.images.load(os.path.abspath(os.environ['AFRO'])); ti.image.pack(); ti.interpolation = 'Closest'
-    nt.links.new(ti.outputs['Color'], b.inputs['Base Color']); b.inputs['Roughness'].default_value = 1.0; nt.nodes.active = ti
+    vc = nt.nodes.new('ShaderNodeVertexColor'); vc.layer_name = 'sombra'
+    mx = nt.nodes.new('ShaderNodeMixRGB'); mx.blend_type = 'MULTIPLY'; mx.inputs['Fac'].default_value = 1.0
+    nt.links.new(ti.outputs['Color'], mx.inputs['Color1']); nt.links.new(vc.outputs['Color'], mx.inputs['Color2'])
+    nt.links.new(mx.outputs['Color'], b.inputs['Base Color']); b.inputs['Roughness'].default_value = 1.0; nt.nodes.active = ti
     o.data.materials.append(mt)
     vg = o.vertex_groups.new(name=hb.name); vg.add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
     m = o.modifiers.new('Armature', 'ARMATURE'); m.object = A; o.parent = A; o.matrix_parent_inverse = A.matrix_world.inverted()
