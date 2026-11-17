@@ -41,4 +41,31 @@ if os.environ.get('CALCA', '0') == '1':   # bermuda larga -> calça reta (perna 
         w.x = sx * (cx + (abs(w.x) - cx) * f); w.y = cy + (w.y - cy) * f
         v.co = inv @ w; n += 1
     print('CALCA', n, 'centro perna', round(cx, 3), round(cy, 3))
+if os.environ.get('ESPINHOS', '0') == '1':   # espinhos e orelhas (personagem ouriço), presos no osso da cabeça
+    import math
+    from mathutils import Vector, Matrix
+    A = bpy.data.objects['simple_character']
+    hb = max(A.data.bones, key=lambda b: (A.matrix_world @ b.head_local).z if b.use_deform else -9)
+    print('OSSO CABECA', hb.name)
+    azul = bpy.data.materials.new('espinho'); azul.use_nodes = True
+    bs = azul.node_tree.nodes['Principled BSDF']; bs.inputs['Base Color'].default_value = (0.0, 0.03, 0.55, 1); bs.inputs['Roughness'].default_value = 0.9
+    pele = bpy.data.materials.new('orelha'); pele.use_nodes = True
+    bp = pele.node_tree.nodes['Principled BSDF']; bp.inputs['Base Color'].default_value = (0.75, 0.45, 0.25, 1); bp.inputs['Roughness'].default_value = 0.9
+    C = Vector((0.0, 0.02, 1.90))
+    def cone(base, ponta, r, mat, nome):
+        bpy.ops.mesh.primitive_cone_add(vertices=5, radius1=r, radius2=0, depth=1)
+        o = bpy.context.object; o.name = nome
+        d = ponta - base; o.scale = (1, 1, d.length); o.location = base + d / 2
+        o.rotation_euler = d.to_track_quat('Z', 'Y').to_euler()
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        o.data.materials.append(mat)
+        vg = o.vertex_groups.new(name=hb.name); vg.add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
+        m = o.modifiers.new('Armature', 'ARMATURE'); m.object = A; o.parent = A; o.matrix_parent_inverse = A.matrix_world.inverted()
+        for p in o.data.polygons: p.use_smooth = False
+    # 3 espinhos grandes pra trás + 2 menores
+    for i, (dz, dx, L, r) in enumerate([(0.06, 0, 0.22, 0.055), (-0.01, 0, 0.24, 0.06), (-0.08, 0, 0.20, 0.05), (0.02, 0.06, 0.17, 0.045), (0.02, -0.06, 0.17, 0.045)]):
+        base = C + Vector((dx, 0.02, dz)); ponta = base + Vector((dx * 1.2, L, -0.05 - dz * 0.3))
+        cone(base, ponta, r, azul, 'espinho%d' % i)
+    for s in (1, -1):   # orelhas
+        base = C + Vector((s * 0.075, -0.0, 0.07)); cone(base, base + Vector((s * 0.04, 0.01, 0.09)), 0.035, pele, 'orelha')
 bpy.ops.wm.save_as_mainfile(filepath=OUT)
