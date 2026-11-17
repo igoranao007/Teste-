@@ -17,15 +17,16 @@ def material(nome, img):
     nt.links.new(t.outputs['Color'], b.inputs['Base Color']); nt.links.new(b.outputs['BSDF'], o.inputs['Surface']); return m
 T = OUT + '/texturas/'
 corpo.data.materials.clear(); corpo.data.materials.append(material('vegetti_corpo', T + 'corpo.png'))
-cab.data.materials[0] = material('vegetti_cabeca', T + 'cabeca.png'); cab.data.materials[1] = material('vegetti_olhos', T + 'olhos.png')
+cab.data.materials[0] = material('vegetti_cabeca', T + 'cabeca.png'); cab.data.materials[1] = material('vegetti_olhos', T + 'olhos.png')   # (sem faces: sobra do modelo base)
 # ── casca do cabelo: duplica as faces cobertas de cabelo e afasta da pele (volume em cima, rente nas laterais) ──
 W, H = 512, 256; YOLHO = (1 - info['pts']['olhoE']['uv'][1]) * H
-def linha(u):
-    a = abs(u - .5) * 2 * math.pi
-    if a < .7: return YOLHO - 46 + 6 * (a / .7) ** 2
-    if a < 1.35: return YOLHO - 40 + 22 * ((a - .7) / .65)
-    if a < 1.75: return YOLHO - 8
-    return YOLHO + 34 * min(1, (a - 1.75) / .9)
+def linha(u):                                                                                                               # altura (px) da linha do cabelo ao redor da cabeça
+    a = abs(u - .5) * 2 * math.pi                                                                                         # 0 = frente, π = nuca
+    if a < .38: return YOLHO - 60 + 4 * (a / .38) ** 2                                                                     # testa alta
+    if a < .62: return YOLHO - 56 - 9 * math.sin((a - .38) / .24 * math.pi)                                                # entradas (sobe nas têmporas)
+    if a < 1.35: return YOLHO - 56 + 40 * ((a - .62) / .73)                                                                # desce até a costeleta
+    if a < 1.75: return YOLHO - 14
+    return YOLHO + 30 * min(1, (a - 1.75) / .9)                                                                            # nuca
 bm = bmesh.new(); bm.from_mesh(cab.data); uvl = bm.loops.layers.uv.active; deform = bm.verts.layers.deform.active
 cabelo = [f for f in bm.faces if f.material_index == 0 and all((1 - l[uvl].uv.y) * H < linha(l[uvl].uv.x % 1) - 3 for l in f.loops)]
 res = bmesh.ops.duplicate(bm, geom=cabelo); novas = [g for g in res['geom'] if isinstance(g, bmesh.types.BMFace)]
@@ -39,13 +40,17 @@ bm.to_mesh(cab.data); bm.free(); cab.data.update()
 # ── shape keys: boca aberta (mandíbula e lábio de baixo descem) e olhos fechados (o globo recua pra dentro da órbita) ──
 me = cab.data; Wm = cab.matrix_world
 cab.shape_key_add(name='Basis'); kb = cab.shape_key_add(name='boca_aberta'); ko = cab.shape_key_add(name='olhos_fechados')
+# piscada: a pálpebra de cima (vértices logo acima de cada olho) desce sobre o olho pintado
+E3, D3 = info['pts']['olhoE']['mundo'], info['pts']['olhoD']['mundo']
 zq = info['pts']['queixo']['mundo'][2]; zb = zq + (info['pts']['olhoE']['mundo'][2] - zq) * (1 - .70); CY = info['CY']
 olhos = set(); 
 for p in me.polygons:
     if p.material_index == 1: olhos.update(p.vertices)
 for v in me.vertices:
     w = Wm @ v.co
-    if v.index in olhos: ko.data[v.index].co = v.co + Vector((0, .016, 0)); continue
+    for e3 in (E3, D3):
+        dx, dz = w.x - e3[0], w.z - e3[2]
+        if abs(dx) < .02 and 0 < dz < .014 and w.y < CY - .04: ko.data[v.index].co = v.co + Vector((0, -.002, -.009 * (1 - abs(dx) / .02)))
     if w.y < CY - .05 and w.z < zb - .002 and w.z > zq - .03 and abs(w.x) < .06:
         f = max(0, 1 - abs(w.x) / .06) ** .7; t = min(1, (zb - w.z) / .012)
         kb.data[v.index].co = v.co + Vector((0, .004 * f, -.02 * f * t))

@@ -24,8 +24,11 @@ VIS = {'frente': ((0, -3.4, 1.0), (0, 0, .95), 50), 'perfil': ((3.4, 0, 1.0), (0
        'perspectiva': ((2.2, -2.6, 1.5), (0, 0, .95), 50), 'rosto': ((.0, -.75, 1.7), (0, -.08, 1.68), 70), 'rosto_34': ((.42, -.62, 1.72), (0, -.06, 1.68), 70)}
 for nome, (p, a, l) in VIS.items(): mirar(p, a, l); foto(nome, 1200, 1200) if nome.startswith('rosto') else foto(nome)
 # mãos
-mao = arm.pose.bones['DEF-hand.R']; hp = arm.matrix_world @ mao.head
-mirar(hp + Vector((-.15, -.45, .05)), hp + Vector((0, 0, -.05)), 60); foto('mao', 1200, 1200)
+corpo_o = [o for o in bpy.data.objects if o.type == 'MESH' and not o.data.shape_keys][0]
+dg = bpy.context.evaluated_depsgraph_get(); ev = corpo_o.evaluated_get(dg).to_mesh(); gi = {g.index: g.name for g in corpo_o.vertex_groups}
+hv = [corpo_o.matrix_world @ ev.vertices[v.index].co for v in corpo_o.data.vertices if v.groups and gi[max(v.groups, key=lambda g: g.weight).group] == 'DEF-hand.R']
+hp = sum(hv, Vector()) / len(hv)
+mirar(hp + Vector((-.05, -.42, .12)), hp, 55); foto('mao', 1200, 1200); mirar(hp + Vector((-.3, .05, .3)), hp, 55); foto('mao_cima', 1200, 1200)
 # sem textura
 sh.color_type = 'SINGLE'; sh.single_color = (.72, .72, .72)
 for nome in ('frente', 'perfil', 'rosto'): p, a, l = VIS[nome]; mirar(p, a, l); foto(nome + '_sem_textura', 1200 if nome == 'rosto' else 900, 1200)

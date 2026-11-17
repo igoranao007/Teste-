@@ -1,12 +1,13 @@
 """VEGETTI — texturas pintadas (cabeça 512×256 no UV cilíndrico, olhos 128×64, corpo 256 repintado do atlas do sy_boss).
 uso: python3 -I tools/pintar_vegetti.py material/producao/personagens/vegetti"""
 import sys, json, math, random
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageChops
 OUT = sys.argv[1]; R = random.Random(7)
 info = json.load(open(OUT + '/cabeca_uv.json'))
 W, H = 512, 256
 def px(u, v): return (u * W, (1 - v) * H)
-PELE = (214, 160, 128); PELE_ESC = (176, 120, 92); CAB = (52, 38, 28); BARBA = (92, 70, 58)
+PELE = (222, 168, 140); PELE_ESC = (184, 126, 100); CAB = (46, 34, 26); BARBA = (96, 72, 60)
 # pontos-chave (px)
 EE = px(*info['pts']['olhoE']['uv']); ED = px(*info['pts']['olhoD']['uv']); NZ = px(*info['pts']['nariz']['uv'])
 Q = px(*info['pts']['queixo']['uv']); OE = px(*info['pts']['orelhaE']['uv']); OD = px(*info['pts']['orelhaD']['uv'])
@@ -50,10 +51,11 @@ for o in (OE, OD):
 hair = Image.new('L', (W, H), 0); hd = ImageDraw.Draw(hair)
 def linha(u):                                                                                                               # altura (px) da linha do cabelo ao redor da cabeça
     a = abs(u - .5) * 2 * math.pi                                                                                         # 0 = frente, π = nuca
-    if a < .7: return YOLHO - 46 + 6 * (a / .7) ** 2                                                                       # testa
-    if a < 1.35: return YOLHO - 40 + 22 * ((a - .7) / .65)                                                                 # entradas → costeletas
-    if a < 1.75: return YOLHO - 8                                                                                          # acima da orelha
-    return YOLHO + 34 * min(1, (a - 1.75) / .9)                                                                            # nuca
+    if a < .38: return YOLHO - 60 + 4 * (a / .38) ** 2                                                                     # testa alta
+    if a < .62: return YOLHO - 56 - 9 * math.sin((a - .38) / .24 * math.pi)                                                # entradas (sobe nas têmporas)
+    if a < 1.35: return YOLHO - 56 + 40 * ((a - .62) / .73)                                                                # desce até a costeleta
+    if a < 1.75: return YOLHO - 14
+    return YOLHO + 30 * min(1, (a - 1.75) / .9)                                                                            # nuca
 for xx in range(0, W):
     u = xx / W; hd.line([(xx, 0), (xx, linha(u) + 2.5 * math.sin(xx * .9) + 1.5 * math.sin(xx * 2.3))], fill=255)
 hair = hair.filter(ImageFilter.GaussianBlur(1.2))
@@ -66,8 +68,43 @@ for xx in range(W):
     a = abs(xx / W - .5) * 2 * math.pi
     if a > 1.1: top = linha(xx / W) - (26 if a < 1.8 else 48); ld.line([(xx, top), (xx, H)], fill=150)
 lado = lado.filter(ImageFilter.GaussianBlur(4))
+# ── foto do Vegetti projetada de frente no rosto (pelo UV novo, sem esticar): cada texel sabe sua posição 3D ──
+pos = np.zeros((H, W, 3), np.float32); cob = np.zeros((H, W), bool)
+for t2, t3 in zip(info['tris'], info['tris3d']):
+    if max(u for u, v in t2) > 1: continue
+    for k in range(1, len(t2) - 1):
+        A, B, C = [np.array(px(*t2[i])) for i in (0, k, k + 1)]; PA, PB, PC = [np.array(t3[i]) for i in (0, k, k + 1)]
+        x0, y0 = np.floor(np.minimum(np.minimum(A, B), C)).astype(int); x1, y1 = np.ceil(np.maximum(np.maximum(A, B), C)).astype(int)
+        xs, ys = np.meshgrid(np.arange(max(0, x0), min(W, x1 + 1)) + .5, np.arange(max(0, y0), min(H, y1 + 1)) + .5)
+        den = (B[1] - C[1]) * (A[0] - C[0]) + (C[0] - B[0]) * (A[1] - C[1])
+        if abs(den) < 1e-9: continue
+        l1 = ((B[1] - C[1]) * (xs - C[0]) + (C[0] - B[0]) * (ys - C[1])) / den; l2 = ((C[1] - A[1]) * (xs - C[0]) + (A[0] - C[0]) * (ys - C[1])) / den; l3 = 1 - l1 - l2
+        ok = (l1 >= -.01) & (l2 >= -.01) & (l3 >= -.01); yy = (ys - .5).astype(int)[ok]; xx = (xs - .5).astype(int)[ok]
+        pos[yy, xx] = (l1[ok][:, None] * PA + l2[ok][:, None] * PB + l3[ok][:, None] * PC); cob[yy, xx] = True
+foto = np.asarray(Image.open('material/personagens/vegetti-ref.jpg').convert('RGB'), np.float32)
+# 3 âncoras: olhos e boca no 3D (x, z) ↔ na foto (px)
+E3, D3 = info['pts']['olhoE']['mundo'], info['pts']['olhoD']['mundo']; zb = info['pts']['queixo']['mundo'][2] + (E3[2] - info['pts']['queixo']['mundo'][2]) * .30
+src = np.array([[D3[0], D3[2], 1], [E3[0], E3[2], 1], [0, zb, 1]]); dst = np.array([[343, 63], [386, 63], [364, 90]], float)    # olho direito do personagem = esquerda da foto
+Mx = np.linalg.solve(src, dst)
+fx = pos[..., 0] * Mx[0, 0] + pos[..., 2] * Mx[1, 0] + Mx[2, 0]; fy = pos[..., 0] * Mx[0, 1] + pos[..., 2] * Mx[1, 1] + Mx[2, 1]
+amostra = foto[np.clip(fy.astype(int), 0, foto.shape[0] - 1), np.clip(fx.astype(int), 0, foto.shape[1] - 1)]
+verde = (amostra[..., 1] > amostra[..., 0] * 1.03) & (amostra[..., 1] > amostra[..., 2] * 1.1)                                  # fundo verde da foto: não usa
+cz = (E3[2] + zb) / 2 - .01
+peso = np.clip((info['CY'] - .035 - pos[..., 1]) / .035, 0, 1) * np.clip(1 - ((pos[..., 0] / .068) ** 2 + ((pos[..., 2] - cz) / .085) ** 2), 0, 1) ** .6
+peso = np.where(cob & ~verde, np.clip(peso * 1.6, 0, 1) * .6, 0)
+boca_px = BOCA[1]; peso[int(boca_px) - 14:int(boca_px) + 14, :] *= .35                                       # a boca pintada fica por cima
+base = np.asarray(img, np.float32); img = Image.fromarray((base * (1 - peso[..., None]) + amostra * peso[..., None]).astype(np.uint8))
 mask = ImageChops.subtract(hair, lado.point(lambda v: v * .55))
 img = Image.composite(cab, img, mask)
+# olhos pintados direto na órbita (o globo separado do modelo base ficava escondido atrás da pálpebra)
+d = ImageDraw.Draw(img, 'RGBA')
+for e, s_ in ((EE, 1), (ED, -1)):
+    cx, cy = e[0], e[1] + 1; w, h = 14, 6.5
+    d.polygon([(cx - w, cy + 1), (cx - w * .4, cy - h), (cx + w * .5, cy - h * .9), (cx + w, cy), (cx + w * .4, cy + h * .8), (cx - w * .5, cy + h * .75)], fill=(236, 230, 220, 255))
+    d.ellipse((cx - 5.5, cy - 5.5, cx + 5.5, cy + 5.5), fill=(84, 104, 74, 255)); d.ellipse((cx - 3.6, cy - 3.6, cx + 3.6, cy + 3.6), fill=(48, 60, 40, 255))
+    d.ellipse((cx - 2.2, cy - 2.2, cx + 2.2, cy + 2.2), fill=(10, 8, 6, 255)); d.rectangle((cx - 3, cy - 3.5, cx - 1.5, cy - 2), fill=(255, 255, 250, 255))
+    d.line([(cx - w - 1, cy + 1), (cx - w * .4, cy - h - 1), (cx + w * .5, cy - h - .8), (cx + w + 1, cy)], fill=(30, 20, 14, 255), width=3)     # cílio de cima
+    d.line([(cx - w, cy + 2), (cx - w * .5, cy + h * .9), (cx + w * .4, cy + h * .95), (cx + w, cy + 1)], fill=(140, 90, 74, 220), width=1)       # pálpebra de baixo
 img = img.quantize(64, dither=Image.Dither.NONE).convert('RGB')                                                             # paleta reduzida (cara de PS1)
 img.save(OUT + '/texturas/cabeca.png')
 # guia: triângulos do UV por cima da textura (só pra conferência)
@@ -75,13 +112,14 @@ g = img.copy(); gd = ImageDraw.Draw(g)
 for t in info['tris']: gd.polygon([px(u % 1.0001 if u <= 1 else u - 1, v) for u, v in t], outline=(0, 255, 120))
 g.save(OUT + '/inspecao/uv_cabeca_guia.png')
 # olhos 128×64: metade esquerda = olho esquerdo do personagem, direita = olho direito
-o = Image.new('RGB', (128, 64), (176, 122, 95)); od = ImageDraw.Draw(o)
-for x0 in (0, 64):
-    cx, cy = x0 + 32, 33
-    od.ellipse((cx - 30, cy - 22, cx + 30, cy + 22), fill=(228, 222, 210))
-    od.ellipse((cx - 12, cy - 12, cx + 12, cy + 12), fill=(92, 62, 40)); od.ellipse((cx - 8, cy - 8, cx + 8, cy + 8), fill=(60, 38, 24))
-    od.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=(10, 8, 6)); od.rectangle((cx - 6, cy - 7, cx - 3, cy - 4), fill=(250, 250, 245))
-    od.rectangle((x0, 0, x0 + 63, 6), fill=(150, 98, 76)); od.line([(x0 + 4, 8), (x0 + 60, 8)], fill=(40, 26, 20), width=3)   # pálpebra de cima + cílio
+o = Image.new('RGB', (128, 64), (196, 140, 114)); od = ImageDraw.Draw(o)
+for x0 in (0, 64):                                                                                                          # olho amendoado: pele em cima e embaixo, branco nos cantos, íris grande
+    cx, cy = x0 + 32, 32
+    od.polygon([(x0 + 2, cy + 2), (cx - 10, cy - 14), (cx + 12, cy - 13), (x0 + 62, cy + 1), (cx + 10, cy + 13), (cx - 12, cy + 12)], fill=(232, 226, 214))
+    od.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), fill=(78, 98, 70)); od.ellipse((cx - 9, cy - 9, cx + 9, cy + 9), fill=(52, 64, 44))     # íris esverdeada/castanha
+    od.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=(8, 8, 6)); od.rectangle((cx - 7, cy - 8, cx - 3, cy - 4), fill=(255, 255, 250))
+    od.line([(x0 + 2, cy + 1), (cx - 10, cy - 15), (cx + 12, cy - 14), (x0 + 62, cy)], fill=(36, 24, 18), width=4)                     # cílio de cima
+    od.line([(x0 + 4, cy + 3), (cx - 12, cy + 13), (cx + 10, cy + 14), (x0 + 60, cy + 2)], fill=(150, 98, 82), width=2)               # pálpebra de baixo
 o.save(OUT + '/texturas/olhos.png')
 # corpo: atlas do sy_boss repintado (terno grafite, camisa branca, gravata verde, mãos e pescoço com a pele do Vegetti)
 c = Image.open('material/modelos/itch/gente/csaf/sy_boss.png').convert('RGB'); q = c.load()
