@@ -1,0 +1,29 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Inspeção no Three.js do personagem-piloto feito no Blender (GLB), lado a lado com o modelo antigo.
+     ?glb=caminho &acao=Idle_Talking_Loop &boca=0..1 &v=lado|rosto|novo &ps1=1 -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:4}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}.rot{position:absolute;top:30px;color:#b9ffc9;font:700 34px monospace}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as M from '../../lib/modelo.js';
+import * as E from '../../lib/elenco.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), ps1 = q.get('ps1') !== '0', v = q.get('v') || 'lado';
+  const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: '#14201a', divisor: ps1 ? 4 : 1, tremor: ps1 ? 1 : 0, dither: ps1 ? 1 : 0, niveis: ps1 ? 31 : 255,
+    luz: { keyDir: [-.4, .7, .8], keyCor: '#f2efe6', fillDir: [.8, .2, .3], fillCor: '#5a6a60', amb: '#5a605c' } });
+  if (!ps1) M.FILTRO.linear = true;
+  const novo = await M.carregar(q.get('glb') || 'material/producao/personagens/vegetti/vegetti_teste.glb', { texMax: 512 }); S.scene.add(novo.obj); window.novo = novo;
+  const mixer = new THREE.AnimationMixer(novo.obj), clip = novo.clips.find(c => c.name === (q.get('acao') || 'Idle_Talking_Loop')); const act = clip && mixer.clipAction(clip); act?.play();
+  const morphs = []; novo.obj.traverse(n => { if (n.morphTargetDictionary) morphs.push(n); });
+  let velho = null;
+  if (v === 'lado') { velho = await E.criar('vegetti'); S.scene.add(velho.obj); velho.obj.position.x = -.75; novo.obj.position.x = .75;
+    const st = document.getElementById('stage'); for (const [txt, x] of [['ANTIGO', 540], ['NOVO (Blender)', 1180]]) { const d = document.createElement('div'); d.className = 'rot'; d.style.left = x + 'px'; d.textContent = txt; st.appendChild(d); } }
+  const C = { lado: [[0, 1.15, 5.2], [0, 1.0, 0], 30], rosto: [[.06, 1.68, .9], [0, 1.66, 0], 24], novo: [[1.2, 1.2, 3.4], [0, .95, 0], 34] }[v];
+  S.camera.fov = C[2]; S.camera.position.set(...C[0]); S.camera.lookAt(...C[1]); S.camera.updateProjectionMatrix();
+  S.update = t => { if (act) mixer.setTime(t); const b = q.get('boca') != null ? +q.get('boca') : Math.max(0, Math.sin(t * 9)) * .9;
+    for (const m of morphs) { const i = m.morphTargetDictionary['boca_aberta']; if (i != null) m.morphTargetInfluences[i] = b; } };
+};
+</script></body></html>
