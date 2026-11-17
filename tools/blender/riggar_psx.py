@@ -3,8 +3,9 @@ Uso: blender -b --python riggar_psx.py -- malha.blend textura.png juntas.json sa
 import bpy, sys, json
 a = sys.argv[sys.argv.index('--') + 1:]; MALHA, TEX, JS, OUT = a
 bpy.ops.wm.read_factory_settings(use_empty=True)
-with bpy.data.libraries.load(MALHA) as (src, dst): dst.objects = ['corpo']
-o = dst.objects[0]; bpy.context.scene.collection.objects.link(o)
+with bpy.data.libraries.load(MALHA) as (src, dst): dst.objects = [n for n in src.objects]
+for x in dst.objects: bpy.context.scene.collection.objects.link(x)
+o = bpy.data.objects['corpo']; pecas = [x for x in dst.objects if x.type == 'MESH' and x.name != 'corpo']
 # material simples estilo PS1: textura sem filtro, sem brilho
 m = bpy.data.materials.new('mat_corpo'); m.use_nodes = True; nt = m.node_tree; bs = nt.nodes['Principled BSDF']
 ti = nt.nodes.new('ShaderNodeTexImage'); ti.image = bpy.data.images.load(TEX); ti.image.pack(); ti.interpolation = 'Closest'
@@ -12,7 +13,7 @@ nt.links.new(ti.outputs['Color'], bs.inputs['Base Color']); bs.inputs['Roughness
 try: bs.inputs['Specular IOR Level'].default_value = 0.0
 except KeyError: pass
 nt.nodes.active = ti
-o.data.materials.clear(); o.data.materials.append(m)
+for x in [o] + pecas: x.data.materials.clear(); x.data.materials.append(m)
 J = json.load(open(JS))
 # roupa com volume: terno e calça um pouco mais largos que o corpo (cabeça, pescoço, mãos e pés ficam)
 import os
@@ -48,6 +49,35 @@ for b in arm.data.edit_bones:
 bpy.ops.object.mode_set(mode='OBJECT')
 bpy.ops.object.select_all(action='DESELECT'); o.select_set(True); arm.select_set(True); bpy.context.view_layer.objects.active = arm
 bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+# peças (roupa, cabelo): pesos copiados do corpo (seguem o corpo sem atravessar)
+for x in pecas:
+    for g in o.vertex_groups: x.vertex_groups.new(name=g.name)
+    dt = x.modifiers.new('pesos', 'DATA_TRANSFER'); dt.object = o; dt.use_vert_data = True
+    dt.data_types_verts = {'VGROUP_WEIGHTS'}; dt.vert_mapping = 'NEAREST'
+    bpy.ops.object.select_all(action='DESELECT'); bpy.context.view_layer.objects.active = x; x.select_set(True)
+    bpy.ops.object.datalayout_transfer(modifier='pesos'); bpy.ops.object.modifier_apply(modifier='pesos')
+    # limpa pesos absurdos: osso longe demais do vértice (> 0,22 m) não pode mexer nele
+    from mathutils.geometry import intersect_point_line
+    seg = {b.name: (b.head_local, b.tail_local) for b in arm.data.bones}
+    def dseg(p, n):
+        h, t = seg[n]; q, f = intersect_point_line(p, h, t); f = max(0, min(1, f)); return (p - (h + (t - h) * f)).length
+    for v in x.data.vertices:
+        gs = [(x.vertex_groups[g.group].name, g.weight) for g in v.groups if x.vertex_groups[g.group].name in seg]
+        ruins = [n for n, w in gs if w > 0 and dseg(v.co, n) > 0.22]
+        for n in ruins: x.vertex_groups[n].remove([v.index])
+        if ruins and not any(n not in ruins and w > 0 for n, w in gs):
+            perto = min(seg, key=lambda n: dseg(v.co, n)); x.vertex_groups[perto].add([v.index], 1.0, 'REPLACE')
+    if x.name == 'paleto':   # barra do paletó presa no quadril (não rasga quando a perna anda)
+        hips = x.vertex_groups['Hips']
+        for v in x.data.vertices:
+            if v.co.z < 1.0:
+                f = max(0.0, min(1.0, (1.0 - v.co.z) / 0.10))
+                for g in v.groups:
+                    nome = x.vertex_groups[g.group].name
+                    if 'Leg' in nome: x.vertex_groups[nome].add([v.index], g.weight * (1 - f), 'REPLACE')
+                hips.add([v.index], f, 'ADD')
+    am = x.modifiers.new('Armature', 'ARMATURE'); am.object = arm; x.parent = arm
+    print('PECA', x.name, 'sem peso:', sum(1 for v in x.data.vertices if not v.groups))
 print('PESOS sem osso:', sum(1 for v in o.data.vertices if not v.groups), 'de', len(o.data.vertices))
 for ac in bpy.data.actions: ac.use_fake_user = True
 arm.animation_data_create(); arm.animation_data.action = bpy.data.actions.get('idle')
