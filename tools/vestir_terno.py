@@ -62,14 +62,14 @@ for k, ts in grupos.items():
                 elif z > 1.245 and dx < v_lim + 0.012: c = tuple(int(q * 0.6) for q in c)   # borda da lapela
                 if z < 1.24 and any(abs(z - bz) < 0.012 for bz in (1.18, 1.07)) and abs(dx - 0.03) < 0.01: c = (18, 18, 20)  # botões
             feito[(x, y)] = c
-for (x, y), c in feito.items(): T[x, y] = c + (255,)
+for (x, y), c in feito.items(): T[x, y] = c + (T[x, y][3],)   # mantém o recorte (alfa) original
 # margem: estende a cor pintada 3 px pra fora das ilhas do UV (senão a borda da ilha mostra a cor antiga)
-for _ in range(3):
+for _ in range(8):
     novo = {}
     for (x, y), c in feito.items():
         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             q = (x + dx, y + dy)
             if q not in feito and q not in novo and 0 <= q[0] < W and 0 <= q[1] < H: novo[q] = c
-    for (x, y), c in novo.items(): T[x, y] = c + (255,)
+    for (x, y), c in novo.items(): T[x, y] = c + (T[x, y][3],)
     feito.update(novo)
 tex.save(OUT); print({k: len(v) for k, v in grupos.items()}, 'texels', len(feito))
