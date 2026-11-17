@@ -13,7 +13,7 @@ nt.links.new(ti.outputs['Color'], bs.inputs['Base Color']); bs.inputs['Roughness
 try: bs.inputs['Specular IOR Level'].default_value = 0.0
 except KeyError: pass
 nt.nodes.active = ti
-for x in [o] + pecas: x.data.materials.clear(); x.data.materials.append(m)
+for x in [o] + [p for p in pecas if not p.get('proprio')]: x.data.materials.clear(); x.data.materials.append(m)
 J = json.load(open(JS))
 # roupa com volume: terno e calça um pouco mais largos que o corpo (cabeça, pescoço, mãos e pés ficam)
 import os

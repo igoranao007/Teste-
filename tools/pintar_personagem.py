@@ -9,7 +9,7 @@ CZ, ESC = 1.62, 0.4
 PY = [(242, 22), (360, 140), (378.5, 160), (422.5, 212), (465, 250), (530, 298), (600, 340)]   # topo, sobrancelha, olho, nariz, boca, queixo, pescoço
 PX = [(478, 256), (435, 220), (370, 176), (320, 140)]                                               # meio, olho, bochecha, borda
 MEIO = 478
-FACE_C, FACE_R = (256, 170), (74, 150)
+FACE_C, FACE_R = (256, 165), (70, 158)
 def interp(pts, v):   # malha -> foto (pts = [(foto, malha)])
     pts = sorted(pts, key=lambda p: p[1])
     if v <= pts[0][1]: a, b = pts[0], pts[1]
@@ -41,12 +41,12 @@ def cor(p, n, x, y):
         orelha = ax > 0.075 and 1.62 < Z < 1.72 and abs(n[0]) > 0.35 and Y > -0.02
         frente = n[1] < -0.15
         if frente and not orelha:
-            w = max(0.0, min(1.0, (1 - math.hypot((mx - FACE_C[0]) / FACE_R[0], (my - FACE_C[1]) / FACE_R[1])) / 0.15))
-            w *= ss(-0.15, -0.55, n[1]) if n[1] > -0.55 else 1.0     # lados do rosto: some a foto (evita esticar/fundo)
+            w = max(0.0, min(1.0, (1 - math.hypot((mx - FACE_C[0]) / FACE_R[0], (my - FACE_C[1]) / FACE_R[1])) / 0.32))
+            w *= ss(-0.10, -0.60, n[1]) if n[1] > -0.60 else 1.0     # lados do rosto: some a foto (evita esticar/fundo)
         else: w = 0.0
         # cabelo: topo escuro; degradê nas laterais e nuca
-        if n[1] < -0.45: h_top = ss(1.755, 1.770, Z)
-        else: h_top = ss(1.700, 1.725, Z)
+        if n[1] < -0.45: h_top = ss(1.745, 1.770, Z)
+        else: h_top = ss(1.695, 1.725, Z)
         fade = ss(1.60, 1.70, Z) * (1.0 if n[1] > -0.45 else 0.0) * (0 if orelha else 1)
         base = [PELE[i] * luz for i in range(3)]
         if fade > 0:
@@ -57,7 +57,10 @@ def cor(p, n, x, y):
         if w > 0:
             f = amostra(mx, my); base = [base[i] * (1 - w) + f[i] * w for i in range(3)]
         if h_top > 0:
-            k = 0.7 + 0.6 * r; base = [base[i] * (1 - h_top) + CAB[i] * k * h_top for i in range(3)]
+            fio = ruido(int(X * 900), int(Z * 260), 7) * 0.6 + ruido(int(X * 300), int(Z * 90), 3) * 0.4   # fios no sentido frente-trás
+            k = 0.55 + 0.75 * fio
+            h = h_top * (1 - w * 0.85)
+            base = [base[i] * (1 - h) + CAB[i] * k * h for i in range(3)]
         return base
     # ---- pescoço / gola
     if Z > 1.53 and rn < 0.068:
@@ -78,8 +81,9 @@ def cor(p, n, x, y):
     if n[1] < -0.3 and ax < 0.26 and Z > 0.90:   # frente do paletó
         v = 0.05 * ss(1.28, 1.50, Z)
         if ax < v:
-            if ax < 0.014 and Z > 1.30: return list(GRAV_N if Z > 1.445 else GRAV)
-            return [c * (0.88 + 0.08 * r) for c in CAMISA]
+            t = ss(v, v - 0.006, ax)
+            cam = [c * (0.88 + 0.08 * r) for c in CAMISA]; lap = [c * k * 0.6 for c in tecido]
+            return [cam[i] * t + lap[i] * (1 - t) for i in range(3)]
         if ax < v + 0.012 and Z > 1.285: return [c * k * 0.6 for c in tecido]                    # lapela
         if Z < 1.27 and any(abs(Z - bz) < 0.010 for bz in (1.20, 1.09)) and abs(ax - 0.035) < 0.009: return [18, 18, 20]  # botões
         if abs(Z - 1.0) < 0.012 and 0.06 < ax < 0.15: return [c * k * 0.7 for c in tecido]       # bolso
