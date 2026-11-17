@@ -23,6 +23,12 @@ for v in (bm.verts if os.environ.get('CABELO_CURTO', '1') == '1' else []):
     if w.z > 1.90 or (w.y > 0.02 and w.z > 1.80):
         d = w - C; f = 0.84 if w.z > 1.92 else (0.90 if w.z > 1.88 else 0.95)
         v.co = inv @ (C + d * f)
+VOL = float(os.environ.get('CABELO_VOLUME', '1'))
+if VOL != 1:   # cabelo mais cheio (cachos): só o volume de cima/trás, rosto fica
+    for v in bm.verts:
+        w = mw @ v.co
+        if w.z > 1.93 or (w.y > 0.0 and w.z > 1.82):
+            v.co = inv @ (C + (w - C) * VOL)
 bm.to_mesh(h.data); bm.free()
 print('OCULOS removidos:', len(fora))
 import os

@@ -61,7 +61,14 @@ if OR is not None:
         mx_, my_ = X_ / ESC * 512 + 256, (CZ - Z_) / ESC * 512 + 256
         dentro = math.hypot((mx_ - 256) / 80, (my_ - 255) / 105) < 1 and t['n'][1] < -0.3   # olhos/sobrancelha do original
         if l < 75 and not dentro:
-            f = max(0.6, min(1.5, l / 40)); T[x, y] = tuple(int(min(255, CAB[i] * f)) for i in range(3)); m += 1
+            if os.environ.get('CABELO_FOLHA') == '1':      # usa o cabelo desenhado na folha (cachos), não cor lisa
+                c = S[x, y]
+                if True:   # sempre um pedaço de cabelo da folha (cachos), repetido
+                    hx0, hy0, hw, hh = [int(v) for v in os.environ.get('AMOSTRA_CABELO', '1150,400,70,80').split(',')]
+                    c = S[hx0 + x % hw, hy0 + y % hh]
+                T[x, y] = c; m += 1
+            else:
+                f = max(0.6, min(1.5, l / 40)); T[x, y] = tuple(int(min(255, CAB[i] * f)) for i in range(3)); m += 1
         elif Z_ > 1.83 and t['n'][1] > -0.5 and abs(X_) > 0.05:
             mx = X_ / ESC * 512 + 256
             if abs(mx - 256) > 60: T[x, y] = tuple(int(PELE[i] * (0.9 + 0.1 * (l / 160))) for i in range(3))
