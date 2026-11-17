@@ -8,3 +8,8 @@ material/modelos/itch/
 audio/00-filme.wav
 previas/
 edicao/public/
+
+# modelos pagos: não redistribuir o arquivo original
+material/producao/modelos-pagos/**/*.blend
+material/producao/modelos-pagos/**/*.fbx
+material/producao/modelos-pagos/**/*.glb
