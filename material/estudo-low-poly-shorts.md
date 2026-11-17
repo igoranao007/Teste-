@@ -26,7 +26,21 @@
 - **A câmera nunca fica parada**: todo plano tem dolly, giro ou zoom lento. Mesmo o personagem parado está sendo orbitado.
 - Ângulos exagerados: câmera de baixo (contra-plongée) no dedo, de cima no homem caindo, close extremo na mão.
 
-## 3. Visual
+## 3. Animação e textura (o que deixa fluido e bonito)
+
+Medido quadro a quadro (30 quadros seguidos em 4 trechos):
+
+- **Animação de verdade a 30 qps: nenhum quadro repetido.** Todo quadro muda (diferença média 2,8 a 8,6 por quadro), então nada "trava".
+- **Movimento de câmera constante e macio**: no trecho da mão a diferença entre quadros varia só ±0,2. A câmera anda em velocidade quase fixa (dolly/órbita lenta, com aceleração suave no começo e no fim), sem trancos nem cortes de velocidade.
+- **Corpo animado por keyframes com curva suave** (estilo animação pronta tipo Mixamo): o braço sobe e desce acelerando e freando; mãos com dedos posados (aponta, espalma, mostra as palmas). Nada é "teleportado".
+- **Sem tremor de vértice e sem resolução baixa**: renderiza em 1080×1920 nativo. A geometria é low-poly (bordas retas e serrilhadas, sem antisserrilhado), mas a imagem é estável. O nosso PS1 tem vértice tremendo + render a 1/4 + pontilhado, e isso faz o movimento parecer "picado".
+- **Texturas fotográficas** (papel de parede, carpete, couro, jeans, pele, xadrez do sofá), de 256 a 512 px, **com filtro suave** (bilinear): de perto ficam borradas, não quadriculadas. Só a mão em close extremo mostra pixel.
+- **Luz chapada e clara**: quase sem sombra, cor de textura aparece pura. Nada de névoa.
+- **Modelos com proporção certa e texturas bem mapeadas** (rosto foto no personagem, roupas com dobras pintadas): é isso que dá o ar de "jogo de PC de 2002" em vez de "boneco".
+
+**Pra chegar nisso no nosso motor:** um "modo fluido" = `divisor` 1 ou 2 (em vez de 4), `tremor: 0`, sem pontilhado, textura com filtro linear e 256–512 px, luz mais aberta; animações de corpo prontas (o pacote *PSX Animation Library Free* que já baixamos tem 30 animações humanoides: andar, sentar, apontar, pegar) em vez da IK feita na mão; câmera sempre andando com curva suave.
+
+## 4. Visual
 
 - Low-poly de PC/PS2 do fim dos anos 90 (não é PS1 duro): **render em resolução cheia**, sem pontilhado e sem vértice tremendo. Bordas serrilhadas, texturas fotográficas pequenas e esticadas (papel de parede, carpete, jaqueta de couro).
 - **Cores saturadas e claras**: lilás, laranja, verde-grama, azul royal. Nada escuro. Luz chapada, quase sem sombra.
@@ -36,20 +50,20 @@
 - Efeitos baratos e claros: **cena em preto e branco** para "impossível", **número gigante em vermelho** ("1 in 1,000,000,000…"), **logo do canal flutuando** entre partículas, **clarão branco/amarelo** e o corpo "desmanchando" em pixels no final.
 - **Piada visual na hora certa**: na fala "she didn't cheat on you", aparece a esposa abraçada com outro homem na porta.
 
-## 4. Texto na tela
+## 5. Texto na tela
 
 - Legenda **pequena**, amarela com contorno preto, fonte sem serifa simples, **no meio da tela** (não embaixo).
 - **2 a 4 palavras por vez**, sincronizadas palavra a palavra com a voz.
 - Sem emoji, sem animação de texto, sem destaque de palavra: é só leitura rápida.
 
-## 5. Som
+## 6. Som
 
 - **Narração em inglês, voz masculina calma**, sintetizada ou de locutor, num tom de "curiosidade".
 - Música de fundo constante (Bert Cole, bitbybitsound.com), baixa, sem drop.
 - Volume integrado **−15,7 LUFS** com **LRA 1,7 LU**: volume praticamente constante do começo ao fim (bem comprimido, para celular).
 - Efeitos pontuais (choque elétrico no final).
 
-## 6. O que levar pro THE GREEN PATH
+## 7. O que levar pro THE GREEN PATH
 
 1. **Gancho em 2 s.** Hoje abrimos com 1,5 s de chiado no preto: no Shorts isso perde metade do público. Abrir já com o carro e uma frase/título forte.
 2. **Um plano a cada 2–3 s e câmera sempre andando.** Os planos de 8–17 s (elevador, sala do Igor) precisam virar 3–5 planos curtos cada, com dolly/giro.
