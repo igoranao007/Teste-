@@ -65,6 +65,8 @@ def peca(nome, bm, mat, ossos):
             bpy.ops.object.datalayout_transfer(modifier='p'); bpy.ops.object.modifier_apply(modifier='p')
         am = o.modifiers.new('Armature', 'ARMATURE'); am.object = arm; o.parent = arm
     print('PECA', nome, sum(len(p.vertices) - 2 for p in mesh.polygons)); return o
+import os
+PALP = float(os.environ.get('PALP', '1'))   # 1 = sem pálpebra; 0,52 = metade do olho
 # ---------- pálpebras caídas: metade de cima do branco do olho coberta de pelo
 bm = bmesh.new(); bm.from_mesh(me); bm.faces.ensure_lookup_table()
 olhos = [f for f in bm.faces if f.material_index == idx['olho']]
@@ -73,11 +75,12 @@ for f in olhos:
     s = 1 if f.calc_center_median().x > 0 else -1
     for v in f.verts: lo, hi = lims.get(s, (9, -9)); lims[s] = (min(lo, v.co.z), max(hi, v.co.z))
 fora = [f for f in bm.faces if not (f.material_index in (idx['olho'], idx['verde'], idx['preto']) and f.calc_center_median().z > 0.82
-        and f.calc_center_median().z > lims[1 if f.calc_center_median().x > 0 else -1][0] + 0.52 * (lims[1 if f.calc_center_median().x > 0 else -1][1] - lims[1 if f.calc_center_median().x > 0 else -1][0]))]
+        and f.calc_center_median().z > lims[1 if f.calc_center_median().x > 0 else -1][0] + PALP * (lims[1 if f.calc_center_median().x > 0 else -1][1] - lims[1 if f.calc_center_median().x > 0 else -1][0]))]
 bmesh.ops.delete(bm, geom=fora, context='FACES'); bm.normal_update()
-for v in bm.verts: v.co += v.normal * 0.006
+for v in bm.verts: v.co += v.normal * 0.004
 for f in bm.faces: f.material_index = 0
-palp = peca('palpebras', bm, M['pelo'], 'Head')
+if PALP < 1: palp = peca('palpebras', bm, M['pelo'], 'Head')
+else: bm.free()
 # ---------- cobertor xadrez nos ombros (tipo capa curta com capuz caído)
 img = bpy.data.images.load(bpy.path.abspath(XAD)); img.pack()
 mx = bpy.data.materials.new('cobertor'); mx.use_nodes = True; nt = mx.node_tree; b = nt.nodes['Principled BSDF']
