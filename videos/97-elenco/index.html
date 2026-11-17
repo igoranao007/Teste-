@@ -1,0 +1,24 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Folha de personagem pra aprovação: ?p=vegetti|gusta|ittu|metalis &v=frente|tres|lado|costas|rosto &ps1=1 (visual PS1) -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as M from '../../lib/modelo.js';
+import * as E from '../../lib/elenco.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), ps1 = q.get('ps1') === '1';
+  const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#2a302c', divisor: ps1 ? 4 : 1, tremor: ps1 ? 1 : 0, dither: ps1 ? 1 : 0, niveis: ps1 ? 31 : 255,
+    luz: { keyDir: [-.4, .7, .8], keyCor: '#f2efe6', fillDir: [.8, .2, .3], fillCor: '#6a7078', amb: '#6a6e70' } });
+  if (!ps1) M.FILTRO.linear = true;
+  const p = await E.criar(q.get('p') || 'vegetti'); window.E = E; S.scene.add(p.obj); window.p = p; window.S = S;
+  p.pose?.();
+  const b = new THREE.Box3().setFromObject(p.obj), h = b.max.y, cab = p.cabeca ? p.cabeca() : new THREE.Vector3(0, h - .12, 0);
+  const V = { frente: [0, h * .55, 4.6, 0, h * .5, 0, 30], tres: [2.6, h * .62, 3.8, 0, h * .5, 0, 30], lado: [4.6, h * .55, 0, 0, h * .5, 0, 30], costas: [-1.2, h * .6, -4.4, 0, h * .5, 0, 30],
+    rosto: [cab.x + .12, cab.y + .03, cab.z + 1.0, cab.x, cab.y, cab.z, 22] }[q.get('v') || 'frente'];
+  S.camera.fov = V[6]; S.camera.position.set(V[0], V[1], V[2]); S.camera.lookAt(V[3], V[4], V[5]); S.camera.updateProjectionMatrix();
+};
+</script></body></html>
