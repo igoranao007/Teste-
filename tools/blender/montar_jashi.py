@@ -47,6 +47,55 @@ if os.environ.get('CALCA', '0') == '1':   # bermuda larga -> calça reta (perna 
         w.x = sx * (cx + (abs(w.x) - cx) * f); w.y = cy + (w.y - cy) * f
         v.co = inv @ w; n += 1
     print('CALCA', n, 'centro perna', round(cx, 3), round(cy, 3))
+if os.environ.get('AFRO'):   # black power: volume grande e fofo em volta da cabeça, sem cobrir o rosto
+    import math, random
+    from mathutils import Vector
+    random.seed(5)
+    A = bpy.data.objects['simple_character']
+    hb = max(A.data.bones, key=lambda b: (A.matrix_world @ b.head_local).z if b.use_deform else -9)
+    ESC = float(os.environ.get('AFRO_TAM', '1.0'))
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1, location=(0, 0, 0))
+    o = bpy.context.object; o.name = 'afro'
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    C = Vector((0.0, 0.03, 1.97)); R = Vector((0.29, 0.26, 0.235)) * ESC
+    for v in bm.verts:
+        n = v.co.normalized(); j = 1 + 0.10 * (random.random() - 0.5)          # contorno fofo/irregular
+        v.co = C + Vector((n.x * R.x, n.y * R.y, n.z * R.z)) * j
+    def corta(c):
+        if c.z < 1.79: return True                                                   # pescoço
+        if c.y < 0.0 and c.z < 1.985 and abs(c.x) < 0.17: return True                # janela do rosto
+        if c.y < 0.03 and c.z < 1.86 and abs(c.x) < 0.13: return True                 # queixo/bochecha
+        return False
+    fora = [f for f in bm.faces if corta(f.calc_center_median())]
+    bmesh.ops.delete(bm, geom=fora, context='FACES')
+    for v in bm.verts:   # frente do cabelo curva pra dentro até a testa (sem aba e sem dentes)
+        if v.co.y < 0.03:
+            t = max(0.0, min(1.0, (2.08 - v.co.z) / 0.12)) * max(0.0, min(1.0, (0.20 - abs(v.co.x)) / 0.08))
+            v.co = C + (v.co - C) * (1 - 0.32 * t)
+        if v.co.y < 0.02 and abs(v.co.x) < 0.15 and v.co.z < 1.975: v.co.z = 1.975
+    # borda da abertura encosta na cabeça (fecha o 'capacete' oco)
+    H = Vector((0.0, -0.02, 1.90))
+    def encostar(v, k):
+        d = Vector((v.co.x - H.x, v.co.y - H.y, 0)); r = d.length
+        alvo = 0.115 if v.co.y > -0.02 else 0.135
+        if r > alvo: v.co = Vector((H.x + d.x * (1 - k + k * alvo / r), H.y + d.y * (1 - k + k * alvo / r), v.co.z))
+    borda = {v for e in bm.edges if e.is_boundary for v in e.verts}
+    viz = {w for v in borda for e in v.link_edges for w in e.verts} - borda
+    for v in borda: encostar(v, 1.0)
+    for v in viz: encostar(v, 0.45)
+    uvl = bm.loops.layers.uv.new('UVMap')
+    for f in bm.faces:
+        for l in f.loops:
+            p = l.vert.co - C; l[uvl].uv = ((math.atan2(p.x, p.y) / math.pi + 1) * 2, (p.z / 0.2 + 1) * 2)
+    bm.to_mesh(o.data); bm.free()
+    for p in o.data.polygons: p.use_smooth = True
+    mt = bpy.data.materials.new('afro'); mt.use_nodes = True; nt = mt.node_tree; b = nt.nodes['Principled BSDF']
+    ti = nt.nodes.new('ShaderNodeTexImage'); ti.image = bpy.data.images.load(os.path.abspath(os.environ['AFRO'])); ti.image.pack(); ti.interpolation = 'Closest'
+    nt.links.new(ti.outputs['Color'], b.inputs['Base Color']); b.inputs['Roughness'].default_value = 1.0; nt.nodes.active = ti
+    o.data.materials.append(mt)
+    vg = o.vertex_groups.new(name=hb.name); vg.add(list(range(len(o.data.vertices))), 1.0, 'REPLACE')
+    m = o.modifiers.new('Armature', 'ARMATURE'); m.object = A; o.parent = A; o.matrix_parent_inverse = A.matrix_world.inverted()
+    print('AFRO tris', sum(len(p.vertices) - 2 for p in o.data.polygons), 'osso', hb.name)
 if os.environ.get('ESPINHOS', '0') == '1':   # espinhos e orelhas (personagem ouriço), presos no osso da cabeça
     import math
     from mathutils import Vector, Matrix
