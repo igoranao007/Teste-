@@ -36,7 +36,7 @@ PELE = [sum(c[i] for c in am) / len(am) for i in range(3)]
 FONTE = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'; FONTE_C = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
 PRETO, BRANCO, VERM, CAB = (22, 22, 25), (226, 226, 222), (196, 30, 36), (48, 33, 22)
 EM = 1000
-PULSO = 0.84
+PULSO = 0.80
 def tela(): return Image.new('RGBA', (900, 1900), (0, 0, 0, 0))     # x -0,45..0,45 ; z 1,9..0
 def pm(xm, zm): return (int((xm + 0.45) * EM), int((1.9 - zm) * EM))
 def escrever(im, txt, xm, zm, alt, larg=None, fonte=FONTE):
@@ -87,11 +87,12 @@ def dobra(o, k, forca=1.0):
     lo = 0.80 if (ROUPA == 'terno' and k in ('paleto', 'manga')) else 0.55   # tira a estampa da camiseta original
     return max(lo, min(1.35, f))
 tex = Image.new('RGB', (N, N), (0, 0, 0)); T = tex.load(); feito = set()
-VERDE, VERDE_L, CAM, GRAV = (26, 78, 48), (34, 96, 60), (20, 20, 23), (48, 48, 54)
+TROCA = os.environ.get('INVERTE', '1') == '1'    # paletó preto + camisa verde
+VERDE, VERDE_L, CAM, GRAV = ((22, 22, 25), (36, 36, 40), (30, 92, 56), (16, 16, 18)) if TROCA else ((26, 78, 48), (34, 96, 60), (20, 20, 23), (48, 48, 54))
 def cor_terno(k, p, n, o):
     X, Y, Z = p; ax = abs(X); frente = n[1] < -0.2
     if k == 'manga':
-        if ax > PULSO - 0.035: return [q * dobra(o, k) for q in (CAM if ax > PULSO - 0.012 else (20, 62, 38))]   # punho
+        if ax > PULSO - 0.035: return [q * dobra(o, k) for q in (CAM if ax > PULSO - 0.012 else [q * 0.8 for q in VERDE])]   # punho
         return [q * dobra(o, k) for q in VERDE]
     if k == 'calca':
         return [q * dobra(o, k, 0.25) for q in (22, 22, 25)]
