@@ -1,0 +1,20 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Igor Anão em pé, corpo inteiro (folha de elenco). ?v=frente|tres|lado|costas -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as T from '../../lib/tgp.js';
+window.SETUP = async () => {
+  const v = new URLSearchParams(location.search).get('v') || 'frente';
+  const CAMS = { frente: [0, 1.0, 4.2], tres: [2.6, 1.2, 3.3], lado: [4.2, 1.0, 0], costas: [0, 1.0, -4.2] };
+  const S = P.palco({ fov: 30, cam: CAMS[v], alvo: [0, .92, 0], fundo: '#29292b',
+    luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillDir: [.8, .1, .3], fillCor: '#8a8a90', amb: '#55555a' } });
+  const I = await T.igor(); S.scene.add(I.obj);
+  I.corpo.braco('R', [-.15, -1, .05], [-.05, -1, .1]); I.corpo.braco('L', [.15, -1, .05], [.05, -1, .1]);
+  I.assentar();
+  S.update = t => I.animar(t, {});
+};
+</script></body></html>
