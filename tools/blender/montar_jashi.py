@@ -57,13 +57,15 @@ if os.environ.get('AFRO'):   # black power: volume grande e fofo em volta da cab
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1, location=(0, 0, 0))
     o = bpy.context.object; o.name = 'afro'
     bm = bmesh.new(); bm.from_mesh(o.data)
-    C = Vector((0.0, 0.03, 1.96)); R = Vector((0.25, 0.23, 0.21)) * ESC
+    C = Vector([float(v) for v in os.environ.get('AFRO_C', '0,0.03,1.96').split(',')]); R = Vector([float(v) for v in os.environ.get('AFRO_R', '0.25,0.23,0.21').split(',')]) * ESC
     for v in bm.verts:
-        n = v.co.normalized(); j = 1 + 0.10 * (random.random() - 0.5)          # contorno fofo/irregular
-        v.co = C + Vector((n.x * R.x, n.y * R.y, n.z * R.z)) * j
+        n = v.co.normalized(); j = 1 + float(os.environ.get('AFRO_JIT', '0.10')) * (random.random() - 0.5)          # contorno fofo/irregular
+        afina = 1 - float(os.environ.get('AFRO_AFINA', '0')) * max(0.0, -n.z)       # mais estreito embaixo (formato de cogumelo/cúpula)
+        v.co = C + Vector((n.x * R.x * afina, n.y * R.y * afina, n.z * R.z)) * j
+    LINHA = float(os.environ.get('AFRO_LINHA', '1.975'))
     def corta(c):
         if c.z < 1.79: return True                                                   # pescoço
-        if c.y < 0.0 and c.z < 1.985 and abs(c.x) < 0.17: return True                # janela do rosto
+        if c.y < 0.0 and c.z < LINHA + 0.01 and abs(c.x) < 0.17: return True        # janela do rosto
         if c.y < 0.03 and c.z < 1.86 and abs(c.x) < 0.13: return True                 # queixo/bochecha
         return False
     fora = [f for f in bm.faces if corta(f.calc_center_median())]
@@ -72,7 +74,7 @@ if os.environ.get('AFRO'):   # black power: volume grande e fofo em volta da cab
         if v.co.y < 0.03:
             t = max(0.0, min(1.0, (2.08 - v.co.z) / 0.12)) * max(0.0, min(1.0, (0.20 - abs(v.co.x)) / 0.08))
             v.co = C + (v.co - C) * (1 - 0.32 * t)
-        if v.co.y < 0.02 and abs(v.co.x) < 0.15 and v.co.z < 1.975: v.co.z = 1.975
+        if v.co.y < 0.02 and abs(v.co.x) < 0.15 and v.co.z < LINHA: v.co.z = LINHA
     # borda da abertura encosta na cabeça (fecha o 'capacete' oco)
     H = Vector((0.0, -0.02, 1.90))
     def encostar(v, k):
