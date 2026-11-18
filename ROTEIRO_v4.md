@@ -154,7 +154,7 @@ Som: teclado, ruído eletrônico do computador, ambiente grave.
 **IGOR:** "Trouxeram?"
 
 - Gusta coloca a maleta na mesa. Igor abre pastas (na mesa ou num armário).
-- Nomes dos arquivos: **PHANTOM · QUAZIN · DOD · PIOLHO** — imagens e registros individuais mostrados rapidamente.
+- Pastas (atualizado pelo diretor): **PIOLHO** (idade ??, simulador, potencial 67%) · **RORAIMA** (16–17 anos, simulador, potencial: vagabundo) · **JV** (17 anos, cuidado: gay guloso) · **PHANTOM** (19 anos, potencial 100%). Fotos com faixa preta nos olhos, estilo procurado (material/cenarios/sala-igor/pastas).
 
 **IGOR:** "Todos eles têm potencial. Um potencial que não pode ser desperdiçado."
 
@@ -214,4 +214,4 @@ Som: fita entrando, motor do videocassete, bip, zumbido do monitor, teclado mec�
 - Cenários novos: posto de gasolina, cabana com interior/porta e elevador da cabana.
 - Sala do Igor (Plano 11) — RECEBIDO: quadro do aniversário na parede do fundo, retrato na mesa e o vídeo que o Igor assiste no computador
   (material/cenarios/sala-igor: ref/ originais, texturas/ versões PS1 e tela_igor_crt.mp4).
-- Imagens das pastas PHANTOM, QUAZIN, DOD, PIOLHO (Plano 12): a enviar pelo diretor.
+- Pastas do Plano 12 — RECEBIDO e feito: material/cenarios/sala-igor/pastas (ficha em alta + textura PS1 256x192).
