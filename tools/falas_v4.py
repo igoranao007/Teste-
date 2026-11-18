@@ -15,6 +15,13 @@ FALAS = {
   ('p7', "Me entrega a maleta. Espera aqui fora e fica de olho em qualquer movimento."),
   ('p8', "Quinze do três, zero zero sete, Biff."),
  ],
+ 'igor': [
+  ('p11', "Nem mesmo no meu aniversário eles conseguem se segurar..."),
+  ('p12a', "Trouxeram?"),
+  ('p12b', "Todos eles têm potencial. Um potencial que não pode ser desperdiçado."),
+  ('p12c', "Então... o Projeto Mogg."),
+  ('p14', "Vamos ver o que a Toca do Anão escondeu."),
+ ],
  'metalis': [
   ('p4a', "Ô, Adryan! Meu parceiro! Tem uma moedinha aí?"),
   ('p4b', "Ué, vai me deixar na mão? Tô numa situação complicada, meu jovem."),
@@ -32,7 +39,8 @@ from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 m = ChatterboxMultilingualTTS.from_pretrained(device="cpu")
 for p in quem:
     ref = f"audio/voz/v4/ref/{p}_ref.wav"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"audio/voz/v4/ref/{p}_amostra.mp3", "-af", "highpass=f=70,afftdn=nf=-28,loudnorm=I=-18", "-ar", "24000", "-ac", "1", ref], check=True)
+    if p == 'igor': ref = "audio/voz/igor-ref.wav"
+    else: subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", f"audio/voz/v4/ref/{p}_amostra.mp3", "-af", "highpass=f=70,afftdn=nf=-28,loudnorm=I=-18", "-ar", "24000", "-ac", "1", ref], check=True)
     os.makedirs(f"audio/voz/v4/{p}", exist_ok=True)
     for nome, txt in FALAS[p]:
         for i in range(N):

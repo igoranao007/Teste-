@@ -1,0 +1,15 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<script>VIDEO={w:1920,h:1080,fps:30,dur:3}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as E4 from '../../lib/elenco4.js';
+window.SETUP = async () => {
+  const S = P.palco({ fov: +(new URLSearchParams(location.search).get('fov') || 32), cam: [0, 1.2, 7.5], alvo: [0, .9, 0], fundo: '#29292b', luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillCor: '#8a8a90', amb: '#55555a' } });
+  const ns = (new URLSearchParams(location.search).get('so') || 'adryan,gusta,nicolas,frentista,metalis').split(','), A = [];
+  for (const [i, n] of ns.entries()) { const a = await E4.ator(n); a.obj.position.x = (i - (ns.length - 1) / 2) * 1.2; S.scene.add(a.obj); A.push(a); }
+  S.update = t => A.forEach((a, i) => a.pose(['walk', 'talk', 'idle', 'wave', 'idle'][i], t));
+};
+</script></body></html>

@@ -1,0 +1,280 @@
+{
+ "planos": [
+  [
+   "41-estrada",
+   17
+  ],
+  [
+   "42-nicolas",
+   9
+  ],
+  [
+   "43-posto",
+   22
+  ],
+  [
+   "44-mendigo",
+   37
+  ],
+  [
+   "45-titulo",
+   7
+  ],
+  [
+   "46-casmiron",
+   12
+  ],
+  [
+   "47-cabana",
+   12
+  ],
+  [
+   "48-senha",
+   10
+  ],
+  [
+   "49-olhos",
+   8
+  ],
+  [
+   "50-elevador",
+   14
+  ],
+  [
+   "51-sala-igor",
+   14
+  ],
+  [
+   "52-arquivos",
+   13
+  ],
+  [
+   "53-projeto-mogg",
+   12
+  ],
+  [
+   "54-computador",
+   16
+  ],
+  [
+   "55-tela-mogg",
+   9
+  ],
+  [
+   "56-final",
+   8
+  ]
+ ],
+ "legendas": [
+  {
+   "text": "Essa maleta precisa chegar ao destino. Não é uma entrega qualquer.",
+   "quem": "adryan",
+   "startMs": 10200,
+   "endMs": 13759,
+   "semVoz": false
+  },
+  {
+   "text": "Tem coisa aí dentro que não pode simplesmente cair nas mãos de qualquer pessoa.",
+   "quem": "adryan",
+   "startMs": 13509,
+   "endMs": 17069,
+   "semVoz": false
+  },
+  {
+   "text": "E você, Nicolas, não solta essa maleta por nada. Entendeu?",
+   "quem": "adryan",
+   "startMs": 18400,
+   "endMs": 22883,
+   "semVoz": false
+  },
+  {
+   "text": "Boa noite. Completa pra mim.",
+   "quem": "adryan",
+   "startMs": 31600,
+   "endMs": 37599,
+   "semVoz": false
+  },
+  {
+   "text": "Movimento fraco hoje, hein?",
+   "quem": "adryan",
+   "startMs": 40200,
+   "endMs": 42604,
+   "semVoz": false
+  },
+  {
+   "text": "Beleza... também não precisa conversar.",
+   "quem": "adryan",
+   "startMs": 44600,
+   "endMs": 46978,
+   "semVoz": false
+  },
+  {
+   "text": "Ô, Adryan! Meu parceiro! Tem uma moedinha aí?",
+   "quem": "metalis",
+   "startMs": 50800,
+   "endMs": 55259,
+   "semVoz": false
+  },
+  {
+   "text": "Ah, não... Metalis. Você de novo?",
+   "quem": "adryan",
+   "startMs": 55400,
+   "endMs": 58096,
+   "semVoz": false
+  },
+  {
+   "text": "Ué, vai me deixar na mão? Tô numa situação complicada, meu jovem.",
+   "quem": "metalis",
+   "startMs": 58200,
+   "endMs": 62551,
+   "semVoz": false
+  },
+  {
+   "text": "Você sempre tá numa situação complicada.",
+   "quem": "adryan",
+   "startMs": 62700,
+   "endMs": 68295,
+   "semVoz": false
+  },
+  {
+   "text": "É a vida, meu amigo. A vida não tá fácil pra ninguém.",
+   "quem": "metalis",
+   "startMs": 68400,
+   "endMs": 71754,
+   "semVoz": false
+  },
+  {
+   "text": "Toma. Agora deixa a gente ir.",
+   "quem": "adryan",
+   "startMs": 72400,
+   "endMs": 74701,
+   "semVoz": false
+  },
+  {
+   "text": "Sabia que podia contar contigo!",
+   "quem": "metalis",
+   "startMs": 75600,
+   "endMs": 78107,
+   "semVoz": false
+  },
+  {
+   "text": "Vai cuidar da tua vida, Metalis.",
+   "quem": "adryan",
+   "startMs": 78000,
+   "endMs": 80304,
+   "semVoz": false
+  },
+  {
+   "text": "Boa viagem!",
+   "quem": "metalis",
+   "startMs": 80600,
+   "endMs": 81881,
+   "semVoz": false
+  },
+  {
+   "text": "Me entrega a maleta. Espera aqui fora e fica de olho em qualquer movimento.",
+   "quem": "adryan",
+   "startMs": 109600,
+   "endMs": 115537,
+   "semVoz": false
+  },
+  {
+   "text": "Senha?",
+   "quem": "gusta",
+   "startMs": 119400,
+   "endMs": 121050,
+   "semVoz": true
+  },
+  {
+   "text": "15/03 007 BIFF.",
+   "quem": "adryan",
+   "startMs": 120800,
+   "endMs": 123762,
+   "semVoz": false
+  },
+  {
+   "text": "Pode entrar.",
+   "quem": "gusta",
+   "startMs": 124000,
+   "endMs": 125650,
+   "semVoz": true
+  },
+  {
+   "text": "Então... o Igor já sabe que a gente tá chegando?",
+   "quem": "nicolas",
+   "startMs": 137000,
+   "endMs": 140450,
+   "semVoz": true
+  },
+  {
+   "text": "Sabe. Mas não é qualquer pessoa que pode ficar sabendo dessa missão.",
+   "quem": "gusta",
+   "startMs": 139600,
+   "endMs": 144383,
+   "semVoz": true
+  },
+  {
+   "text": "Por quê?",
+   "quem": "nicolas",
+   "startMs": 142100,
+   "endMs": 143750,
+   "semVoz": true
+  },
+  {
+   "text": "Porque o Projeto Mogg é importante demais. Isso não pode ser comentado em qualquer lugar.",
+   "quem": "gusta",
+   "startMs": 143200,
+   "endMs": 149383,
+   "semVoz": true
+  },
+  {
+   "text": "Você vai entender quando encontrar o Igor.",
+   "quem": "gusta",
+   "startMs": 146000,
+   "endMs": 149050,
+   "semVoz": true
+  },
+  {
+   "text": "Nem mesmo no meu aniversário eles conseguem se segurar...",
+   "quem": "igor",
+   "startMs": 155600,
+   "endMs": 158830,
+   "semVoz": false
+  },
+  {
+   "text": "Trouxeram?",
+   "quem": "igor",
+   "startMs": 164200,
+   "endMs": 166273,
+   "semVoz": false
+  },
+  {
+   "text": "Todos eles têm potencial. Um potencial que não pode ser desperdiçado.",
+   "quem": "igor",
+   "startMs": 168800,
+   "endMs": 172868,
+   "semVoz": false
+  },
+  {
+   "text": "Então... o Projeto Mogg.",
+   "quem": "igor",
+   "startMs": 173000,
+   "endMs": 174818,
+   "semVoz": false
+  },
+  {
+   "text": "Então é isso. O Projeto Mogg.",
+   "quem": "igor",
+   "startMs": 181200,
+   "endMs": 183890,
+   "semVoz": false
+  },
+  {
+   "text": "Vamos ver o que a Toca do Anão escondeu.",
+   "quem": "igor",
+   "startMs": 196000,
+   "endMs": 198337,
+   "semVoz": false
+  }
+ ]
+}
