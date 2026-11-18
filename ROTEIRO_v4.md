@@ -208,7 +208,10 @@ Som: fita entrando, motor do videocassete, bip, zumbido do monitor, teclado mec�
 
 ## PENDÊNCIAS (antes de produzir)
 - Áudios: Adryan e Metalis (a enviar). Nicolas fala só no Plano 10 — voz a definir. Gusta ainda sem voz gravada. Igor: voz clonada (já temos).
-- Modelo do Adryan: confirmar qual modelo é ele.
-- Novos modelos: frentista (Plano 3); dono dos olhos amarelos na mata (Plano 9, só os olhos).
+- Adryan = modelo do Vegetti (uniforme do Vasco). Olhos amarelos na mata (Plano 9) = Metalis.
+- Frentista: feito (material/producao/personagens/frentista).
+- Vozes: Adryan e Metalis feitas (audio/voz/v4). Faltam Gusta e Nicolas.
 - Cenários novos: posto de gasolina, cabana com interior/porta e elevador da cabana.
-- Imagens dos quadros da sala do Igor e das pastas PHANTOM, QUAZIN, DOD, PIOLHO (a enviar pelo diretor).
+- Sala do Igor (Plano 11) — RECEBIDO: quadro do aniversário na parede do fundo, retrato na mesa e o vídeo que o Igor assiste no computador
+  (material/cenarios/sala-igor: ref/ originais, texturas/ versões PS1 e tela_igor_crt.mp4).
+- Imagens das pastas PHANTOM, QUAZIN, DOD, PIOLHO (Plano 12): a enviar pelo diretor.
