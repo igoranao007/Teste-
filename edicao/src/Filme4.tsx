@@ -32,13 +32,10 @@ const Ficha: React.FC<{ ini: number; fim: number; texto: string; lado?: "dir" | 
 const Titulo: React.FC = () => {
   const t = useT(), t0 = INI["45"] + 2.6, t1 = INI["45"] + 6.4;
   if (t < t0 || t >= t1 + .4) return null;
-  const k = Math.min(1, (t - t0) / .25), sai = Math.max(0, Math.min(1, (t1 + .4 - t) / .4)), px = 6;
+  const k = Math.min(1, (t - t0) / .25), sai = Math.max(0, Math.min(1, (t1 + .4 - t) / .4));
   return (
     <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: sai }}>
-      <svg width="1920" height="400" style={{ imageRendering: "pixelated" }}>
-        <defs><filter id="px"><feFlood x="0" y="0" width={px} height={px} /><feComposite width={px} height={px} /><feTile result="a" /><feComposite in="SourceGraphic" in2="a" operator="in" /><feMorphology operator="dilate" radius={px / 2} /></filter></defs>
-        <text x="960" y="250" textAnchor="middle" filter="url(#px)" style={{ ...TITULO, fontSize: 190 * (0.9 + 0.1 * k), fill: VERDE }} >THE GREEN PATH</text>
-      </svg>
+      <div style={{ ...TITULO, fontSize: 190, color: VERDE, transform: `scale(${0.92 + 0.08 * k})`, textShadow: "8px 8px 0 #03220f, -2px -2px 0 #0c3a1c", imageRendering: "pixelated", filter: "contrast(1.2)" }}>THE GREEN PATH</div>
       <div style={{ ...TERMINAL, position: "absolute", top: 700, fontSize: 40, color: CLARO, opacity: k }}>feito por Igor Anão</div>
     </AbsoluteFill>
   );
