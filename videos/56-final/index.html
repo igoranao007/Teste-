@@ -1,0 +1,23 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 16 · FINAL (8 s): o carregamento falha — chiado verde, tracking, rasgos, o verde invade; em 7,0 s estrondo e 2 quadros de flash verde-branco; preto seco no fim. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:8}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+import * as K from "../../lib/terminal.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const term = K.terminal(), flash = F.camada('background:#d8ffe2'), preto = F.camada('background:#000');
+  
+  window.onTick(t => {
+    const q = Math.round(t * 30), f = t < 7 ? .08 + .92 * Math.pow(t / 7, 1.6) : 1;
+    term.limpar(); K.carregando(term, .46 + .53 * P.clamp(t / 7), t); term.pixelar(); term.sinal(q, f);
+    flash.style.opacity = q >= 210 && q < 212 ? 1 : 0; preto.style.opacity = q >= 237 ? 1 : 0;
+  });
+};
+</script></body></html>

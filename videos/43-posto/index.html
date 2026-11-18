@@ -1,0 +1,50 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 3 · 0:26–0:48 · POSTO: chega e para na bomba; frentista vem à janela ("Boa noite. Completa pra mim."), abastece calado
+     ("Movimento fraco hoje, hein?" sem resposta; "Beleza... também não precisa conversar."); Nicolas imóvel com a maleta; Adryan paga, frentista vai embora. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:22}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 42, perto: 14, longe: 70, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
+  const C = await V.montarPosto(S), { D, Fr, bico } = C, fala = await V.vozes();
+  const JANELA = [.4, -1.7], TAMPA = [-2.05, -1.6], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  S.update = t => {
+    // carro chegando e parado
+    const ch = P.suave(0, 5, t); C.naCurva(C.curva, 1 - (1 - P.clamp(t / 5)) ** 2.2);
+    const v = fala('43', t, 'adryan');
+    D.atualizar(t, { giro: t < 5 ? .25 * Math.sin(t * .9) : 0, falaAd: v, maoFora: P.suave(20.6, 21.0, t) * (1 - P.suave(21.5, 21.9, t)),
+      olhaAd: .75 * (P.suave(5.3, 5.8, t) * (1 - P.suave(11.4, 11.9, t)) + P.suave(14, 14.4, t) * (1 - P.suave(21.5, 21.9, t))) });
+    // frentista: da bomba até a janela (5–7), vai pra tampa (11,2–12,6), volta (19,3–20,4), recebe e sai (21,4–)
+    let anda = false, alvo = null;
+    if (t < 5) { Fr.obj.position.set(2.0, 0, -3.3); Fr.obj.rotation.y = -1.2; Fr.pose('idle', t); }
+    else if (t < 11.2) { anda = V.caminhar(Fr, [2.0, -3.3], JANELA, t, 5, 7); if (!anda) { Fr.obj.rotation.y = 0; Fr.pose('idle', t); } }
+    else if (t < 19.3) { anda = V.caminhar(Fr, JANELA, TAMPA, t, 11.2, 12.6); if (!anda) { Fr.obj.rotation.y = .2; Fr.pose('idle', t * .7); alvo = v3(-2.2, .82, -1.02); } }
+    else if (t < 21.4) { anda = V.caminhar(Fr, TAMPA, JANELA, t, 19.3, 20.4); if (!anda) { Fr.obj.rotation.y = 0; Fr.pose('idle', t); if (t > 20.6) alvo = v3(.5, 1.0, -1.15); } }
+    else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 21.5, 26); }
+    if (alvo) { Fr.obj.updateMatrixWorld(true); Fr.modelo.alcancar('R', alvo.toArray(), [.6, -.6, -.5], .06); }
+    // bico: no suporte da bomba, na mão durante o abastecimento
+    const naMao = t > 12.6 && t < 19.3; if (naMao) { const h = Fr.osso('hand.R').getWorldPosition(v3()); bico.position.copy(h).add(v3(0, -.15, .05)); bico.rotation.set(0, 0, .6); } else { bico.position.set(-2.65, 1.0, -2.3); bico.rotation.set(0, 0, 0); }
+    // câmeras (nas tomadas pela janela, mais luz dentro do carro)
+    const janela = (t >= 14 && t < 16.4) || (t >= 18.6 && t < 20.7);
+    P.luz({ keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: janela ? '#5f8068' : '#2c4232', fillDir: [-.1, .2, -1], fillCor: janela ? '#6fae82' : '#1c5a30' });
+    if (t < 5) cam([14, 6, 13], [P.lerp(-10, 0, ch), .8, P.lerp(7, -1, ch)], 40);
+    else if (t < 11.4) cam([1.35, 1.72, -3.55], [.2, 1.0, -.35], 36);                                          // por cima do ombro do frentista
+    else if (t < 14) cam([-1.2, 2.0, -5.6], [-1.4, 1.0, -1.2], 44);                                         // abastecendo
+    else if (t < 16.4) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                       // Adryan pela janela
+    else if (t < 17.4) cam([1.4, 1.15, 1.75], [.25, .92, .35], 38);                                        // Nicolas imóvel com a maleta
+    else if (t < 18.6) cam([-3.3, 1.5, -.15], [-2.05, 1.45, -1.6], 40);                                     // frentista calado
+    else if (t < 20.7) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);
+    else cam([1.8, 1.6, -4.2], [.2, 1.0, -.8], 42);
+    C.halos(S.camera);
+    window.C = C; window.dbgNaN = () => { const out = []; for (const [n, A] of [['ad', C.D.Ad], ['ni', C.D.Ni], ['fr', C.Fr]]) A.obj.traverse(o => { if (o.isBone && !isFinite(o.quaternion.x + o.quaternion.w + o.position.x)) out.push(n + ':' + o.name); }); return out; };
+    window.dbgCam = () => { const r = new THREE.Raycaster(); r.setFromCamera(new THREE.Vector2(0, 0), S.camera); const h = r.intersectObjects(S.scene.children, true)[0]; return [S.camera.position.toArray(), h ? [h.object.name, h.distance, h.object.parent?.name] : null]; };
+  };
+};
+</script></body></html>

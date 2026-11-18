@@ -1,0 +1,16 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as V from '../../lib/v4.js';
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), arqs = q.get('a').split(','), n = arqs.length, col = Math.ceil(Math.sqrt(n));
+  const S = P.palco({ fov: 40, cam: [0, 8, 14], alvo: [0, 0, 0], fundo: '#3a3d3b', luz: { keyDir: [-.3, .8, .5], keyCor: '#ffffff', fillCor: '#777777', amb: '#666666' } });
+  const out = [];
+  for (const [i, a] of arqs.entries()) { const g = await V.peca(a); const k = 3 / Math.max(g.tam.x, g.tam.y, g.tam.z); g.scale.setScalar(k); g.position.set(((i % col) - (col - 1) / 2) * 4, 0, (Math.floor(i / col) - (col - 1) / 2) * 4); g.rotation.y = +(q.get('r') || 0); S.scene.add(g); out.push(a + ' ' + g.tam.toArray().map(x => x.toFixed(2)).join('x')); }
+  window.dbg = out; const d = col * 4.5; S.camera.position.set(0, d * .9, d * 1.1); S.camera.lookAt(0, 0, 0);
+};
+</script></body></html>

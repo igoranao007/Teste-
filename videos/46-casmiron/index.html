@@ -1,0 +1,38 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 6 · CASMIRON CITY (12 s): carro na estrada com a cidade ao fundo (janelas verdes e amarelas na névoa); passa por baixo da placa
+     amarela CASMIRON CITY; zoom lento até as letras encherem a tela (o amarelo leva pra próxima cena). -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:12}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as A from '../../lib/arh.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 40, perto: 16, longe: 200, luz: { keyDir: [.2, .8, .6], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } }), cena = S.scene, R = P.rng(61);
+  cena.add(A.chaoA({ w: 300, d: 260, seg: 90, mapa: F.TEX.capim(), rep: [90, 80], y: -.03 }));
+  await V.asfalto(cena, -150, 150, 0);
+  await V.arvoresRetro(cena, R, { x0: -120, x1: 120, z0: 9, z1: 50, n: 40 });
+  await V.arvoresRetro(cena, R, { x0: -120, x1: 20, z0: -9, z1: -50, n: 26 });
+  const cid = F.cidade(R, { n: 30 }); cid.position.set(60, 0, -110); cena.add(cid);
+  const torre = await V.peca('Roads/Tower_01.glb'); torre.scale.setScalar(.7); torre.position.set(30, 0, -45); cena.add(torre);
+  const postes = [-50, -14, 22, 58].map(x => F.posteVerde(x, -7, { rot: Math.PI / 2 })); postes.forEach(p => cena.add(p));
+  const placa = F.placaCidade(); placa.position.x = 0; cena.add(placa);
+  A.assar(cena, postes.map(p => p.luz()), '#1b3524');
+  const car = await F.carro(); car.rotation.y = Math.PI / 2; cena.add(car);
+  const am = F.camada('background:#ffd23a;opacity:0');
+  S.update = t => {
+    const x = -64 + t * 11; car.position.set(x, .02, -1.6 + Math.sin(t * 9) * .005); car.encarar(S.camera); car.rodar(t * 11);
+    if (t < 5) { const u = t / 5; S.camera.fov = 40; S.camera.position.set(-52 + u * 6, 1.6, 9); S.camera.lookAt(-10 + u * 14, 4, -45); }                 // cidade ao fundo, carro passando
+    else { const z = P.suave(5, 11.6, t);                                                                                                         // passa embaixo da placa e o zoom vai nas letras
+      S.camera.position.set(P.lerp(-13, -19, z), P.lerp(9, 6.2, z), P.lerp(9.5, 2.2, z)); S.camera.fov = P.lerp(44, 4.6, Math.pow(z, .8));
+      S.camera.lookAt(P.lerp(-3, 0, P.suave(5, 6.6, t)), P.lerp(2.2, 4.9, P.suave(5, 6.6, t)), 0); }
+    S.camera.updateProjectionMatrix();
+    am.style.opacity = P.suave(11.5, 11.95, t);
+    for (const p of postes) p.halo.quaternion.copy(S.camera.quaternion).premultiply(p.getWorldQuaternion(new THREE.Quaternion()).invert());
+  };
+};
+</script></body></html>

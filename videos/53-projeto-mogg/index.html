@@ -1,0 +1,49 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 13 · O PROJETO MOGG (12 s): Igor abre a maleta (dois estalos), brilho verde no rosto; dentro, a fita VHS com a logo da Toca do Anão;
+     close na fita: "Então é isso. O Projeto Mogg."; ele pega a fita e a câmera acompanha a mão. Gusta e Nicolas em pé, observando. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:12}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as T from '../../lib/tgp.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 36, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, Y, lamp } = sala, fala = await V.vozes();
+  const Gu = await E4.ator('gusta'), Ni = await E4.ator('nicolas'); cena.add(Gu.obj, Ni.obj);
+  Gu.obj.position.set(-.55, 0, 1.15); Gu.obj.rotation.y = Math.PI; Ni.obj.position.set(-1.25, 0, 1.55); Ni.obj.rotation.y = Math.PI;
+  const mal = T.maleta(); cena.add(mal); const fita = await T.fitaVHS(); mal.dentro.add(fita);
+  const MESA = new THREE.Vector3(-.3, Y, .46), V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));
+  const chi = F.chiadoVerde();
+  S.update = t => {
+    sala.video(t + 27); lamp.acender(1, S.camera); I.girar(0);
+    Gu.pose('idle', t); Ni.pose('idle', t + .5); V.girar(Ni, 'spine.005', [1, 0, 0], .2 * P.suave(2, 3, t));
+    const abre = P.suave(1.0, 2.0, t), maos = P.suave(.2, .8, t) * (1 - P.suave(2.1, 2.6, t)), pega = t >= 8.6, close = t >= 3.2 && t < 8.6;
+    const m = {};
+    if (maos > 0) { m.R = [MESA.x - .13, Y + .135, MESA.z - .03]; m.L = [MESA.x + .13, Y + .135, MESA.z - .03]; m.kR = m.kL = maos; }
+    if (pega) { const a = P.suave(8.6, 9.6, t), s = P.suave(9.8, 11.6, t);
+      const mao = V3(P.lerp(-.02, FR.x, a), P.lerp(Y + .3, FR.y + .05, a) + s * .34, P.lerp(.3, FR.z, a) - s * .3);
+      m.R = mao.toArray(); m.poloR = [-.8, .2, -.5]; m.kR = P.suave(8.6, 9.1, t);
+      if (t >= 9.8) { cena.attach(fita); fita.position.set(mao.x, mao.y - .05, mao.z + .03); fita.rotation.set(-Math.PI / 2 + s * .4, 0, .12 * s); } }
+    if (!pega || t < 9.8) { if (fita.parent !== mal.dentro) mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); }
+    m.inclina = .16; const v = fala('53', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });
+    I.cabeca.rotation.x += .52; I.cabeca.rotation.y += -.3; I.cabeca.position.z += .03; I.cabeca.position.y -= .02;
+    mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(t);
+    const g = abre * (.75 + .25 * Math.sin(t * 9));
+    P.luz({ ...F.LUZ_SALA, fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#1d5f37').lerp(new THREE.Color('#39ff6a'), g * .45).getHexString() });
+    S.camera.up.set(0, close ? 0 : 1, close ? -1 : 0);
+    if (t < 3.2) { S.camera.fov = 36; S.camera.position.set(.05, 1.06, 1.85); S.camera.lookAt(-.05, .98, .2); }
+    else if (close) { const q = P.clamp((t - 3.2) / 5.4); S.camera.fov = 34; S.camera.position.set(FR.x + .01, FR.y + .5 - q * .08, FR.z + .05); S.camera.lookAt(FR.x, FR.y, FR.z); }
+    else { S.camera.fov = 40; S.camera.position.set(.6, 1.25, 1.35); S.camera.lookAt(-.1, Y + .25, .3); }
+    S.camera.updateProjectionMatrix();
+    I.cabeca.visible = !close; I.pescoco.visible = !close; lamp.visible = !close;
+    chi.desenha(Math.round(t * 30), close ? .1 : 0, { dens: .25 });
+  };
+};
+</script></body></html>

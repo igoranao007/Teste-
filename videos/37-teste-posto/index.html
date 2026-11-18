@@ -1,0 +1,18 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search);
+  const S = F.noite({ fov: 42, perto: 18, longe: 60, luz: { keyDir: [.2, .9, .4], keyCor: '#9fc4ab', amb: '#2a3f30', fillCor: '#1c5a30' } });
+  const p = await V.postoRetro(); S.scene.add(p);
+  const car = await F.carro(); car.rotation.y = Math.PI / 2; S.scene.add(car);
+  const cam = (q.get('c') || '10,6,14').split(',').map(Number), al = (q.get('a') || '0,1.5,-2').split(',').map(Number);
+  S.camera.position.set(...cam); S.camera.lookAt(...al);
+};
+</script></body></html>

@@ -1,0 +1,52 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 4 · O MENDIGO DE CASMIRON (37 s): Metalis chega na janela pedindo moeda; conversa com o Adryan; recebe o dinheiro;
+     o carro sai e a câmera fica com ele, os faróis amarelos passam no rosto, ele acompanha o carro até sumir. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:37}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 42, perto: 14, longe: 70, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
+  const C = await V.montarPosto(S), { D, Fr, Me, bico } = C, fala = await V.vozes();
+  Fr.obj.visible = false; bico.position.set(-2.65, 1.0, -2.3);
+  const PERTO = [.35, -1.75], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  S.update = t => {
+    const sai = P.clamp((t - 32.2) / 4.6); C.naCurva(C.saida, sai ** 1.8, 0); if (t < 32.2) { D.car.position.set(0, .02, 0); D.car.rotation.y = Math.PI / 2; }
+    const vA = fala('44', t, 'adryan'), vM = fala('44', t, 'metalis');
+    D.atualizar(t, { giro: t > 32 ? .3 * P.suave(32.2, 33.5, t) : 0, falaAd: vA, maoFora: P.suave(26.3, 26.7, t) * (1 - P.suave(27.2, 27.6, t)),
+      olhaAd: .7 * P.suave(1.2, 1.8, t) * (1 - P.suave(23.4, 23.8, t)) - .45 * P.suave(23.5, 23.8, t) * (1 - P.suave(24.1, 24.4, t)) + .7 * P.suave(24.3, 24.7, t) * (1 - P.suave(31.8, 32.3, t)),
+      olhaNi: .35 * P.suave(3, 3.6, t) * (1 - P.suave(31, 32, t)) });
+    // Metalis: vem da loja até a janela (0,2–2,6); fala (talk) ou fica parado; estica a mão pra pegar (26,5–27,5); depois acompanha o carro com o corpo
+    if (!V.caminhar(Me, [3.2, -6.2], PERTO, t, .2, 2.6)) {
+      Me.obj.position.set(...[PERTO[0], 0, PERTO[1]]);
+      const alvoCar = D.car.position; Me.obj.rotation.y = t < 32 ? .15 : Math.atan2(alvoCar.x - PERTO[0], alvoCar.z - PERTO[1]) * P.suave(32, 33, t);
+      if (t > 26.4 && t < 27.6) Me.quadro('wave', 1.1);
+      else Me.pose(vM > 0 ? 'talk' : 'idle', t);
+    }
+    // faróis no rosto dele quando o carro manobra pra sair
+    const far = P.suave(32.6, 33.4, t) * (1 - P.suave(34.4, 35.6, t));
+    const base = { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillDir: [-.1, .2, -1], fillCor: '#1c5a30' };
+    if (far > 0) P.luz({ ...base, keyDir: [1, .25, .2], keyCor: '#' + new THREE.Color('#b9d8c2').lerp(new THREE.Color('#ffd23a'), far).multiplyScalar(1 + far * .6).getHexString() });
+    else P.luz(base);
+    // câmeras: plano e contraplano
+    const ROSTO_M = [PERTO[0], .8, PERTO[1]], th = Me.obj.rotation.y, fr = [Math.sin(th), Math.cos(th)], frente = (d, lado, y) => [PERTO[0] + fr[0] * d + fr[1] * lado, y, PERTO[1] + fr[1] * d - fr[0] * lado];
+    if (t < 2.7) cam([5.6, 1.7, -4.8], [1.4, .8, -2.2], 40);                                                // ele chegando
+    else if (t < 31.8) {
+      const q = fala.quem('44', t);
+      if (q === 'metalis' || (t > 26.4 && t < 27.6)) cam(frente(.85, .28, .86), ROSTO_M, 44);                     // Metalis falando (de perto, junto da porta)
+      else if (t >= 23.4 && t < 24.4) cam([2.7, 1.25, .1], [.27, 1.0, 0], 40);                                  // Adryan olha o Nicolas (pelo para-brisa)
+      else cam([.75, 1.3, -2.75], [.27, 1.0, -.35], 38);                                                          // Adryan (por cima do ombro do Metalis)
+    }
+    else if (t < 34.2) cam([2.2, 1.15, -3.9], ROSTO_M, 44);                                                     // o carro sai, faróis no rosto
+    else { const u = P.suave(34.2, 37, t); cam(frente(P.lerp(1.3, .85, u), P.lerp(.5, .3, u), .88), ROSTO_M, P.lerp(40, 32, u)); }   // fica com ele
+    C.halos(S.camera);
+    window.dbgCam = () => { const r = new THREE.Raycaster(); r.setFromCamera(new THREE.Vector2(0, 0), S.camera); const h = r.intersectObjects(S.scene.children, true).slice(0, 3); return [S.camera.position.toArray(), h.map(x => [x.object.name, x.distance])]; };
+  };
+};
+</script></body></html>

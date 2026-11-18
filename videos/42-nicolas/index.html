@@ -1,0 +1,30 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 2 · 0:17–0:26 · NICOLAS: banco do passageiro, maleta segura com as duas mãos, calado; Adryan fala dirigindo; Nicolas olha e confirma com a cabeça (ficha na edição). -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:9}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 46, perto: 3, longe: 22 }), cena = S.scene;
+  const D = await V.carroComDupla(cena);
+  const fala = await V.vozes();
+  const POSTES = [1.0, 3.3, 5.6, 7.9];
+  S.update = t => {
+    let amar = 0, lado = 0; for (const q of POSTES) { const d = (t - q) / .32; if (Math.abs(d) < 2) { const e = Math.exp(-d * d); if (e > amar) { amar = e; lado = d; } } }
+    const mix = (a, b) => '#' + new THREE.Color(a).lerp(new THREE.Color(b), amar).getHexString();
+    P.luz({ keyDir: [-.9, .35, .5 - lado * .6], keyCor: mix('#b8dcc2', '#ffcf66'), fillDir: [.2, -.3, .9], fillCor: '#2f9a50', amb: mix('#35503d', '#5a4c22') });
+    const v = fala('42', t, 'adryan');
+    const olha = P.suave(4.9, 5.4, t) * (1 - P.suave(7.6, 8.2, t)), sim = P.suave(6.1, 6.35, t) * (1 - P.suave(6.35, 6.6, t)) + P.suave(6.6, 6.85, t) * (1 - P.suave(6.85, 7.1, t));
+    D.atualizar(t, { falaAd: v, olhaAd: -.22 * P.suave(1.2, 1.6, t) * (1 - P.suave(5.6, 6.2, t)), olhaNi: -.42 * olha, acenaNi: .22 * sim });
+    // câmera: do lado do motorista olhando o Nicolas e a maleta, chega devagar no rosto
+    const z = P.suave(0, 9, t);
+    S.camera.fov = P.lerp(46, 40, z); S.camera.position.set(P.lerp(.2, .12, z) + Math.sin(t * 7.3) * .003, 1.06 + Math.sin(t * 11) * .003, P.lerp(.72, .64, z));
+    S.camera.lookAt(-.36, P.lerp(.84, .9, z), .3); S.camera.updateProjectionMatrix();
+  };
+};
+</script></body></html>

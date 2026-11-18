@@ -1,0 +1,53 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 12 · OS ARQUIVOS (13 s): a porta abre, Gusta (com a maleta) e Nicolas chegam; Igor tira a atenção do computador: "Trouxeram?";
+     Gusta põe a maleta na mesa; Igor abre as pastas PIOLHO, RORAIMA, JV, PHANTOM ("Todos eles têm potencial..."); fecha e volta pra maleta: "Então... o Projeto Mogg." -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:13}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as T from '../../lib/tgp.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, Y, lamp, est } = sala, fala = await V.vozes();
+  const Gu = await E4.ator('gusta'), Ni = await E4.ator('nicolas'); cena.add(Gu.obj, Ni.obj); T.poses(Gu.modelo);
+  const mal = T.maleta(); cena.add(mal);
+  const MESA = new THREE.Vector3(-.3, Y, .46), v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  // as 4 fichas, deitadas na mesa uma por cima da outra
+  const NOMES = ['piolho', 'roraima', 'jv', 'phantom'], fichas = [];
+  for (const [i, n] of NOMES.entries()) { const tx = await V.pastaFicha(n); const f = P.malha(new THREE.PlaneGeometry(.4, .3), P.mat({ mapa: tx }), { pos: [.32, Y + .004 + i * .002, .62], rot: [-Math.PI / 2, 0, -.08 + i * .05] }); cena.add(f); fichas.push(f); }
+  const capa = P.caixa(.42, .012, .32, P.mat({ cor: '#7a6a44' }), { pos: [.32, Y + .02, .62] }); cena.add(capa);
+  const porta = P.malha(new THREE.PlaneGeometry(1.1, 3.4, 2, 6), P.mat({ cor: '#7dffa0', opac: .16, aditivo: true, semLuz: true, lados: THREE.DoubleSide }), { pos: [-.7, .02, 3.6], rot: [-Math.PI / 2, 0, 0] }); cena.add(porta);
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  S.update = t => {
+    sala.video(t + 14); lamp.acender(1, S.camera); porta.scale.x = P.suave(0, .6, t);
+    I.girar(1 - P.suave(1.0, 2.0, t));
+    // Gusta e Nicolas entram (0,3–3,6) até a frente da mesa
+    for (const [A2, a, b] of [[Gu, [-.9, 3.6], [-.55, 1.15]], [Ni, [-1.6, 3.9], [-1.25, 1.55]]]) if (!V.caminhar(A2, a, b, t, .3, 3.6)) { A2.obj.rotation.y = Math.PI; A2.pose('idle', t); }
+    // maleta: na mão do Gusta até pousar (4,0–5,0)
+    const pousa = P.suave(4.0, 5.0, t);
+    if (pousa <= 0) { mal.deitar(0); V.segurarMaleta(Gu, mal); }
+    else { Gu.obj.updateMatrixWorld(true); const ini = Gu.osso('hand.R').getWorldPosition(v3()).add(v3(0, -.35, 0)); mal.position.lerpVectors(ini, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .2; mal.deitar(P.suave(.3, .9, pousa));
+      if (pousa < 1) Gu.modelo.alcancar('R', mal.position.clone().add(v3(0, .14, .1)).toArray(), [.6, -.5, .5], .08); }
+    mal.pulsar(t);
+    // Igor: fala, abre as pastas (5,4–10,6), fecha e olha a maleta
+    const ab = P.clamp((t - 5.4) / 5.2), qual = Math.min(3, Math.floor(ab * 4)), aberto = t > 5.4 && t < 10.6;
+    capa.visible = !aberto; fichas.forEach((f, i) => { f.visible = aberto ? i <= qual : false; });
+    const m = {}; if (aberto) { m.R = [.32 + .1 * Math.sin(t * 3), Y + .07, .5]; m.kR = P.suave(5.2, 5.6, t) * (1 - P.suave(10.4, 10.8, t)); m.plana = true; }
+    const v = fala('52', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });
+    const praEles = P.suave(1.2, 2.0, t) * (1 - P.suave(4.6, 5.2, t)), praMesa = P.suave(5.0, 5.6, t);
+    I.cabeca.rotation.y += .35 * praEles; I.cabeca.rotation.x += -.05 * praEles + .5 * praMesa;
+    est.visible = true;
+    // câmeras
+    if (t < 4.0) cam([.25, 1.55, 3.9], [-.4, 1.0, .5], 40);                                           // eles entram; Igor vira: "Trouxeram?"
+    else if (t < 5.4) cam([.9, 1.35, 1.7], [-.3, Y + .1, .5], 38);                                     // maleta na mesa
+    else if (t < 10.6) { const f = fichas[qual].position; cam([f.x + .02, Y + .62, f.z + .12], [f.x, Y, f.z], 40); }   // as pastas, uma por uma
+    else cam([.06, 1.08, 2.0], [0, 1.0, 0], 34);                                                        // Igor olha a maleta: "Então... o Projeto Mogg."
+  };
+};
+</script></body></html>

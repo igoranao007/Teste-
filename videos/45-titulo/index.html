@@ -1,0 +1,26 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 5 · THE GREEN PATH (7 s): começa no Metalis e sobe devagar pro céu escuro; o carro segue pela estrada lá longe (título na edição). -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:7}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 40, perto: 20, longe: 110, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
+  const C = await V.montarPosto(S), { D, Fr, Me } = C; Fr.obj.visible = false;
+  Me.obj.position.set(.35, 0, -1.75); Me.obj.rotation.y = 1.25;
+  S.update = t => {
+    D.car.position.set(34 + t * 9, .02, 9); D.car.rotation.y = Math.PI / 2; D.atualizar(t, { giro: 0 });
+    Me.pose('idle', t);
+    const u = P.suave(0, 7, t), e = u * u * (3 - 2 * u);
+    S.camera.fov = 40; S.camera.position.set(P.lerp(1.5, -10, e), P.lerp(.95, 34, e), P.lerp(-1.3, -24, e));
+    S.camera.lookAt(P.lerp(.35, 46, e), P.lerp(.8, 2, e), P.lerp(-1.75, 8, e)); S.camera.updateProjectionMatrix();
+    P.nevoa({ perto: P.lerp(14, 40, e), longe: P.lerp(70, 160, e) });
+    C.halos(S.camera);
+  };
+};
+</script></body></html>

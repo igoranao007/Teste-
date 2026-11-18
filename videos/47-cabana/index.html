@@ -1,0 +1,49 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 7 · A CABANA (12 s): vista aérea, o carro sai da estrada e para diante da cabana (uma janela verde acesa); desliga o motor;
+     Adryan: "Me entrega a maleta. Espera aqui fora e fica de olho em qualquer movimento." Nicolas entrega; Adryan sai e vai até a porta. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:12}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as T from '../../lib/tgp.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 42, perto: 18, longe: 80, luz: { keyDir: [.3, .8, .5], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } }), cena = S.scene;
+  const { ext, cab } = await V.montarCabana(S);
+  const car = await F.carro(); ext.add(car);
+  const inte = new THREE.Group(); cena.add(inte); inte.position.set(0, -60, 0);
+  const D = await V.carroComDupla(inte), fala = await V.vozes();
+  const Ad = await E4.ator('adryan'); ext.add(Ad.obj); const mal = T.maleta(); mal.scale.setScalar(.72); ext.add(mal);
+  const curva = new THREE.CatmullRomCurve3([[-30, 0, 46], [-10, 0, 40], [0, 0, 30], [0, 0, 14], [0, 0, 8.6]].map(p => new THREE.Vector3(...p)));
+  S.update = t => {
+    const fora = t < 4.6 || t >= 11; ext.visible = fora; inte.visible = !fora; inte.position.y = fora ? -60 : 0;
+    if (fora) {
+      P.nevoa({ perto: 18, longe: 80 }); P.luz({ keyDir: [.3, .8, .5], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' });
+      const u = P.clamp(t / 4.4), e = 1 - (1 - u) ** 2.2, p = curva.getPointAt(Math.min(1, e)), q = curva.getTangentAt(Math.min(1, e));
+      car.position.set(p.x, .02, p.z); car.rotation.y = Math.atan2(q.x, q.z) + Math.PI;  car.encarar(S.camera); car.luzes(t < 4.5 ? 1 : 0);   // de ré? não: a frente olha pra cabana
+      car.rotation.y = Math.atan2(-q.x, -q.z) + Math.PI;
+      cab.halo.quaternion.copy(S.camera.quaternion);
+      if (t < 4.6) { S.camera.fov = 42; S.camera.position.set(-11, 15, 30); S.camera.lookAt(P.lerp(-8, 0, P.suave(0, 4, t)), 0, P.lerp(36, 6, P.suave(0, 4.4, t))); }
+      else { // Adryan sai do carro com a maleta e vai até a porta
+        const a = V.caminhar(Ad, [1.3, 9.2], [-1.2, 3.6], t, 11.05, 13); if (!a) Ad.pose('idle', t);
+        Ad.obj.visible = true; V.segurarMaleta(Ad, mal); mal.pulsar(t);
+        S.camera.fov = 40; S.camera.position.set(4.5, 1.7, 12.5); S.camera.lookAt(-.5, 1.1, 5);
+      }
+      Ad.obj.visible = t >= 11; mal.visible = t >= 11;
+    } else {
+      P.nevoa({ perto: 3, longe: 20 }); P.luz({ keyDir: [.1, .5, 1], keyCor: '#b4d8be', fillDir: [.6, .2, -.6], fillCor: '#2a8a48', amb: '#3f6048' });
+      const u = t - 4.6, v = fala('47', t, 'adryan');
+      D.atualizar(t, { giro: 0, falaAd: v, olhaAd: -.55 * P.suave(.3, .8, u) * (1 - P.suave(5.8, 6.3, u)), olhaNi: -.4 * P.suave(.5, 1, u) * (1 - P.suave(6.2, 6.4, u)), entrega: P.clamp((u - 4.6) / 1.6) });
+      if (u > 6.2) { D.mal.visible = true; D.mal.position.set(.06, .9, .36); }
+      if (u < 4.3) { S.camera.fov = 46; S.camera.position.set(.02, 1.3, 1.05); S.camera.lookAt(0, .86, .3); }
+      else { S.camera.fov = 52; S.camera.position.set(.0, 1.24, .66); S.camera.lookAt(0, .74, .28); }
+    }
+    S.camera.updateProjectionMatrix();
+  };
+};
+</script></body></html>
