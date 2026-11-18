@@ -1,0 +1,2 @@
+Escolhidas (tomada): adryan p1-1 p2-1 p3a-1 p3b-2 p3c-1 p4a-2 p4b-1 p4c-1 p4d-1 p7-1 p8-1 | metalis p4a..p4e -1
+Ordem da prévia: adryan/p1-1 adryan/p2-1 adryan/p3a-1 adryan/p3b-2 adryan/p3c-1 metalis/p4a-1 adryan/p4a-2 metalis/p4b-1 adryan/p4b-1 metalis/p4c-1 adryan/p4c-1 metalis/p4d-1 adryan/p4d-1 metalis/p4e-1 adryan/p7-1 adryan/p8-1
