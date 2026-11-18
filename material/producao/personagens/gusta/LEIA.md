@@ -8,3 +8,6 @@
 - Folha: material/personagens/ref/gusta-textura-alvo-v2.png. O rosto veio maior que o espaço do modelo: realinhado com
   `ORIG=.../character_256.png python3 tools/realinhar_rosto.py tris.json folha.png saida.png "1116,565 1121,640 1018,602 981,602 1176,600"`
   (marcos na folha: olho D, olho E, boca, queixo, testa) -> reduz pra 512 -> tools/manga_comprida.py -> montar_jashi.py com CABELO_CURTO=0.
+
+## Animações (JashiPSX)
+`blender -b X.blend --python tools/blender/animar_jashi.py -- X_anim.blend` passa as 10 animações do PSX Character Creator pro esqueleto do JashiPSX (retarget em espaço de mundo). Saídas: *_anim.blend / *_anim.glb (fora do git).
