@@ -25,8 +25,8 @@ def interp(pts, v):
 import os
 ROUPA = os.environ.get('ROUPA', 'vasco')
 from PIL import ImageEnhance
-foto = ImageEnhance.Contrast(Image.open(FOTO).convert('RGB').filter(ImageFilter.GaussianBlur(0.5))).enhance(1.25).filter(ImageFilter.UnsharpMask(2, 90, 2)); F = foto.load(); FW, FH = foto.size
-QUENTE = (1.0, 0.93, 0.82)
+foto = ImageEnhance.Contrast(Image.open(FOTO).convert('RGB').filter(ImageFilter.GaussianBlur(0.5))).enhance(float(os.environ.get('CONTRASTE', '1.25'))).filter(ImageFilter.UnsharpMask(2, 90, 2)); F = foto.load(); FW, FH = foto.size
+QUENTE = tuple(float(v) for v in os.environ.get('QUENTE', '1.0,0.93,0.82').split(','))
 def amostra(mx, my):
     d = abs(mx - 256); fx = min(max(interp(PX, 256 - d), 0), FW - 1); fy = min(max(interp(PY, my), 0), FH - 1)
     c = F[int(fx), int(fy)]; return [c[i] * QUENTE[i] for i in range(3)]
@@ -35,6 +35,7 @@ PELE = [sum(c[i] for c in am) / len(am) for i in range(3)]
 # ---------- desenhos do uniforme (tela em metros)
 FONTE = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'; FONTE_C = '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
 PRETO, BRANCO, VERM, CAB = (22, 22, 25), (226, 226, 222), (196, 30, 36), (48, 33, 22)
+if os.environ.get('CAB'): CAB = tuple(int(v) for v in os.environ['CAB'].split(','))
 EM = 1000
 PULSO = 0.80
 def tela(): return Image.new('RGBA', (900, 1900), (0, 0, 0, 0))     # x -0,45..0,45 ; z 1,9..0
@@ -112,7 +113,23 @@ def cor_terno(k, p, n, o):
         return [q * dobra(o, k) for q in VERDE]
     return [q * dobra(o, k, 0.8) for q in (24, 24, 27)]
 for x, y, p, t in lista:
-    o = O[x, y]; k = regiao(t, p, o); X, Y, Z = p; ax = abs(X); n = t['n']
+    o = O[x, y]; k = regiao(t, p, o); X, Y, Z = p; ax = abs(X); n = t['n']; rn_ = math.hypot(X, Y + 0.02)
+    if ROUPA == 'frentista' and k not in ('pele_cab', 'cabelo'):
+        CAM_F, CALCA_F, REFL, BOTA = (56, 74, 102), (30, 38, 56), (196, 200, 196), (20, 20, 22)
+        if k == 'pele' and not (t['obj'] == 'body' and Z < 0.96): c = [PELE[i] * dobra(o, k, 0.9) for i in range(3)]
+        elif k == 'chuteira': c = [q * dobra(o, k, 0.8) for q in BOTA]
+        elif Z < 0.96 and t['obj'] == 'body': c = [q * dobra(o, 'calcao', 0.6) for q in CALCA_F]          # calça (calção, pele e meião)
+        else:                                                                                       # camisa de frentista
+            cor = CAM_F
+            if t['obj'] != 'arms' and abs(Z - 1.36) < 0.022: cor = REFL                              # faixa refletiva no peito/costas
+            if t['obj'] == 'arms' and 0.36 < ax < 0.40: cor = REFL                                   # faixa na manga
+            if t['obj'] != 'arms' and n[1] < -0.3:
+                if 0.07 < X < 0.15 and 1.44 < Z < 1.52: cor = (236, 236, 230)                        # crachá
+                if -0.16 < X < -0.06 and 1.42 < Z < 1.52 and (abs(X + 0.11) > 0.046 or abs(Z - 1.47) > 0.046): cor = (40, 54, 76)   # bolso
+                if ax < 0.006 and Z < 1.62: cor = (36, 48, 70)                                       # abotoadura
+            if Z > 1.66 and rn_ < 0.12 and t['obj'] == 'body': cor = (44, 60, 86)                    # gola
+            c = [q * dobra(OB[x, y], 'camisa' if t['obj'] != 'arms' else 'manga', 0.8) for q in cor]
+        T[x, y] = tuple(max(0, min(255, int(v))) for v in c); feito.add((x, y)); continue
     if ROUPA == 'terno' and k in ('manga', 'calca', 'paleto', 'chuteira'):
         T[x, y] = tuple(max(0, min(255, int(v))) for v in cor_terno(k, p, n, OB[x, y] if k in ('paleto', 'manga') else o)); feito.add((x, y)); continue
     if k == 'pele_cab':
