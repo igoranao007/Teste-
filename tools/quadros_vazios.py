@@ -18,7 +18,7 @@ while i < len(vazio):
         if (j - i) / 4 >= .75: trechos.append((t[i], t[j - 1], round(float(sd[i:j].mean()), 1)))
         i = j
     else: i += 1
-PROPOSITAL = [(0, 2.2)]   # preto + ruído do começo
+PROPOSITAL = [(0, 2.2), (266.5, 269.8)]   # preto + ruído do começo · v5: preto seco depois do "Dom?! É você?" e antes do EM BREVE
 ruins = [x for x in trechos if not any(a <= x[0] and x[1] <= b for a, b in PROPOSITAL)]
 for a, b, m in trechos: print(f"{'OK (proposital)' if (a, b, m) not in ruins else 'VAZIO':16s} {int(a//60)}:{a%60:05.2f}–{int(b//60)}:{b%60:05.2f}  bordas {m}")
 print('✓ nenhum quadro vazio fora do previsto' if not ruins else f'⚠ {len(ruins)} trecho(s) com câmera no vazio'); sys.exit(1 if ruins else 0)

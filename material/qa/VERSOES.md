@@ -41,3 +41,10 @@ Pendências documentadas em `AUDITORIA_v4.4.md` (o que não dá pra medir automa
 ## v4.6 — tag `v4.6-estavel`
 - Fita do Igor na palma (53/54); Metalis 1,38 m agarrando a janela (mão direita), POV do Adryan nos closes; vidro do motorista desce inteiro.
 - Problemas: `REGISTRO.md` #39–#41. QA quadro a quadro: todos aprovados (exceção documentada: Gusta 48 · 8,13 s, fora de quadro).
+
+## v5 — tag `v5-estavel`
+- Cena nova 57 (1:34, antes da placa de Casmiron): primeira pessoa do Adryan dirigindo; a maleta aberta no colo do Nicolas; falas novas do Adryan
+  (voz clonada localmente das falas dele) e a resposta do Nicolas só em legenda; a placa aparece na neblina.
+- Final novo: o chiado verde vira AMARELO com o aviso "LOCAL DESCOBERTO" (56); o Igor reage, a câmera entra no monitor e o DOM aparece no chiado,
+  com voz de vilão (voz pública = voz padrão do modelo aberto, engrossada em tools/vilao.sh); "Dom?! É você?"; tela preta (58); "EM BREVE" verde (59).
+- Filme: 4:33. QA 57/58 aprovado; quadros vazios: só o preto proposital do fim.
