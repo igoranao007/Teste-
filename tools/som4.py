@@ -76,7 +76,7 @@ def cue(tipo, t, **o): Cs.append({'type': tipo, 't': round(t, 3), **o})
 def P(n): return INI[n]
 # PASSOS: sincronizados com cada caminhada do motor (mesma aceleração/frenagem de lib/v4.js caminhar: ease .18 nas pontas)
 # um passo a cada meio ciclo de caminhada (passo_m/2 de distância). sup = superfície, peso = personagem (1 adulto, .6 Metalis)
-ALT = {'adryan': 1.76, 'gusta': 1.80, 'nicolas': 1.62, 'frentista': 1.74, 'metalis': 1.10}
+ALT = {'adryan': 1.76, 'gusta': 1.80, 'nicolas': 1.62, 'frentista': 1.74, 'metalis': 1.38}
 PESO = {'adryan': .9, 'gusta': 1.0, 'nicolas': .8, 'frentista': 1.0, 'metalis': .6}
 _seed = [0]
 OFF = {'concreto': 4.8, 'mato': 1.3, 'madeira': -3.2, 'corredor': -.4, 'carpete': -.5, 'arrasto': -2.3}   # iguala o volume percebido entre superfícies (medido: RMS 300 ms)

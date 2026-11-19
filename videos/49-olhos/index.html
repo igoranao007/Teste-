@@ -21,7 +21,7 @@ window.SETUP = async () => {
   Me.pose('idle', 0); const olhos = V.olhosMetalis(Me, { soIris: true });
   for (const ml of Me.malhas) if (![].concat(ml.material).some(m => /olho/.test(m.name))) ml.visible = false;   // corpo some: no escuro só a íris aparece
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
-  const OLHO = new THREE.Vector3(8.5, .8, 13.5);
+  const OLHO = new THREE.Vector3(8.5, 1.0, 13.5);
   S.update = t => {
     Ni.pose('idle', t * .6);
     const vira = P.suave(2.2, 3.8, t); Ni.obj.rotation.y = Math.PI - 1.15 * vira;                // vira devagar pros olhos

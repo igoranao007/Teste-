@@ -41,7 +41,11 @@ window.SETUP = async () => {
       m.R = R0.map((v, i) => P.lerp(v, R1[i], tr)); m.L = rot(.1 + Math.sin(t * 4.3 + 1) * .035, Y + .075 + tk(2), .2); m.kL = tr;
       m.poloR = rot(-.9, -.3, -.2); m.poloL = rot(.9, -.3, -.2); m.plana = true; m.extra = .04;
       m.pegada = { R: { dedos: rot(0, -.45, 1), indice: rot(1, 0, 0) }, L: { dedos: rot(0, -.45, 1), indice: rot(-1, 0, 0) } }; }   // digitando: palmas pra baixo
-    const fala = boca(TT); I.pose(TT, m); I.animar(TT, { boca: fala, pisca: (TT % 4.1) > 3.95 ? 1 : 0 }); I.cabeca.rotation.x += .12 * (TT < 9 ? 1 : .3);
+    const fala = boca(TT); I.pose(TT, m); I.animar(TT, { boca: fala, pisca: (TT % 4.1) > 3.95 ? 1 : 0 });
+    // a fita fica NA PALMA enquanto ele leva até o videocassete; ao encaixar, passa pro trilho da boca do aparelho (sem flutuar)
+    if (TT < D) { I.obj.updateMatrixWorld(true); const c = I.corpo, h = c.osso('hand.R').getWorldPosition(new THREE.Vector3()), md = c.osso('f_middle.01.R');
+      const palma = (md ? h.clone().lerp(md.getWorldPosition(new THREE.Vector3()), .6) : h).add(new THREE.Vector3(0, -.03, 0)), trilho = hol.position.clone();
+      hol.position.copy(palma.lerp(trilho, P.suave(1.55, 2.0, TT))); } I.cabeca.rotation.x += .12 * (TT < 9 ? 1 : .3);
     Ad.pose('idle', TT); Gu.pose('idle', TT + .4); mal.pulsar(TT);
     const tela = { ...F.LUZ_SALA, keyDir: rot(0, .1, 1), keyCor: '#' + new THREE.Color('#39ff6a').multiplyScalar(tremor).getHexString(), fillDir: rot(-.6, .6, -.4), fillCor: '#16321f', amb: '#12241a' };
     if (TT < 1.7) cam([-1.3, 1.3, .5], [-.04, Y + .24, .3], 44);
