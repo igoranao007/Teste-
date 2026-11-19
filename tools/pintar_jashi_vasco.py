@@ -114,6 +114,29 @@ def cor_terno(k, p, n, o):
     return [q * dobra(o, k, 0.8) for q in (24, 24, 27)]
 for x, y, p, t in lista:
     o = O[x, y]; k = regiao(t, p, o); X, Y, Z = p; ax = abs(X); n = t['n']; rn_ = math.hypot(X, Y + 0.02)
+    if ROUPA == 'dom' and k not in ('pele_cab', 'cabelo'):
+        # DOM: casaco branco (manga comprida até o pulso) aberto em V sobre blusa preta de zíper, fivela laranja, gola alta branca;
+        # calça escura e sapato preto
+        CASACO, BLUSA, ZIPER, LARANJA, CALCA_D, SAP = (218, 214, 205), (20, 20, 23), (120, 122, 126), (226, 112, 30), (36, 37, 44), (18, 18, 20)
+        frente = n[1] < -0.2
+        if t['obj'] == 'arms': c = [q * dobra(OB[x, y], 'manga', 0.8) for q in CASACO] if ax < PULSO else [PELE[i] * dobra(o, 'pele', 0.9) for i in range(3)]
+        elif k == 'chuteira': c = [q * dobra(o, k, 0.8) for q in SAP]
+        elif Z < 0.96 and t['obj'] == 'body':
+            cor = CASACO if (Z > 0.80 and not (frente and ax < 0.05)) else CALCA_D                # barra do casaco cobre o quadril (aberta na frente)
+            c = [q * dobra(OB[x, y], 'calcao', 0.35 if cor == CASACO else 0.6) for q in cor]
+        elif k == 'pele': c = [PELE[i] * dobra(o, k, 0.9) for i in range(3)]
+        else:
+            cor = CASACO
+            if frente:
+                v = 0.012 + 0.085 * ss(1.18, 1.70, Z)                                            # abertura em V
+                if ax < v and Z > 1.10:
+                    cor = BLUSA
+                    if ax < 0.006: cor = ZIPER                                                    # zíper
+                if abs(Z - 1.24) < 0.016 and ax < 0.045: cor = LARANJA                            # fivela laranja
+                if Z <= 1.10 and ax < 0.007: cor = (150, 148, 140)                                # fecho do casaco
+            if Z > 1.64 and rn_ < 0.13: cor = BLUSA if (frente and ax < 0.05) else CASACO        # gola alta branca (blusa preta na frente)
+            c = [q * dobra(OB[x, y], 'camisa' if t['obj'] != 'arms' else 'manga', 0.3) for q in cor]   # dobras leves (sem a estampa da camiseta original)
+        T[x, y] = tuple(max(0, min(255, int(v))) for v in c); feito.add((x, y)); continue
     if ROUPA == 'frentista' and k not in ('pele_cab', 'cabelo'):
         CAM_F, CALCA_F, REFL, BOTA = (56, 74, 102), (30, 38, 56), (196, 200, 196), (20, 20, 22)
         if k == 'pele' and not (t['obj'] == 'body' and Z < 0.96): c = [PELE[i] * dobra(o, k, 0.9) for i in range(3)]
