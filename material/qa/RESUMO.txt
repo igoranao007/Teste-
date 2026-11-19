@@ -1,18 +1,3 @@
-QA 41-estrada: APROVADO  (atores: adryan, nicolas)
-QA 42-nicolas: APROVADO  (atores: adryan, nicolas)
-QA 43-posto: APROVADO  (atores: adryan, nicolas, frentista, metalis)
-QA 44-mendigo: 2 problema(s)  (atores: adryan, nicolas, frentista, metalis)
-  ANATOMIA  metalis · mão torcida R  ×476  4.57–30.6s  máx 115
-  ANATOMIA  metalis · salto de mão R  ×3  27.47–27.53s  máx 39
-QA 45-titulo: APROVADO  (atores: adryan, nicolas, frentista, metalis)
-QA 46-casmiron: APROVADO  (atores: )
-QA 47-cabana: APROVADO  (atores: adryan, nicolas, adryan, nicolas)
-QA 48-senha: 1 problema(s)  (atores: adryan, gusta)
-  ANATOMIA  gusta · pé deslizando (cm/s)  ×1  8.13–8.13s  máx 318
-QA 49-olhos: APROVADO  (atores: nicolas, metalis)
-QA 50-elevador: APROVADO  (atores: gusta, adryan)
-QA 51-sala-igor: APROVADO  (atores: igor)
-QA 52-arquivos: APROVADO  (atores: igor, adryan, gusta)
-QA 53-projeto-mogg: APROVADO  (atores: igor, adryan, gusta)
-QA 54-computador: APROVADO  (atores: igor, adryan, gusta)
-QA 55-tela-mogg: APROVADO  (atores: arms#0)
+QA 57-maleta: APROVADO  (atores: adryan, nicolas)
+QA 58-dom: 1 problema(s)  (atores: igor, dom)
+  ANATOMIA  igor · braço congelado R (s)  ×1  0.67–0.67s  máx 3

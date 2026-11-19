@@ -6,9 +6,9 @@ import json, os, subprocess, math
 import numpy as np
 from scipy.io import wavfile
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); os.chdir(R)
-PLANOS = [('41-estrada', 17), ('42-nicolas', 9), ('43-posto', 24), ('44-mendigo', 37), ('45-titulo', 7), ('46-casmiron', 12),
+PLANOS = [('41-estrada', 17), ('42-nicolas', 9), ('43-posto', 24), ('44-mendigo', 37), ('45-titulo', 7), ('57-maleta', 14), ('46-casmiron', 12),
           ('47-cabana', 19.5), ('48-senha', 10), ('49-olhos', 8), ('50-elevador', 24), ('51-sala-igor', 14), ('52-arquivos', 13),
-          ('53-projeto-mogg', 12), ('54-computador', 16), ('55-tela-mogg', 9), ('56-final', 8)]
+          ('53-projeto-mogg', 12), ('54-computador', 16), ('55-tela-mogg', 9), ('56-final', 7), ('58-dom', 15), ('59-embreve', 6)]
 INI = {}; acc = 0
 for n, d in PLANOS: INI[n[:2]] = acc; acc += d
 FIM = acc
@@ -45,6 +45,13 @@ FALAS = [
  (C + 'igor_p12c-1.wav', '52', 11.0, 'igor', 'Então... o Projeto Mogg.'),
  ('audio/voz/falas/f2-1.wav', '53', 6.2, 'igor', 'Então é isso. O Projeto Mogg.'),
  (C + 'igor_p14-1.wav', '54', 9.0, 'igor', 'Vamos ver o que a Toca do Anão escondeu.'),
+ # v5 · cena da maleta aberta (57) e o Dom (58)
+ ('audio/voz/v5/cortadas/adryan_p5a.wav', '57', 3.0, 'adryan', 'O que eu disse, caralho? Que não era pra abrir a maleta!'),
+ (None, '57', 6.4, 'nicolas', 'Como assim? Não abri nada, pô.'),
+ ('audio/voz/v5/cortadas/adryan_p5b.wav', '57', 9.9, 'adryan', 'Não sei por que o Igor deu a confiança em você.'),
+ ('audio/voz/v5/cortadas/igor_p15a.wav', '58', 0.5, 'igor', 'Como, caralho, isso aconteceu? Como?!'),
+ ('audio/voz/v5/cortadas/dom_p15.wav', '58', 5.3, 'dom', 'Finalmente... depois de tanto tempo, nos encontramos.|Dessa vez você não vai escapar, Igor.'),
+ ('audio/voz/v5/cortadas/igor_p15b.wav', '58', 12.6, 'igor', 'Dom?! É você?'),
 ]
 p12 = sorted(f for f in os.listdir(C) if f.startswith('igor_p12a-') and f != 'igor_p12a-1.wav')
 FALAS = [(C + (p12[0] if p12 else 'igor_p12a-1.wav'), *x[1:]) if x[0] and 'p12a-X' in x[0] else x for x in FALAS]
@@ -156,7 +163,19 @@ cue('chiado', P('54') + 13, d=3, gain=-3)
 cue('ui_blip', P('55') + .3); cue('ui_blip', P('55') + 1.2); cue('click', P('55') + 3.4, gain=6); cue('ui_blip', P('55') + 3.85); cue('chiado', P('55'), d=9, gain=-4)
 for k in range(20): cue('tick', P('55') + 4 + k * .24)
 # 56 final
-cue('chiado_sobe', P('56'), d=7.0); cue('estrondo', P('56') + 7.0, d=.9, gain=-3); cue('boom', P('56') + 7.0, gain=-2); cue('chiado', P('56') + 7.05, d=.83, gain=14)
+cue('chiado_sobe', P('56'), d=4.2)
+# v5: o chiado vira AMARELO de repente (4,2 s) + alarme do aviso "LOCAL DESCOBERTO"
+cue('glitch', P('56') + 4.2, d=.4, gain=4); cue('chiado', P('56') + 4.2, d=2.8, gain=6)
+for k in range(8): cue('ui_blip', P('56') + 4.45 + k * .33, gain=2)
+# v5 · CENA DA MALETA (57): dentro do carro, estrada; o motor abafado e o vento
+cue('motor', P('57'), d=14, abafado=1, gain=-3); cue('pneus', P('57'), d=14, gain=-9); cue('grilos', P('57'), d=14, gain=-14); cue('drone', P('57') + 9, d=6, root=31, gain=-8)
+# v5 · O DOM (58): sala amarela (chiado do monitor + alarme), dentro da tela (chiado forte + drone grave), Igor, preto seco com estrondo
+cue('chiado', P('58'), d=4.5, gain=-6)
+for k in range(11): cue('ui_blip', P('58') + .1 + k * .33, gain=-4)
+cue('whoosh_slow', P('58') + 3.9, gain=-2); cue('chiado', P('58') + 4.5, d=7.8, gain=-1); cue('sobe', P('58') + 4.5, d=8, root=27, sem=3, gain=-4); cue('braam', P('58') + 4.6, d=3.6, root=33, gain=-6)
+cue('chiado', P('58') + 12.3, d=2.1, gain=-8); cue('estrondo', P('58') + 14.4, d=.9, gain=-3); cue('boom', P('58') + 14.4, gain=-2)
+# v5 · EM BREVE (59)
+cue('drone', P('59') + .5, d=5.4, root=29, gain=-10); cue('ui_blip', P('59') + 1.0, gain=-6)
 os.makedirs('videos/00-filme4', exist_ok=True)
 json.dump({'dur': FIM, 'bpm': 120, 'fps': 30, 'music': {'style': 'nenhum'}, 'cues': Cs}, open('videos/00-filme4/cues.json', 'w'), indent=1)
 json.dump({'segments': SEG}, open('videos/00-filme4/narration.json', 'w'))

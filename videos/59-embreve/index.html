@@ -1,0 +1,19 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v5 · EM BREVE (6 s): tela preta; "EM BREVE" em letras verdes de terminal acende devagar, com um chiado fraco; apaga no fim. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:6}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as K from "../../lib/terminal.js";
+window.SETUP = async () => {
+  const term = K.terminal();
+  window.onTick(t => {
+    const q = Math.round(t * 30), k = P.suave(1.0, 2.2, t) * (1 - P.suave(5.2, 5.9, t)), pisca = (q % 47 === 0 && t > 2.5) ? .4 : 1;
+    term.limpar('#000');
+    if (k > 0) { term.txt('EM BREVE', 240, 112, 44, K.VERDE, { alinhar: 'center', peso: 800 }); term.pixelar(); }
+    term.el.style.opacity = (k * pisca).toFixed(2); if (k > .2) term.sinal(q, .05);
+  });
+};
+</script></body></html>
