@@ -10,7 +10,7 @@
   ],
   [
    "43-posto",
-   22
+   24
   ],
   [
    "44-mendigo",
@@ -111,183 +111,183 @@
   {
    "text": "Ô, Adryan! Meu parceiro! Tem uma moedinha aí?",
    "quem": "metalis",
-   "startMs": 50800,
-   "endMs": 55259,
+   "startMs": 52800,
+   "endMs": 57259,
    "semVoz": false
   },
   {
    "text": "Ah, não... Metalis. Você de novo?",
    "quem": "adryan",
-   "startMs": 55400,
-   "endMs": 58096,
+   "startMs": 57400,
+   "endMs": 60096,
    "semVoz": false
   },
   {
    "text": "Ué, vai me deixar na mão? Tô numa situação complicada, meu jovem.",
    "quem": "metalis",
-   "startMs": 58200,
-   "endMs": 62551,
+   "startMs": 60200,
+   "endMs": 64551,
    "semVoz": false
   },
   {
    "text": "Você sempre tá numa situação complicada.",
    "quem": "adryan",
-   "startMs": 62700,
-   "endMs": 68295,
+   "startMs": 64700,
+   "endMs": 70295,
    "semVoz": false
   },
   {
    "text": "É a vida, meu amigo. A vida não tá fácil pra ninguém.",
    "quem": "metalis",
-   "startMs": 68400,
-   "endMs": 71754,
+   "startMs": 70400,
+   "endMs": 73754,
    "semVoz": false
   },
   {
    "text": "Toma. Agora deixa a gente ir.",
    "quem": "adryan",
-   "startMs": 72400,
-   "endMs": 74701,
+   "startMs": 74400,
+   "endMs": 76701,
    "semVoz": false
   },
   {
    "text": "Sabia que podia contar contigo!",
    "quem": "metalis",
-   "startMs": 75600,
-   "endMs": 78107,
+   "startMs": 77600,
+   "endMs": 80107,
    "semVoz": false
   },
   {
    "text": "Vai cuidar da tua vida, Metalis.",
    "quem": "adryan",
-   "startMs": 78000,
-   "endMs": 80304,
+   "startMs": 80000,
+   "endMs": 82304,
    "semVoz": false
   },
   {
    "text": "Boa viagem!",
    "quem": "metalis",
-   "startMs": 80600,
-   "endMs": 81881,
+   "startMs": 82600,
+   "endMs": 83881,
    "semVoz": false
   },
   {
    "text": "Me entrega a maleta. Espera aqui fora e fica de olho em qualquer movimento.",
    "quem": "adryan",
-   "startMs": 109600,
-   "endMs": 115537,
+   "startMs": 111600,
+   "endMs": 117537,
    "semVoz": false
   },
   {
    "text": "Qual a senha?",
    "quem": "gusta",
-   "startMs": 119400,
-   "endMs": 120514,
+   "startMs": 121400,
+   "endMs": 122514,
    "semVoz": false
   },
   {
    "text": "15/03 007 BIFF.",
    "quem": "adryan",
-   "startMs": 120800,
-   "endMs": 123762,
+   "startMs": 122800,
+   "endMs": 125762,
    "semVoz": false
   },
   {
    "text": "Pode entrar.",
    "quem": "gusta",
-   "startMs": 123500,
-   "endMs": 126038,
+   "startMs": 125500,
+   "endMs": 128038,
    "semVoz": false
   },
   {
    "text": "Então... o Igor já sabe que a gente tá chegando?",
    "quem": "adryan",
-   "startMs": 137000,
-   "endMs": 140038,
+   "startMs": 139000,
+   "endMs": 142038,
    "semVoz": false
   },
   {
    "text": "Sabe.",
    "quem": "gusta",
-   "startMs": 140200,
-   "endMs": 140979,
+   "startMs": 142200,
+   "endMs": 142979,
    "semVoz": false
   },
   {
    "text": "Mas não é qualquer pessoa que pode ficar sabendo dessa missão.",
    "quem": "gusta",
-   "startMs": 141000,
-   "endMs": 146131,
+   "startMs": 143000,
+   "endMs": 148131,
    "semVoz": false
   },
   {
    "text": "Por quê?",
    "quem": "adryan",
-   "startMs": 146300,
-   "endMs": 147022,
+   "startMs": 148300,
+   "endMs": 149022,
    "semVoz": false
   },
   {
    "text": "Porque o Projeto Mogg é importante demais.",
    "quem": "gusta",
-   "startMs": 147200,
-   "endMs": 150557,
+   "startMs": 149200,
+   "endMs": 152557,
    "semVoz": false
   },
   {
    "text": "Isso não pode ser comentado em qualquer lugar. Nem mesmo fora daqui.",
    "quem": "gusta",
-   "startMs": 150307,
-   "endMs": 153664,
+   "startMs": 152307,
+   "endMs": 155664,
    "semVoz": false
   },
   {
    "text": "Você vai entender quando encontrar o Igor.",
    "quem": "gusta",
-   "startMs": 153900,
-   "endMs": 156660,
+   "startMs": 155900,
+   "endMs": 158660,
    "semVoz": false
   },
   {
    "text": "Nem mesmo no meu aniversário eles conseguem se segurar...",
    "quem": "igor",
-   "startMs": 165600,
-   "endMs": 168830,
+   "startMs": 167600,
+   "endMs": 170830,
    "semVoz": false
   },
   {
    "text": "Trouxeram?",
    "quem": "igor",
-   "startMs": 174200,
-   "endMs": 176084,
+   "startMs": 176200,
+   "endMs": 178084,
    "semVoz": false
   },
   {
    "text": "Todos eles têm potencial. Um potencial que não pode ser desperdiçado.",
    "quem": "igor",
-   "startMs": 178800,
-   "endMs": 182868,
+   "startMs": 180800,
+   "endMs": 184868,
    "semVoz": false
   },
   {
    "text": "Então... o Projeto Mogg.",
    "quem": "igor",
-   "startMs": 183000,
-   "endMs": 184818,
+   "startMs": 185000,
+   "endMs": 186818,
    "semVoz": false
   },
   {
    "text": "Então é isso. O Projeto Mogg.",
    "quem": "igor",
-   "startMs": 191200,
-   "endMs": 193890,
+   "startMs": 193200,
+   "endMs": 195890,
    "semVoz": false
   },
   {
    "text": "Vamos ver o que a Toca do Anão escondeu.",
    "quem": "igor",
-   "startMs": 206000,
-   "endMs": 208337,
+   "startMs": 208000,
+   "endMs": 210337,
    "semVoz": false
   }
  ]
