@@ -38,6 +38,12 @@ foram adaptadas pra este motor.
 | 30 | Saltos de mão do Adryan indo ao bolso / à janela (43) | direção da mão e fechamento dos dedos trocavam em degrau (limiares 0,3/0,5) | misturas contínuas | QA "salto de mão" |
 | 31 | Mãos do Igor 100% imóveis por 7 s (51) e atrás do terminal (55) | IK em alvo fixo depois que para de digitar | respiração nas mãos + rajada curta de digitação; pose viva no 55 | QA "braço congelado" |
 | 32 | Detector de deslize dava alarme falso | olhava cada pé sozinho em janelas de 0,45 s (caía na fase de balanço) | mede os DOIS pés: acusa se nenhum fica parado por ≥ 0,17 s com o corpo andando | validado contra medição quadro a quadro |
+| 33 | **Mão do Metalis passando na frente do rosto** (44 · 4,3–4,6 s · 0:54) | ao apoiar na janela, a mão sobe pelo lado da câmera; a mistura de rotações do IK cortava a frente do rosto | caminho da mão pelo lado de fora + plano aberto mantido até a mão apoiar (corte em 4,95 s) | fotos 4,0–5,0 s |
+| 34 | **Cabeça do Igor "solta" e monitor cobrindo o rosto** (53 · 8,6–12 s · 3:17) | rotação extra exagerada na cabeça (.52/−.3 + deslocamento) e câmera atrás do monitor | inclinação menor, sem deslocar a cabeça; câmera de frente | fotos 8,7–12 s |
+| 35 | **Saída do carro com as pernas atravessando a porta fechada** (47 · 11–12 s) | o Adryan "sentado" era girado pra porta com a porta ainda fechada; o carro era menor que ele (não cabia) | sequência real: maçaneta → porta abre → gira → perna esquerda, perna direita → mão na coluna → levanta abaixando a cabeça → sai do raio da porta → empurra → porta bate; carro na escala do Adryan (1,25) | QA 47 aprovado; fotos 11–17 s |
+| 36 | **Porta secreta aberta "de cara" pra pedir senha** (48) | sem portinhola | portinhola de correr na altura dos olhos; senha pela fresta (ponto de vista do Gusta); fecha, ele sai do arco da porta e abre | QA 48; fotos |
+| 37 | **Sem som de porta / batida** (47, 48) | batida era um "corte" genérico | sons sintetizados: trinco, porta do carro abrindo/batendo, nós dos dedos na madeira, portinhola, rangido, trinco da cabana — no instante do contato | cues em `tools/som4.py` |
+| 38 | Mão do Gusta cruzando o rosto pra correr a tampa | mão direita numa tampa que corre pra esquerda | mão esquerda; cotovelo relativo ao corpo (ele gira) | QA 48 |
 
 ## Lição (processo)
 Toda edição passa por `python3 tools/sintaxe.py` antes do QA (bug #20 e #29).

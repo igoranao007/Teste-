@@ -17,11 +17,14 @@ Se um item quebrar, a versão não é entregue (volta pra última estável — v
 | 10 | Metalis chega andando sem patinar; gestos ao lado do corpo (sem braço cruzando o rosto) | 44 | QA 44; fotos de frente 10–27 s |
 | 11 | Olhos do Metalis: íris amarela; no mato só a íris aparece | 44, 45, 49 | fotos 35 s (44), 49 |
 | 12 | Entrega da maleta Nicolas → Adryan pela alça | 47 | fotos 2–5 s |
-| 13 | Adryan sai pela porta aberta e fecha a porta (não atravessa a lataria) | 47 | QA 47 colisão = 0 |
-| 14 | Gusta fora do arco da porta da cabana; passo pra trás quando ela abre | 48 | QA 48 |
+| 13 | Adryan sai do carro de verdade: maçaneta, porta abre, uma perna de cada vez, mão na coluna, cabeça baixa, sai do raio da porta, empurra, porta bate (com som) | 47 (11–15,5 s) | QA 47; fotos 11,1 · 12,2 · 12,9 · 13,3 · 13,95 · 14,95 · 15,3 |
+| 14 | Porta secreta: 3 batidas (som no contato), portinhola corre, senha pela fresta (POV), portinhola fecha, Gusta sai do arco da porta, destranca e abre (rangido) | 48 | QA 48; fotos 1,05 · 2,5 · 4,8 · 7,0 · 8,4 · 9,6 |
 | 15 | Elevador: andam assim que a porta abre, passo natural, param e conversam em plano/contraplano | 50 | fotos 1,5 · 6 · 11,5 · 12,4 · 14 |
 | 16 | Escritório do Igor verde e escuro; mãos do Igor de palma pra baixo no teclado/fita/Enter | 51–55 | QA 51/54; closes |
 | 17 | Passos: um som por contato real do pé, superfície da cena, volume igualado | todos | `tools/som4.py` (contagem) + escuta |
 | 18 | Pé de apoio PARADO no chão ao andar (trava do pé) | todos com caminhada | QA "pé deslizando" = 0 |
 | 19 | Nenhum trecho de câmera olhando pro nada | filme | `python3 tools/quadros_vazios.py` = 0 |
 | 20 | Entrega 720p < 100 MB (GitHub) | entrega | `ls -l entrega/` |
+| 21 | Metalis: mão não passa na frente do rosto ao apoiar na janela | 44 (4–5 s) | fotos 4,0–5,0 |
+| 22 | Igor: cabeça presa ao pescoço, monitor fora do rosto ao pegar a fita | 53 (8,6–12 s) | fotos |
+| 23 | Carro na mesma escala do Adryan nos planos com os dois do lado de fora | 47, 48 | visual |

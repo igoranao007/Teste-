@@ -14,7 +14,7 @@ const { THREE } = P;
 window.SETUP = async () => {
   const S = F.noite({ fov: 40, perto: 6, longe: 40, luz: { keyDir: [.3, .7, .7], keyCor: '#9fc4ab', amb: '#2b4636', fillCor: '#24703c' } }), cena = S.scene;
   await V.montarCabana(S);
-  const car = await F.carro(); car.position.set(0, .02, 8.6); car.rotation.y = Math.PI; car.luzes(0); cena.add(car);
+  const car = await F.carro(); car.scale.setScalar(1.25); car.position.set(0, .02, 8.6); car.rotation.y = Math.PI; car.luzes(0); cena.add(car);
   const Ni = await E4.ator('nicolas'); cena.add(Ni.obj); Ni.obj.position.set(1.55, 0, 9.4); Ni.obj.rotation.y = Math.PI;
   // os olhos na mata são do METALIS: ele parado no escuro entre as árvores, só a íris amarela acesa (mesmos olhos do posto)
   const Me = await E4.ator('metalis'); cena.add(Me.obj); Me.obj.position.set(8.5, 0, 13.5); Me.obj.rotation.y = Math.atan2(1.55 - 8.5, 9.4 - 13.5);

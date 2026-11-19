@@ -15,34 +15,51 @@ const { THREE } = P;
 window.SETUP = async () => {
   const S = F.noite({ fov: 40, perto: 8, longe: 45, luz: { keyDir: [.3, .7, .7], keyCor: '#a8cdb2', amb: '#22382a', fillCor: '#1c5a30' } }), cena = S.scene;
   const { cab } = await V.montarCabana(S);
-  const car = await F.carro(); car.position.set(0, .02, 8.6); car.rotation.y = Math.PI; car.luzes(0); cena.add(car);
+  const car = await F.carro(); car.scale.setScalar(1.25); car.position.set(0, .02, 8.6); car.rotation.y = Math.PI; car.luzes(0); cena.add(car);   // mesma escala do plano 47
   const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj); T.poses(Ad.modelo);
   const mal = T.maleta(); mal.scale.setScalar(.72); cena.add(mal);
   const fala = await V.vozes(), v3 = (x, y, z) => new THREE.Vector3(x, y, z);
   const PORTA = new THREE.Vector3(-1.2, 0, 2.8), MAC = () => cab.macaneta.getWorldPosition(v3());
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
   S.update = t => {
-    const abre = .42 * P.suave(2.6, 3.1, t) + .58 * P.suave(8.1, 9.0, t); cab.abrir(abre);
-    // Adryan diante da porta, maleta na direita; bate com a esquerda (0,9–2,1)
+    // LUGAR SECRETO: ninguém abre a porta de cara. Adryan bate (3×) → a portinhola na altura dos olhos corre → o Gusta pede a senha
+    // pela fresta → fecha a portinhola → sai da frente (a porta abre pra dentro) → destranca e abre → "Pode entrar."
+    const K = [1.05, 1.37, 1.69], pulso = Math.max(...K.map(q => Math.exp(-(((t - q) / .055) ** 2))));
+    const fresta = P.suave(2.3, 2.6, t) * (1 - P.suave(6.85, 7.05, t)); cab.portinhola(fresta);
+    const abre = P.suave(8.4, 9.3, t); cab.abrir(abre);
+    // Adryan diante da porta, maleta na direita; bate com os nós dos dedos da esquerda (o som cai no contato)
     Ad.obj.position.set(-1.2, 0, 3.6); Ad.obj.rotation.y = Math.PI; Ad.pose('idle', t);
-    const bate = t > .9 && t < 2.1 ? Math.max(0, Math.sin((t - .9) * Math.PI * 2.5)) : 0;
-    const kb = P.suave(.55, .95, t) * (1 - P.suave(2.05, 2.45, t)); if (kb > 0) { Ad.obj.updateMatrixWorld(true); const h = Ad.osso('hand.L').getWorldPosition(new THREE.Vector3()); Ad.modelo.alcancar('L', h.lerp(new THREE.Vector3(-1.45, 1.4, 2.95 - .07 * bate), kb).toArray(), [-.8, -.6, .3], .05); }
-    const v = fala('48', t, 'adryan'); V.falar(Ad, v, t);
-    if (t > 9.2) V.caminhar(Ad, [-1.2, 3.6], [-1.2, 1.2], t, 9.2, 10.6, { de: Ad.obj.rotation.y });
+    const kb = P.suave(.55, .95, t) * (1 - P.suave(1.85, 2.25, t)); if (kb > 0) { Ad.obj.updateMatrixWorld(true); const h = Ad.osso('hand.L').getWorldPosition(v3());
+      V.pegar(Ad, 'L', h.lerp(v3(-1.42, 1.38, 2.86 + .09 * (1 - pulso)), kb), v3(0, .3, -1), v3(0, 1, 0), [-.8, -.6, .3], kb, .95); }   // mão fechada (nós dos dedos)
+    const v = fala('48', t, 'adryan'); V.falar(Ad, v, t); V.girar(Ad, 'spine.005', [1, 0, 0], .06 * P.suave(2.3, 2.7, t) * (1 - P.suave(7.2, 7.6, t)));   // olha a fresta
+    if (t > 9.55) V.caminhar(Ad, [-1.2, 3.6], [-1.2, 1.2], t, 9.55, 10.95, { de: Ad.obj.rotation.y });
     Ad.obj.position.y = V.chao(Ad.obj.position.x, Ad.obj.position.z, cab.plataformas);          // sobe o degrau da varanda (não atravessa)
     V.segurarMaleta(Ad, mal, t); mal.pulsar(t);
-    // Gusta lá dentro, aparece pela fresta (do lado da maçaneta); levanta o queixo quando ouve a senha; depois abre
-    // fora do arco da porta (raio 1,04 m da dobradiça): olha pela fresta; dá um passo pra trás quando abre de vez
-    const RG = Math.atan2(.55, -.65) - Math.PI, rotG = RG * P.suave(7.7, 8.1, t) * (1 - P.suave(9.35, 9.8, t));   // vira ~40° abrindo passagem e recua ALINHADO ao passo
-    const recua = V.caminhar(Gu, [-.7, 2.0], [-.15, 1.35], t, 8.1, 9.35, { virar: false, rot: RG, re: true }); Gu.obj.rotation.y = rotG; Gu.obj.position.y = .08;
-    if (!recua) Gu.pose('idle', t, 'talk', .7 * fala.peso('48', t, 'gusta') * (1 - P.suave(7.7, 8.1, t)), t);   // o gesto de fala termina antes do passo pra trás
-    V.girar(Gu, 'spine.005', [1, 0, 0], -.1 * P.suave(6.4, 7.2, t));
-    if (t < 2.4) cam([1.8, 1.7, 7.2], [-1.2, 1.3, 3.0], 38);                                             // ele bate
-    else if (t < 3.2) cam([-.25, 1.15, 3.45], MAC().toArray(), 34);                                       // maçaneta; a porta abre um pouco
-    else if (t < 4.7) cam([-.55, 1.72, 4.5], [-.9, 1.62, 2.05], 30);                                       // pela fresta: Gusta "Senha?"
-    else if (t < 7.6) cam([-.72, 1.6, 2.82], [-1.2, 1.58, 3.6], 44);                                      // de dentro, por cima do ombro do Gusta: a senha
-    else if (t < 9.2) cam([-.8, 1.78, 4.6], [-.9, 1.5, 2.05], 40);                                        // a porta abre: "Pode entrar."
+    // Gusta: colado na porta olhando pela fresta (2,3–7,1) → sai pro lado (fora do arco da porta, que abre pra dentro) →
+    // puxa a porta pela maçaneta de dentro → dá passagem
+    const GF = [-1.2, 2.55], GL = [-.55, 2.0], RG = Math.atan2(.55, -.65) - Math.PI, fG = .35 * fala.peso('48', t, 'gusta') * (1 - P.suave(6.9, 7.15, t) * (1 - P.suave(8.15, 8.5, t))) * (1 - P.suave(8.55, 8.8, t) * (1 - P.suave(9.75, 10.1, t)));   /* sem gesto de fala andando */
+    let gAnda = false;
+    if (t < 6.95) { Gu.obj.position.set(GF[0], 0, GF[1]); Gu.obj.rotation.y = 0; Gu.pose('idle', t, 'talk', fG, t); }
+    else if (t < 8.4) { const RD = Math.atan2(GF[0] - GL[0], GF[1] - GL[1]);   /* recua na diagonal ainda de frente pra porta (de ré), sem dar meia-volta */
+      gAnda = V.caminhar(Gu, GF, GL, t, 7.35, 8.3, { virar: false, rot: RD, re: true }); Gu.obj.rotation.y = t < 7.35 ? RD * P.suave(6.95, 7.35, t) : t < 8.3 ? RD : V.angLerp(RD, -.5, P.suave(8.3, 8.4, t)); if (!gAnda) Gu.pose('idle', t, 'talk', fG, t); }
+    else { const rec = V.caminhar(Gu, GL, [-.15, 1.45], t, 8.85, 9.75, { virar: false, rot: RG, re: true }); Gu.obj.rotation.y = V.angLerp(-.5, RG, P.suave(8.6, 8.85, t)) * (1 - P.suave(9.75, 10.2, t));
+      if (!rec) Gu.pose('idle', t, 'talk', fG, t); }
+    Gu.obj.position.y = .08; Gu.obj.updateMatrixWorld(true);
+    V.girar(Gu, 'spine.005', [1, 0, 0], -.1 * P.suave(6.4, 6.9, t) * (1 - P.suave(7.0, 7.3, t)));
+    // mão direita do Gusta: corre a tampa (abrir/fechar) e depois puxa a porta pela maçaneta de dentro (acompanha a porta abrindo)
+    const mT = P.suave(2.05, 2.3, t) * (1 - P.suave(2.6, 2.85, t)) + P.suave(6.6, 6.85, t) * (1 - P.suave(6.95, 7.35, t));   /* solta a tampa ANTES de sair do lugar */
+    if (mT > 0) V.pegar(Gu, 'L', cab.fresta().add(v3(.13 + .3 * fresta, -.02, -.08)), v3(0, .2, 1).normalize(), v3(-1, 0, 0), v3(.7, -.6, -.3).applyAxisAngle(v3(0, 1, 0), Gu.obj.rotation.y).toArray(), mT, .5);   /* cotovelo relativo ao corpo (ele gira) */   /* a tampa corre pra ESQUERDA dele: mão esquerda (a direita cruzava o rosto) */
+    const mP = P.suave(8.2, 8.45, t) * (1 - P.suave(8.65, 8.9, t));   /* puxa e solta: a porta segue abrindo no embalo */
+    if (mP > 0) { cab.updateMatrixWorld(true); const mc = cab.macanetaDentro.getWorldPosition(v3()); V.pegar(Gu, 'L', mc, mc.clone().sub(Gu.obj.position).setY(0).normalize(), v3(0, 1, 0), v3(.7, -.6, -.3).applyAxisAngle(v3(0, 1, 0), Gu.obj.rotation.y).toArray(), mP, .7); }
+    // câmeras
+    const FR = cab.fresta();
+    if (t < 2.35) cam([1.8, 1.7, 7.2], [-1.2, 1.3, 3.0], 38);                                               // ele bate
+    else if (t < 4.6) cam([-.98, 1.66, 3.95], [FR.x, FR.y - .02, FR.z], 30);                               // a portinhola corre: os olhos do Gusta na fresta
+    else if (t < 6.8) cam([FR.x + .01, FR.y + .01, FR.z - .5], [-1.2, 1.58, 3.6], 26);                    // ponto de vista do Gusta: a moldura da fresta enquadra o Adryan
+    else if (t < 8.35) cam([-.55, 1.72, 4.5], [-.9, 1.5, 2.8], 40);                                        // fecha a portinhola, destranca
+    else if (t < 9.55) cam([-.8, 1.78, 4.6], [-.9, 1.5, 2.05], 40);                                        // a porta abre: "Pode entrar."
     else cam([1.5, 1.8, 6.6], [-1.2, 1.2, 2.6], 40);
+    Gu.obj.visible = !(t >= 4.6 && t < 6.8);                                                        // a câmera está no lugar da cabeça dele (POV)
     cab.halo.quaternion.copy(S.camera.quaternion);
   };
 };

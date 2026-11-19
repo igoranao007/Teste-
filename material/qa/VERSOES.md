@@ -26,3 +26,11 @@ quadro a quadro de 43 (bico/mangueira/grana), 44 (Metalis), 50 (elevador), `NAO_
 **Resultado**: QA quadro a quadro (PASSO=1) aprovado em todos os planos com personagem; `quadros_vazios.py` = 0;
 folha 1 qps dos 232 s revisada; 720p 63 MB. Tag `v4.4-estavel` · `out/historico/v4.4-720p.mp4`.
 Pendências documentadas em `AUDITORIA_v4.4.md` (o que não dá pra medir automaticamente).
+
+## v4.5 — tag `v4.5-estavel`
+**Mudanças** (pedido do diretor + bugs das capturas 0:54 e 3:18)
+- 47: saída do carro realista (pesquisa: cartilhas de "como sair do carro"), carro na escala do Adryan, Nicolas visível no carro olhando em volta, luz da cabana no lado do motorista; plano 47 de 12 → 19,5 s.
+- 48: portinhola na porta (lugar secreto), senha pela fresta com ponto de vista do Gusta, porta abre só depois.
+- Sons novos: porta do carro abrindo/batendo, batidas na porta, portinhola, rangido, trinco.
+- 44 (0:54): mão do Metalis não cruza mais o rosto. 53 (3:17): cabeça do Igor e câmera corrigidas.
+**Problemas encontrados → corrigidos**: `REGISTRO.md` #33–#38.

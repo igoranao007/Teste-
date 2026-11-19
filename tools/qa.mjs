@@ -114,7 +114,7 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
       A.y = B.y = 0; if (A.distanceTo(B) < .3) add(out.col, t, vis[i].nome + '×' + vis[j].nome, 'corpos sobrepostos (cm)', A.distanceTo(B) * 100); }
   }
   // BRAÇO CONGELADO: mão parada (< 4 mm no espaço do corpo) por 3 s ou mais dentro do mesmo plano de câmera
-  for (const [at, hh] of hist) for (const sd of ['L', 'R']) { if (veic(at.raiz)) continue; const h = hh.m[sd]; let i = 0;   // sentado em veículo: mãos no volante/maleta são paradas de propósito
+  for (const [at, hh] of hist) for (const sd of ['L', 'R']) { if (veic(at.raiz) || at.raiz.userData?.noVeiculo) continue; const h = hh.m[sd]; let i = 0;   // sentado em veículo: mãos no volante/maleta são paradas de propósito
     while (i < h.length) { let j = i, mx = 0; while (j + 1 < h.length && !h[j + 1][2]) { j++; mx = Math.max(mx, h[j][1].distanceTo(h[i][1])); if (mx > .004) break; }
       if (mx <= .004 && h[j][0] - h[i][0] >= 3) { add(out.anat, h[i][0], at.nome, 'braço congelado ' + sd + ' (s)', h[j][0] - h[i][0]); i = j + 1; } else i++; } }
   // PÉ DESLIZANDO: andando, sempre tem um pé de APOIO parado no chão (o outro está no ar). Se por ≥ 0,17 s NENHUM dos dois

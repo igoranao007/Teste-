@@ -47,7 +47,10 @@ window.SETUP = async () => {
     // mão esquerda na beirada da janela, mas VIVA: escorrega um pouco, levanta e reapoia nas falas (antes ficava 26 s cravada)
     const ergue = [8.4, 16.4, 23.7, 29.6].reduce((m, q) => Math.max(m, env(t, q, q + .25, q + .55, q + .85)), 0);
     if (debr > 0) { V.girar(Me, 'Spine', [1, 0, 0], .05 * debr); Me.obj.updateMatrixWorld(true);
-      V.ik2(Me, 'LeftArm', 'LeftForeArm', 'LeftHand', SOLEIRA.clone().add(v3(-.06 + .03 * Math.sin(t * .6), .04 * ergue, .015 * Math.sin(t * .45))), dM.clone().negate().add(v3(0, -.35, 0)).addScaledVector(fM, -.3), debr); }
+      // a mão vai até a beirada pelo LADO DE FORA do corpo (antes a mistura de rotações fazia a mão cruzar na frente do rosto)
+      const sol = SOLEIRA.clone().add(v3(-.06 + .03 * Math.sin(t * .6), .04 * ergue, .015 * Math.sin(t * .45))), h0 = Me.osso('LeftHand').getWorldPosition(v3()), arco = Math.sin(Math.PI * debr);
+      const alvoL = debr >= 1 ? sol : h0.lerp(sol, P.suave(0, 1, debr)).addScaledVector(dM, -.16 * arco).add(v3(0, -.06 * arco, 0));
+      V.ik2(Me, 'LeftArm', 'LeftForeArm', 'LeftHand', alvoL, dM.clone().negate().add(v3(0, -.35, 0)).addScaledVector(fM, -.3), P.suave(0, .35, debr)); }
     // mão direita: pede (palma pra cima, na frente do peito) · dá de ombros (pro lado) · pega a moeda · olha a moeda · guarda no bolso · comemora
     const em = (f, d, y) => OMB.clone().addScaledVector(fM, f).addScaledVector(dM, d).add(v3(0, y, 0));
     const alvos = [
@@ -77,8 +80,8 @@ window.SETUP = async () => {
     const mp = Me.obj.position, th = Me.obj.rotation.y, fr = [Math.sin(th), Math.cos(th)];
     const ROSTO_M = [mp.x, .82, mp.z], frente = (d, lado, y) => [mp.x + fr[0] * d + fr[1] * lado, y, mp.z + fr[1] * d - fr[0] * lado];
     const q = fala.quem('44', t);
-    if (t < 3.9) cam([3.3, 1.45, .7], [mp.x * .5 + .9, .7, mp.z * .5 - 1.4], 44);                          // ele chegando, chamando o Adryan
-    else if (t < 7.3) cam([1.3, .82, -1.05], [.46, .84, -1.25], 46);                                           // de dentro do carro, pela janela aberta
+    if (t < 4.95) cam([3.3, 1.45, .7], [mp.x * .5 + .9, .7, mp.z * .5 - 1.4], 44);                          // ele chegando, chamando o Adryan
+    else if (t < 7.3) cam([1.9, .92, -.95], [.42, .86, -1.35], 36);                                           // na janela do carro (um pouco mais aberto: rosto + mão na beirada)
     else if (t < 10.1) cam([1.25, 1.65, -2.85], [.22, 1.05, -.4], 34);                                        // Adryan respondendo (por cima do Metalis)
     else if (t < 14.5) cam([1.2, .8, -1.12], [.46, .85, -1.26], 36);                                                     // Metalis pedindo (close pela janela)
     else if (t < 20.2) cam([-.45, 1.6, -2.75], [.25, 1.05, -.4], 34);                                         // Adryan (do outro lado)

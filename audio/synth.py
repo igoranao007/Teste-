@@ -371,11 +371,50 @@ def fx_sobe(d=8.0, root=31, sem=5):         # drone que sobe de tom (suspense)
     return reverb(x * _janela(t, d, 1.0, .08), 2.5, .35)
 def fx_chiado_sobe(d=6.0):                  # chiado que cresce até o máximo
     x = fx_chiado(d, 1); t = tt(d); return x * (.06 + .94 * (t / d) ** 2.2) * np.clip((d - t) / .01, 0, 1)
+# ── portas (v4.5): carro abrindo/fechando, batida de nós dos dedos na madeira, portinhola de correr, rangido, porta de madeira batendo
+def fx_trinco():                            # trinco metálico: dois estalos curtos com corpo
+    d = .12; t = tt(d); c1 = bp(noise(d), 1200, 6000) * np.exp(-t / .004); c2 = np.roll(bp(noise(d), 900, 4000) * np.exp(-t / .006), N(.035))
+    return (c1 + .8 * c2 + .3 * osc('sin', 950, d) * np.exp(-t / .02)) * .9
+def fx_porta_carro_abre():                 # puxa a maçaneta (trinco) + a borracha da porta descolando
+    d = .6; t = tt(d); x = np.zeros(N(d)); tr = fx_trinco(); x[:len(tr)] += tr
+    sela = bp(noise(d), 300, 1800) * np.exp(-((t - .12) / .07) ** 2) * .35
+    return x + sela
+def fx_porta_carro_fecha():                # batida pesada: baque grave da lataria + clang metálico + trinco
+    d = .9; t = tt(d); baque = osc('sin', 62 * (1 + .6 * np.exp(-t / .015)), d) * np.exp(-t / .12)
+    clang = bp(noise(d), 700, 3200) * np.exp(-t / .03) * .45 + .15 * osc('sin', 410, d) * np.exp(-t / .09)
+    x = sat(baque * 1.2 + clang, 1.6); tr = fx_trinco() * .5; x[N(.012):N(.012) + len(tr)] += tr
+    return x
+def fx_batida(n=3, esp=.24):               # nós dos dedos na porta de madeira: n batidas com variação
+    d = n * esp + .5; x = np.zeros(N(d))
+    for i in range(n):
+        dd = .25; t = tt(dd); g = 1 - .12 * i + .06 * R.standard_normal()
+        k = (bp(noise(dd), 140, 900) * np.exp(-t / .012) * 1.3 + osc('sin', 175 + 12 * R.standard_normal(), dd) * np.exp(-t / .05)
+             + .5 * osc('sin', 410, dd) * np.exp(-t / .025) + .25 * bp(noise(dd), 2000, 5000) * np.exp(-t / .002)) * g
+        i0 = N(i * esp + .015 * R.standard_normal() ** 2); x[i0:i0 + len(k)] += k[:len(x) - i0]
+    return reverb(x, .5, .12)[0]
+def fx_portinhola(abre=1):                 # tampa de madeira correndo no trilho + estalo no fim do curso
+    d = .45; t = tt(d); u = np.clip(t / .3, 0, 1)
+    raspa = stft_filter(noise(d), lambda v: 700 + 900 * abs(np.sin(v * 40)), lambda v: 3500, 512, .35) * np.sin(np.pi * u) * (t < .3)
+    bate = bp(noise(d), 250, 1600) * np.exp(-np.clip(t - .3, 0, None) / .015) * (t >= .3) * (1.0 if abre else 1.4)
+    return raspa * .7 + bate
+def fx_range(d=1.3):                        # rangido de dobradiça: atrito em pulsos (stick-slip) excitando ressonâncias que deslizam
+    t = tt(d); taxa = 22 + 30 * np.sin(np.pi * t / d) + 6 * np.sin(t * 7); fase = np.cumsum(taxa) / SR
+    pulsos = (np.mod(fase, 1) < .08).astype(float) * (1 + .3 * R.standard_normal(len(t)))
+    f = 650 + 500 * np.sin(np.pi * t / d * .8)
+    x = sum(bp(pulsos, fc * .9, fc * 1.1) for fc in (float(np.mean(f)), float(np.mean(f)) * 1.9, float(np.mean(f)) * 2.7)) * np.sin(np.pi * np.clip(t / d, 0, 1)) ** .5
+    return x / (np.max(np.abs(x)) + 1e-9) * .7
+def fx_porta_madeira(d=.9):                 # porta de madeira fechando: baque surdo + chacoalhar do batente
+    t = tt(d); baque = osc('sin', 85 * (1 + .4 * np.exp(-t / .02)), d) * np.exp(-t / .14) + .4 * bp(noise(d), 120, 700) * np.exp(-t / .03)
+    chac = bp(noise(d), 900, 3000) * np.exp(-np.clip(t - .03, 0, None) / .04) * .2
+    return sat(baque + chac, 1.4)
 SFX.update({
  'motor': (lambda p: fx_motor(p.get('d', 6.0), p.get('abafado', 0), p.get('rpm', 1.0)), -17, False), 'pneus': (lambda p: fx_pneus(p.get('d', 6.0)), -24, True),
  'grilos': (lambda p: fx_grilos(p.get('d', 6.0)), -27, True), 'passo': (lambda p: fx_passo(), -14, False), 'pisada': (lambda p: fx_pisada(p), -17, False), 'radio': (lambda p: fx_radio(p.get('d', 6.0)), -32, False),
  'estrondo': (lambda p: fx_estrondo(p.get('d', 1.0)), -1, False), 'sobe': (lambda p: fx_sobe(p.get('d', 8.0), p.get('root', 31), p.get('sem', 5)), -15, True),
  'chiado_sobe': (lambda p: fx_chiado_sobe(p.get('d', 6.0)), -5, True),
+ 'carro_abre': (lambda p: fx_porta_carro_abre(), -15, False), 'carro_fecha': (lambda p: fx_porta_carro_fecha(), -9, False),
+ 'batida': (lambda p: fx_batida(p.get('n', 3), p.get('esp', .24)), -10, False), 'portinhola': (lambda p: fx_portinhola(p.get('abre', 1)), -14, False),
+ 'range': (lambda p: fx_range(p.get('d', 1.3)), -19, False), 'trinco': (lambda p: fx_trinco(), -16, False), 'porta_madeira': (lambda p: fx_porta_madeira(), -10, False),
 })
 
 # ════════════════ TRILHAS ════════════════

@@ -7,7 +7,7 @@ import numpy as np
 from scipy.io import wavfile
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); os.chdir(R)
 PLANOS = [('41-estrada', 17), ('42-nicolas', 9), ('43-posto', 24), ('44-mendigo', 37), ('45-titulo', 7), ('46-casmiron', 12),
-          ('47-cabana', 12), ('48-senha', 10), ('49-olhos', 8), ('50-elevador', 24), ('51-sala-igor', 14), ('52-arquivos', 13),
+          ('47-cabana', 19.5), ('48-senha', 10), ('49-olhos', 8), ('50-elevador', 24), ('51-sala-igor', 14), ('52-arquivos', 13),
           ('53-projeto-mogg', 12), ('54-computador', 16), ('55-tela-mogg', 9), ('56-final', 8)]
 INI = {}; acc = 0
 for n, d in PLANOS: INI[n[:2]] = acc; acc += d
@@ -81,7 +81,7 @@ PESO = {'adryan': .9, 'gusta': 1.0, 'nicolas': .8, 'frentista': 1.0, 'metalis': 
 _seed = [0]
 OFF = {'concreto': 4.8, 'mato': 1.3, 'madeira': -3.2, 'corredor': -.4, 'carpete': -.5, 'arrasto': -2.3}   # iguala o volume percebido entre superfícies (medido: RMS 300 ms)
 PES = json.load(open('material/qa/pes.json'))          # fração do ciclo 'walk' em que cada pé toca o chão (videos/_pes)
-def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18, fase=0.0, re=False):
+def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18, fase=0.0, re=False, ate=None):
     """um som por CONTATO do pé (como notify de animação): o motor anda u·L/passo ciclos (+fase em ciclos)."""
     pc = PES[quem].get('passada', passo * ALT[quem] / 1.75); v = 1 / (1 - e)   # passada medida no clipe
     def u_de(u0): return v * u0 * u0 / (2 * e) if u0 < e else (1 - v * (1 - u0) ** 2 / (2 * e) if u0 > 1 - e else v * (u0 - e / 2))
@@ -92,6 +92,7 @@ def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18, fase=0.0,
         if d <= .02 or d > L: continue
         alvo, a, b = d / L, 0.0, 1.0
         for _ in range(30): m = (a + b) / 2; a, b = (m, b) if u_de(m) < alvo else (a, m)
+        if ate is not None and t0 + a * (t1 - t0) > ate: continue   # passo depois do corte do plano
         _seed[0] += 1; cue('pisada', P(pl) + t0 + a * (t1 - t0), sup=sup, peso=PESO[quem], seed=_seed[0], gain=gain + OFF[sup] + (-1.5 if pe == 'L' else 0), pan=pan + (.06 if pe == 'R' else -.06))
 # camadas longas de clima
 cue('drone', 0, d=26, root=31, gain=-4); cue('drone', P('44') + 20, d=17, root=29, gain=-3); cue('drone', P('46'), d=37, root=31, gain=-2); cue('drone', P('51'), d=55, root=31, gain=-3)
@@ -119,12 +120,16 @@ for t in (4, 6, 8, 10): cue('heart', P('46') + t)
 cue('boom', P('46') + 11.85, gain=-5)
 # 47 cabana
 cue('motor', P('47'), d=4.5, gain=-5); cue('pneus', P('47'), d=4.5, gain=-4); cue('motor', P('47') + 4.5, d=.8, rpm=.6, gain=-6); cue('click', P('47') + 5.2, gain=-2)
-cue('grilos', P('47'), d=12, gain=-8); cue('cut', P('47') + 10.6, gain=-4)
-passos('47', 11.05, 13, 6.13, 'adryan', 'mato', gain=-1)
+cue('grilos', P('47'), d=19.5, gain=-8); cue('cut', P('47') + 10.6, gain=-4)
+# saída do carro: trinco + porta abrindo (11,3) · passo pra fora do raio da porta · porta batendo (15,28) · vai pra cabana
+cue('carro_abre', P('47') + 11.3, gain=-2); cue('carro_fecha', P('47') + 15.28, gain=-3)
+passos('47', 13.95, 14.6, .57, 'adryan', 'mato', gain=-1); passos('47', 15.45, 18.3, 3.24, 'adryan', 'mato', gain=-1); passos('47', 18.3, 19.9, 1.88, 'adryan', 'mato', gain=-1, ate=19.45)
 # 48 senha
-cue('grilos', P('48'), d=10, gain=-10); passos('48', 9.2, 10.6, 2.4, 'adryan', 'madeira', gain=-3); passos('48', 8.1, 9.35, .85, 'gusta', 'madeira', gain=-5, re=True)
-for k in range(3): cue('cut', P('48') + 1.0 + k * .32, gain=2)
-cue('click', P('48') + 2.8, gain=-2); cue('whoosh_slow', P('48') + 8.6, gain=-6)
+cue('grilos', P('48'), d=10, gain=-10); passos('48', 9.55, 10.95, 2.4, 'adryan', 'madeira', gain=-3, ate=9.95)
+passos('48', 7.35, 8.3, .8, 'gusta', 'madeira', gain=-6, re=True); passos('48', 8.85, 9.75, .82, 'gusta', 'madeira', gain=-6, re=True)
+# lugar secreto: 3 batidas (nós dos dedos, no contato) · portinhola corre · fecha · destranca · porta range abrindo
+cue('batida', P('48') + 1.05, n=3, esp=.32, gain=0); cue('portinhola', P('48') + 2.3, abre=1, gain=-1); cue('portinhola', P('48') + 6.85, abre=0, gain=-1)
+cue('trinco', P('48') + 8.25, gain=-1); cue('range', P('48') + 8.4, d=1.0, gain=-2)
 # 49 olhos
 cue('grilos', P('49'), d=8, gain=-6); cue('chiado', P('49') + 1.5, d=1.2, gain=-14); cue('sobe', P('49') + 2, d=6, root=27, sem=2, gain=-6)
 for t in (3, 3.8, 4.6, 5.4, 6.2, 7.0): cue('heart', P('49') + t, gain=-2)
