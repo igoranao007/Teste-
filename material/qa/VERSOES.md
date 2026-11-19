@@ -18,7 +18,7 @@ por causa do tamanho). Pra voltar: `git checkout v4.3-estavel -- lib videos tool
 - Motor: trava do pé (foot locking) em toda caminhada; mistura parado↔andando .15 s; passada medida por personagem.
 - QA: braço atravessando o corpo, braço congelado, pé deslizando (métrica corrigida: os DOIS pés fora do chão), objeto flexível × corpo.
 
-**Problemas encontrados → corrigidos**: ver `REGISTRO.md` #21–#28.
+**Problemas encontrados → corrigidos**: ver `REGISTRO.md` #21–#32 e `AUDITORIA_v4.4.md`.
 
 **Testes**: `bash tools/qa_todos.sh` (resultado em `RESUMO.txt`), `quadros_vazios.py`, folha 1 qps do filme inteiro,
 quadro a quadro de 43 (bico/mangueira/grana), 44 (Metalis), 50 (elevador), `NAO_REGREDIR.md`.
