@@ -1,0 +1,25 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Folha de personagem: DOM (modelo PS1 feito a partir da foto material/dom/dom.jpg; não entra no filme).
+     ?v=frente|tres|lado|costas|rosto · &fundo=#hex · &t=segundos (a cabeça e o véu mexem de leve) -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:4}</script>
+<script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as T from '../../lib/tgp.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search);
+  const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#1c2420',
+    luz: { keyDir: [-.4, .7, .8], keyCor: '#f2efe6', fillDir: [.8, .2, .3], fillCor: '#6a7078', amb: '#626a66' } });
+  S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#2c332e' }), { pos: [0, -.01, 0] }));                 // chão
+  const D = await T.dom(); S.scene.add(D.obj);
+  const c = D.corpo;                                                                                  // braços soltos ao lado do corpo
+  c.braco('L', [.18, -1, -.02], [.1, -1, .12], [0, -1, .1]); c.braco('R', [-.18, -1, -.02], [-.1, -1, .12], [0, -1, .1]); c.guardar(); D.assentar();
+  const b = new THREE.Box3().setFromObject(D.obj), h = b.max.y, cab = D.cabeca.getWorldPosition(new THREE.Vector3());
+  const V = { frente: [0, h * .55, 4.4, 0, h * .5, 0, 30], tres: [2.5, h * .62, 3.6, 0, h * .5, 0, 30], lado: [4.4, h * .55, 0, 0, h * .5, 0, 30],
+    costas: [-1.2, h * .6, -4.2, 0, h * .5, 0, 30], rosto: [cab.x + .1, cab.y + .02, cab.z + .9, cab.x, cab.y - .02, cab.z, 24] }[q.get('v') || 'frente'];
+  S.update = t => { c.repor(); D.assentar(); D.animar(t, { pisca: (t % 3.2) > 3.05 ? 1 : 0 });
+    if (!q.get('cam')) { S.camera.fov = V[6]; S.camera.position.set(V[0], V[1], V[2]); S.camera.lookAt(V[3], V[4], V[5]); S.camera.updateProjectionMatrix(); } };
+  window.D = D;
+};
+</script></body></html>
