@@ -1,7 +1,14 @@
 {
- "quando": "2026-11-19T11:48:04.152Z",
+ "quando": "2026-11-19T14:33:35.946Z",
  "resumo": {
-  "anat": {},
+  "anat": {
+   "igor · braço atravessa o corpo R (cotovelo)": {
+    "n": 23,
+    "t0": 6.47,
+    "t1": 9.27,
+    "max": 6
+   }
+  },
   "cont": {},
   "col": {}
  }

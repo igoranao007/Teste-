@@ -36,8 +36,8 @@ window.SETUP = async () => {
     if (t < 3.7) { andando = V.caminhar(Me, INICIO, PERTO, t, .2, 3.6, { de: Math.atan2(PERTO[0] - INICIO[0], PERTO[1] - INICIO[1]), ease: .15 }); if (!andando) Me.pose('idle', t); }
     else if (t < 31.4) { Me.obj.position.set(PERTO[0], 0, PERTO[1]); Me.obj.rotation.y = angLerp(Math.atan2(PERTO[0] - INICIO[0], PERTO[1] - INICIO[1]), .32, P.suave(3.6, 4.3, t));
       Me.pose('idle', t, 'talk', .45 * fala.peso('44', t, 'metalis'), t); }
-    else if (t < 34.2) { andando = V.caminhar(Me, PERTO, ATRAS, t, 31.4, 32.3, { virar: false, passo: .9 }); Me.obj.rotation.y = .32;
-      if (!andando) { const w = P.suave(32.3, 32.7, t) * (1 - P.suave(33.7, 34.1, t)); Me.pose('idle', t, 'wave', w, t - 32.3); } else Me.pose('walk', -P.clamp((t - 31.4) / .9) * .67 / Me.passada * Me.dur('walk'), 'idle', 1 - Math.min(P.suave(31.4, 31.7, t), 1 - P.suave(32.0, 32.3, t)), t); }
+    else if (t < 34.2) { andando = V.caminhar(Me, PERTO, ATRAS, t, 31.4, 32.3, { virar: false, rot: .32, re: true });   // passo de ré (clipe ao contrário, pé travado)
+      if (!andando) { const w = P.suave(32.3, 32.7, t) * (1 - P.suave(33.7, 34.1, t)); Me.pose('idle', t, 'wave', w, t - 32.3); } }
     else { Me.obj.position.set(ATRAS[0], 0, ATRAS[1]); const c = D.car.position; Me.obj.rotation.y = angLerp(.32, Math.atan2(c.x - ATRAS[0], c.z - ATRAS[1]), P.suave(34.2, 35.2, t)); Me.pose('idle', t); }
     Me.obj.updateMatrixWorld(true);
     // debruçado na janela: tronco pra frente + mão esquerda na beirada

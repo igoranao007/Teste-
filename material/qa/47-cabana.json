@@ -1,7 +1,20 @@
 {
- "quando": "2026-11-19T11:47:59.581Z",
+ "quando": "2026-11-19T14:33:30.721Z",
  "resumo": {
-  "anat": {},
+  "anat": {
+   "adryan · braço atravessa o corpo L (cotovelo)": {
+    "n": 1,
+    "t0": 12,
+    "t1": 12,
+    "max": 6
+   },
+   "adryan · pé deslizando (cm/s)": {
+    "n": 1,
+    "t0": 11.33,
+    "t1": 11.33,
+    "max": 359
+   }
+  },
   "cont": {},
   "col": {}
  }

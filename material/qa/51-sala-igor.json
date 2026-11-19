@@ -1,7 +1,20 @@
 {
- "quando": "2026-11-19T11:48:03.705Z",
+ "quando": "2026-11-19T14:33:35.503Z",
  "resumo": {
-  "anat": {},
+  "anat": {
+   "igor · braço congelado L (s)": {
+    "n": 1,
+    "t0": 6.53,
+    "t1": 6.53,
+    "max": 7
+   },
+   "igor · braço congelado R (s)": {
+    "n": 1,
+    "t0": 6.53,
+    "t1": 6.53,
+    "max": 7
+   }
+  },
   "cont": {},
   "col": {}
  }

@@ -46,14 +46,14 @@ window.SETUP = async () => {
     // FRENTISTA (sequência completa, como num posto real): vai até a bomba (11,2–12,3) · estende o braço e pega o cabo (12,6–13,15)
     //   · tira o bico do gancho, pra cima e pra fora (13,15–13,6) · leva até a traseira do carro (13,6–14,3) · abre a portinhola (14,3–14,65)
     //   · encaixa o bico (14,65–15,15) · segura enquanto abastece (até 18,3) · tira o bico (18,3–18,7) · fecha a portinhola (18,7–19,0)
-    //   · volta à bomba (19,0–19,7) · pendura o bico (19,95–20,35) · solta (20,35–20,6) · janela (20,6–21,45) · recebe (21,5–21,8) · bolso · vai embora (22,4–)
+    //   · volta à bomba (19,0–19,95) · pendura o bico (20,2–20,6) · solta (20,6–20,85) · janela (20,85–23,0) · recebe (23,1–23,45) · bolso (23,5–24)
     let anda = false;
     if (t < 5) { Fr.obj.position.set(1.05, 0, -3.45); Fr.obj.rotation.y = -1.2; Fr.pose('idle', t); }
     else if (t < 9.6) { anda = V.caminhar(Fr, [1.05, -3.45], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
     else if (t < 13.9) { anda = V.caminhar(Fr, JANELA, PB, t, 9.6, 11.9, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(PB[0] - JANELA[0], PB[1] - JANELA[1]), ROT_BOMBA, P.suave(11.9, 12.35, t)); if (t > 13.35) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.35, 13.9, t)); Fr.pose('idle', t); } }
     else if (t < 19.0) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.9, 14.5, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(TAMPA[0] - PB[0], TAMPA[1] - PB[1]), ROT_CARRO, P.suave(14.5, 14.85, t)); Fr.pose('idle', t * .6); } }
-    else if (t < 20.6) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.0, 19.7, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, ROT_BOMBA, P.suave(19.7, 19.95, t)); Fr.pose('idle', t); } }
-    else if (t < 24.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.6, 22.9, { de: ROT_BOMBA }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(JANELA[0] - PB[0], JANELA[1] - PB[1]), 0, P.suave(22.9, 23.25, t)); Fr.pose('idle', t); } }
+    else if (t < 20.85) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.0, 19.95, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(PB[0] - TAMPA[0], PB[1] - TAMPA[1]), ROT_BOMBA, P.suave(19.95, 20.2, t)) - .8 * P.suave(20.5, 20.85, t);   /* já começa a virar pra janela ao soltar o bico */ Fr.pose('idle', t); } }
+    else if (t < 24.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.85, 23.0, { de: ROT_BOMBA - .8 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(JANELA[0] - PB[0], JANELA[1] - PB[1]), 0, P.suave(23.0, 23.3, t)); Fr.pose('idle', t); } }
     else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 24.4, 28.8, { de: 0 }); }
     Fr.obj.updateMatrixWorld(true);
     const curva = P.suave(14.5, 15.0, t) * (1 - P.suave(18.6, 19.0, t));                       // inclina o tronco pra alcançar a traseira
@@ -68,17 +68,20 @@ window.SETUP = async () => {
     else if (t < 18.3) B = noTanque(t, P.suave(15.15, 15.35, t));
     else if (t < 18.45) B = noTanque(t, 1 - P.suave(18.3, 18.45, t));
     else if (t < 18.75) B = mix(noTanque(t, 0), carregado(), P.suave(18.45, 18.75, t));
-    else if (t < 19.95) B = carregado();
-    else if (t < 20.2) B = mix(carregado(), noSuporte(1), P.suave(19.95, 20.2, t));
-    else if (t < 20.35) B = noSuporte(1 - P.suave(20.2, 20.35, t));
+    else if (t < 20.2) B = carregado();
+    else if (t < 20.45) B = mix(carregado(), noSuporte(1), P.suave(20.2, 20.45, t));
+    else if (t < 20.6) B = noSuporte(1 - P.suave(20.45, 20.6, t));
     else B = noSuporte();
+    const arco = Math.sin(Math.PI * P.clamp((t - 14.85) / .3)) + Math.sin(Math.PI * P.clamp((t - 18.45) / .3));   // encaixando/tirando (0→1→0, sem tranco)
+    if (arco > 0) { const sp = Fr.osso('spine').getWorldPosition(v3()), dv = B.p.clone().sub(sp); dv.y = 0;          // o caminho do bico passa por fora da barriga
+      if (dv.length() > 1e-4) B.p.addScaledVector(dv.normalize(), .07 * arco); }
     bico.position.copy(B.p); bico.quaternion.copy(B.q); bico.updateMatrixWorld(true); bico.obstaculos = [() => V.capsulasCorpo(Fr)]; bico.mangueira();   // a mangueira contorna o frentista
     // mão direita: pegada orientada no cabo (palma por cima, dedos no gatilho) — a mão segue a orientação do bico
-    const pegaBico = P.suave(12.6, 13.15, t) * (1 - P.suave(20.35, 20.6, t));
+    const pegaBico = P.suave(12.6, 13.15, t) * (1 - P.suave(20.6, 20.85, t));
     if (pegaBico > 0) { const r = Fr.obj.rotation.y, U = v3(0, 0, 1).applyQuaternion(bico.quaternion), F = v3(0, 1, 0).applyQuaternion(bico.quaternion);
       // no gancho o cabo fica de pé: a mão fecha nele como numa barra (dedos na horizontal, indicador pra cima);
       // em uso: palma por cima, dedos descendo pela frente do cabo até o gatilho (pulso quase reto)
-      const uso = P.suave(13.4, 13.95, t) * (1 - P.suave(19.95, 20.25, t));
+      const uso = P.suave(13.4, 13.95, t) * (1 - P.suave(20.2, 20.5, t));
       const alvoG = bico.localToWorld(GRIP.clone()), hor = alvoG.clone().sub(Fr.obj.position); hor.y = 0; hor.normalize();
       const dedosGancho = hor, dedosUso = U.clone().negate().multiplyScalar(.8).addScaledVector(F, .45).addScaledVector(direita(r), -.2);
       // pegada definida NO GANCHO (bico em pé = rotação identidade): dedos na direção do braço até o cabo, indicador pra cima;
@@ -90,14 +93,14 @@ window.SETUP = async () => {
     const maoTampa = P.suave(14.5, 14.65, t) * (1 - P.suave(14.82, 15.0, t)) + P.suave(18.7, 18.8, t) * (1 - P.suave(18.98, 19.1, t));
     if (maoTampa > 0) { car.updateMatrixWorld(true); V.pegar(Fr, 'L', tampa.borda(), v3(0, -.3, 1), v3(0, 1, 0), [.8, -.5, -.2], maoTampa, .3); }
     // pagamento: as notas saem do bolso do Adryan (19,6), vão pra janela, passam pra mão do frentista (21,2) e somem no bolso dele (21,7)
-    const pegaGrana = P.suave(22.95, 23.3, t) * (1 - P.suave(23.35, 23.65, t)), bolsoFr = P.suave(23.4, 23.7, t) * (1 - P.suave(23.75, 24, t));
+    const pegaGrana = P.suave(23.1, 23.4, t) * (1 - P.suave(23.45, 23.7, t)), bolsoFr = P.suave(23.5, 23.75, t) * (1 - P.suave(23.8, 24, t));
     if (pegaGrana > 0 || bolsoFr > 0) {
       const h = Fr.osso('hand.R').getWorldPosition(v3()), mAd = D.Ad.osso('hand.L').getWorldPosition(v3());
       const quadril = direita(Fr.obj.rotation.y).multiplyScalar(.27).addScaledVector(frente(Fr.obj.rotation.y), .02).add(v3(0, .92, 0)).add(Fr.obj.position);   // bolso DIREITO (antes: lado trocado, o braço cruzava o corpo)
       Fr.modelo.alcancar('R', h.clone().lerp(mAd, pegaGrana).lerp(quadril, bolsoFr).toArray(), [.6, -.7, -.4], .04);
     }
-    notas.visible = t > 20.2 && t < 23.7;
-    if (t < 23.32) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
+    notas.visible = t > 20.2 && t < 23.75;
+    if (t < 23.42) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
     Me.obj.visible = false;
     // câmeras (nas tomadas pela janela, mais luz dentro do carro)
     const janela = (t >= 15.4 && t < 17.4) || (t >= 18.6 && t < 20.0) || (t >= 20.9 && t < 24.4);

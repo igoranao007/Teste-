@@ -20,7 +20,8 @@ window.SETUP = async () => {
     sala.video(t); est.visible = true;
     V.luzSalaVerde(sala, t, S.camera);                                                // sala esverdeada e escura (luz do monitor)
     // mãos no teclado, digita de vez em quando; cabeça vira um pouco quando percebe alguém (12,4)
-    const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .016 * (t > .5 && t < 6.5 ? 1 : 0);
+    const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .016 * (t > .5 && t < 6.5 ? 1 : P.suave(9.4, 9.6, t) * (1 - P.suave(10.6, 10.8, t)) * .7)   // digita; depois uma rajada curta no meio da fala
+      + .004 * Math.sin(t * 1.7 + s);                                                                   // respiração: as mãos nunca ficam congeladas
     const m = { R: rot(-.1, Y + .075 + tk(0), .2), L: rot(.1, Y + .075 + tk(2), .2), poloR: rot(-.9, -.3, -.2), poloL: rot(.9, -.3, -.2), plana: true, extra: .04,
       pegada: { R: { dedos: rot(0, -.45, 1), indice: rot(1, 0, 0) }, L: { dedos: rot(0, -.45, 1), indice: rot(-1, 0, 0) } } };   // palmas pra baixo nas teclas
     const v = fala('51', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });

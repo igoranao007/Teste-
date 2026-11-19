@@ -32,13 +32,13 @@ window.SETUP = async () => {
       else { // Adryan sai do carro com a maleta e vai até a porta
         // sai do carro DE VERDADE: a porta do motorista (lado −x do mundo) abre, ele se levanta pela abertura, a porta fecha,
         // e vai pela lateral de fora do carro até a varanda (antes ele nascia no capô e atravessava a lataria)
-        car.abrirPorta(P.suave(11.0, 11.35, t) * (1 - P.suave(11.85, 12.1, t)));
-        const sai = P.suave(11.25, 11.8, t), SAIDA = [-1.5, 8.78];         // de pé fora do raio da porta (0,95 m da dobradiça): ela fecha sem passar por ele
-        Ad.obj.userData.noVeiculo = t < 11.8 ? car : null;                          // QA: saindo do carro (está dentro dele de propósito)
-        if (t < 11.8) { Ad.obj.position.set(P.lerp(-.4, SAIDA[0], sai), 0, P.lerp(8.3, SAIDA[1], sai * sai)); Ad.obj.rotation.y = P.lerp(-Math.PI / 2, Math.PI, sai); Ad.pose('idle', t, 'sit', 1 - sai, 2.2); }
-        else { const a = V.caminhar(Ad, SAIDA, [-1.25, 3.6], t, 12.1, 14.9, { de: Math.PI }); if (!a) { Ad.obj.position.set(SAIDA[0], 0, SAIDA[1]); Ad.obj.rotation.y = Math.PI; Ad.pose('idle', t); }
+        car.abrirPorta(P.suave(11.0, 11.35, t) * (1 - P.suave(12.45, 12.7, t)));
+        const sai = P.suave(11.25, 12.4, t), SAIDA = [-1.5, 8.78];         // de pé fora do raio da porta (0,95 m da dobradiça): ela fecha sem passar por ele
+        Ad.obj.userData.noVeiculo = t < 12.4 ? car : null;                          // QA: saindo do carro (está dentro dele de propósito)
+        if (t < 12.4) { Ad.obj.position.set(P.lerp(-.4, SAIDA[0], sai), 0, P.lerp(8.3, SAIDA[1], sai * sai)); Ad.obj.rotation.y = P.lerp(-Math.PI / 2, Math.PI, sai); Ad.pose('idle', t, 'sit', 1 - sai, 2.2); }
+        else { const a = V.caminhar(Ad, SAIDA, [-1.25, 3.6], t, 12.7, 15.5, { de: Math.PI }); if (!a) { Ad.obj.position.set(SAIDA[0], 0, SAIDA[1]); Ad.obj.rotation.y = Math.PI; Ad.pose('idle', t); }
           // fecha a porta com a mão esquerda antes de andar (a porta não passa por ele)
-          const fecha = P.suave(11.75, 11.9, t) * (1 - P.suave(12.05, 12.25, t)); if (fecha > 0) { car.updateMatrixWorld(true); const borda = car.portaMot.localToWorld(new THREE.Vector3(.1, .55, -.85));   // borda de trás da porta (acompanha a porta fechando)
+          const fecha = P.suave(12.35, 12.5, t) * (1 - P.suave(12.65, 12.85, t)); if (fecha > 0) { car.updateMatrixWorld(true); const borda = car.portaMot.localToWorld(new THREE.Vector3(.1, .55, -.85));   // borda de trás da porta (acompanha a porta fechando)
             const dd = borda.clone().sub(Ad.obj.position.clone().add(new THREE.Vector3(0, 1.2, 0))).normalize(); V.pegar(Ad, 'L', borda, dd, [0, 1, 0], [.8, -.5, .2], fecha, .5); } }
         Ad.obj.visible = true; V.segurarMaleta(Ad, mal, t); mal.pulsar(t);
         S.camera.fov = 40; S.camera.position.set(4.5, 1.7, 12.5); S.camera.lookAt(-.5, 1.1, 5);

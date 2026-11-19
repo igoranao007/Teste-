@@ -1,12 +1,12 @@
 {
- "quando": "2026-11-19T13:08:31.196Z",
+ "quando": "2026-11-19T14:35:11.223Z",
  "resumo": {
   "anat": {
    "frentista · braço atravessa o corpo R (cotovelo)": {
-    "n": 1,
+    "n": 3,
     "t0": 18.43,
-    "t1": 18.43,
-    "max": 5
+    "t1": 23.13,
+    "max": 6
    },
    "frentista · salto de mão L": {
     "n": 1,
@@ -22,15 +22,15 @@
    },
    "frentista · salto de mão R": {
     "n": 1,
-    "t0": 22.97,
-    "t1": 22.97,
+    "t0": 23.1,
+    "t1": 23.1,
     "max": 28
    },
    "frentista · pé deslizando (cm/s)": {
-    "n": 6,
-    "t0": 5.1,
-    "t1": 20.93,
-    "max": 477
+    "n": 3,
+    "t0": 9.87,
+    "t1": 21.07,
+    "max": 309
    }
   },
   "cont": {},

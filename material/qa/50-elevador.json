@@ -1,20 +1,7 @@
 {
- "quando": "2026-11-19T13:08:26.395Z",
+ "quando": "2026-11-19T14:33:34.967Z",
  "resumo": {
-  "anat": {
-   "gusta · pé deslizando (cm/s)": {
-    "n": 2,
-    "t0": 1.93,
-    "t1": 2.4,
-    "max": 164
-   },
-   "adryan · pé deslizando (cm/s)": {
-    "n": 2,
-    "t0": 2,
-    "t1": 2.67,
-    "max": 76
-   }
-  },
+  "anat": {},
   "cont": {},
   "col": {}
  }

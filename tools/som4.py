@@ -81,11 +81,12 @@ PESO = {'adryan': .9, 'gusta': 1.0, 'nicolas': .8, 'frentista': 1.0, 'metalis': 
 _seed = [0]
 OFF = {'concreto': 4.8, 'mato': 1.3, 'madeira': -3.2, 'corredor': -.4, 'carpete': -.5, 'arrasto': -2.3}   # iguala o volume percebido entre superfícies (medido: RMS 300 ms)
 PES = json.load(open('material/qa/pes.json'))          # fração do ciclo 'walk' em que cada pé toca o chão (videos/_pes)
-def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18, fase=0.0):
+def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18, fase=0.0, re=False):
     """um som por CONTATO do pé (como notify de animação): o motor anda u·L/passo ciclos (+fase em ciclos)."""
     pc = PES[quem].get('passada', passo * ALT[quem] / 1.75); v = 1 / (1 - e)   # passada medida no clipe
     def u_de(u0): return v * u0 * u0 / (2 * e) if u0 < e else (1 - v * (1 - u0) ** 2 / (2 * e) if u0 > 1 - e else v * (u0 - e / 2))
-    cont = sorted((n + PES[quem][pe] - fase, pe) for n in range(-1, int(L / pc) + 3) for pe in ('L', 'R'))
+    # de ré (clipe ao contrário) o pé toca no FIM da janela de apoio (contato + 0,56 do ciclo)
+    cont = sorted((n + ((fase - (PES[quem][pe] + .56)) % 1 if re else PES[quem][pe] - fase), pe) for n in range(-1, int(L / pc) + 3) for pe in ('L', 'R'))
     for c, pe in cont:
         d = c * pc
         if d <= .02 or d > L: continue
@@ -100,14 +101,14 @@ cue('chiado', 0, d=2, gain=-6); cue('motor', 2, d=8); cue('pneus', 2, d=8); cue(
 cue('motor', P('42'), d=9, abafado=1, gain=-3); cue('radio', P('42'), d=9, gain=-6)
 # 43 posto
 cue('motor', P('43'), d=4.5, gain=-4); cue('pneus', P('43'), d=4.2, gain=-4); cue('lampada', P('43'), d=24, rede=60, pisca=0, gain=-12); cue('grilos', P('43'), d=24, gain=-8)
-cue('click', P('43') + 5.0, gain=-2); cue('turbina', P('43') + 5.1, d=.9, gain=-16); cue('click', P('43') + 13.15, gain=-4); cue('tick', P('43') + 14.65, gain=-4); cue('click', P('43') + 15.3, gain=-3); cue('turbina', P('43') + 15.4, d=2.9, gain=-10); cue('click', P('43') + 18.32, gain=-5); cue('tick', P('43') + 18.95, gain=-4); cue('click', P('43') + 20.3, gain=-4)
+cue('click', P('43') + 5.0, gain=-2); cue('turbina', P('43') + 5.1, d=.9, gain=-16); cue('click', P('43') + 13.15, gain=-4); cue('tick', P('43') + 14.65, gain=-4); cue('click', P('43') + 15.3, gain=-3); cue('turbina', P('43') + 15.4, d=2.9, gain=-10); cue('click', P('43') + 18.32, gain=-5); cue('tick', P('43') + 18.95, gain=-4); cue('click', P('43') + 20.55, gain=-4)
 import math as _m
-for a, b, L in ((5, 7, 1.91), (9.6, 11.9, 2.9), (13.9, 14.5, .76), (19.0, 19.7, .76), (20.6, 22.9, 2.9)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2)
-cue('paper', P('43') + 23.3, gain=-6)
+for a, b, L, e in ((5, 7, 1.91, .18), (9.6, 11.9, 2.9, .18), (13.9, 14.5, .76, .18), (19.0, 19.95, .76, .18), (20.85, 23.0, 2.9, .18)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2, e=e)
+cue('paper', P('43') + 23.4, gain=-6)
 passos('43', 24.4, 28.8, 6.3, 'frentista', 'concreto', gain=-6)          # vai embora: some ao longe
 # 44 mendigo
 cue('lampada', P('44'), d=37, rede=60, pisca=0, gain=-12); cue('grilos', P('44'), d=37, gain=-8); cue('motor', P('44') + .6, d=31, abafado=1, gain=-8)
-passos('44', .2, 3.6, 2.5, 'metalis', 'arrasto', gain=-3, e=.15); passos('44', 31.4, 32.3, .67, 'metalis', 'arrasto', gain=-5, passo=.9)
+passos('44', .2, 3.6, 2.5, 'metalis', 'arrasto', gain=-3, e=.15); passos('44', 31.4, 32.3, .67, 'metalis', 'arrasto', gain=-5, re=True)
 cue('tick', P('44') + 25.35, gain=-1); cue('turbina', P('44') + 31.2, d=.8, gain=-16)
 cue('sobe', P('44') + 20, d=14, root=29, sem=3, gain=-8); cue('motor', P('44') + 32.2, d=4.8, rpm=1.4, gain=-2); cue('pneus', P('44') + 32.4, d=4.6, gain=-3)
 # 45 título
@@ -121,7 +122,7 @@ cue('motor', P('47'), d=4.5, gain=-5); cue('pneus', P('47'), d=4.5, gain=-4); cu
 cue('grilos', P('47'), d=12, gain=-8); cue('cut', P('47') + 10.6, gain=-4)
 passos('47', 11.05, 13, 6.13, 'adryan', 'mato', gain=-1)
 # 48 senha
-cue('grilos', P('48'), d=10, gain=-10); passos('48', 9.2, 10.6, 2.4, 'adryan', 'madeira', gain=-3)
+cue('grilos', P('48'), d=10, gain=-10); passos('48', 9.2, 10.6, 2.4, 'adryan', 'madeira', gain=-3); passos('48', 8.1, 9.35, .85, 'gusta', 'madeira', gain=-5, re=True)
 for k in range(3): cue('cut', P('48') + 1.0 + k * .32, gain=2)
 cue('click', P('48') + 2.8, gain=-2); cue('whoosh_slow', P('48') + 8.6, gain=-6)
 # 49 olhos

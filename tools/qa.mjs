@@ -84,7 +84,7 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
       const hh = hist.get(at) ?? hist.set(at, { m: { L: [], R: [] }, p: { L: [], R: [] } }).get(at);
       for (const sd of ['L', 'R']) { const H = O['h' + sd]; if (H) hh.m[sd].push([t, at.raiz.worldToLocal(H.getWorldPosition(new V3())), corte]);
         const pe = O['p' + sd]; if (pe) { const w = pe.getWorldPosition(new V3()); hh.p[sd].push([t, w, w.y - at.raiz.getWorldPosition(new V3()).y, corte]); } }
-      { const rq = at.raiz.getWorldPosition(new V3()); hh.c ??= []; hh.c.push(hh.ult && !corte ? Math.hypot(rq.x - hh.ult.x, rq.z - hh.ult.z) / (passo / 30) : null); hh.ult = rq; }
+      { const rq = at.raiz.getWorldPosition(new V3()); hh.c ??= []; hh.c.push(hh.ult && !corte && !at.raiz.userData?.noVeiculo ? Math.hypot(rq.x - hh.ult.x, rq.z - hh.ult.z) / (passo / 30) : null); hh.ult = rq; }
       // continuidade
       const q = (O.qd ?? at.raiz).getWorldPosition(new V3()), ql = at.raiz.parent ? at.raiz.parent.worldToLocal(q.clone()) : q;   // relativo a quem carrega (carro)
       if (pa.q && !corte && ql.distanceTo(pa.q) / passo > .25) add(out.cont, t, k, 'teletransporte (cm)', ql.distanceTo(pa.q) * 100); pa.q = ql;
