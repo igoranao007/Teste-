@@ -15,7 +15,7 @@ const res = await p.evaluate(async ([ator, t0, t1]) => {
   for (let t = t0; t <= t1; t += 1 / 30) { await window.__seek(t); S.scene.updateMatrixWorld(true);
     let vis = true; for (let x = raiz; x; x = x.parent) if (x.visible === false) vis = false;
     for (const o of ossos) { const par = o.parent; const REF = (new URLSearchParams(location.search).get("ref") === "pai" && raiz.parent) ? raiz.parent : raiz; const rel = REF.worldToLocal(o.getWorldPosition(new V()));   // relativo ao corpo (ou ao pai: ?ref=pai)
-      const e = o.matrixWorld.elements, ax = new V(e[4], e[5], e[6]).normalize(); const ri = REF.matrixWorld.clone().invert(); ax.transformDirection(ri); rel.addScaledVector(ax, .1);   // + direção do osso (10 cm de alavanca): pega giro também
+      const e = o.matrixWorld.elements, ax = new V(e[0], e[1], e[2]).normalize();   // eixo LATERAL do osso: pega a torção (o giro em torno do próprio eixo) const ri = REF.matrixWorld.clone().invert(); ax.transformDirection(ri); rel.addScaledVector(ax, .1);   // + direção do osso (10 cm de alavanca): pega giro também
       (hist.get(o) ?? hist.set(o, []).get(o)).push(vis ? [t, rel.x, rel.y, rel.z] : null); } }
   const out = {};
   for (const [o, h] of hist) { let n = 0, mx = 0; const quando = [];
