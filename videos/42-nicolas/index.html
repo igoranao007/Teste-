@@ -23,7 +23,7 @@ window.SETUP = async () => {
     D.atualizar(t, { falaAd: v, olhaAd: -.22 * P.suave(1.2, 1.6, t) * (1 - P.suave(5.6, 6.2, t)), olhaNi: -.42 * olha, acenaNi: .22 * sim });
     // câmera: do lado do motorista olhando o Nicolas e a maleta, chega devagar no rosto
     const z = P.suave(0, 9, t);
-    S.camera.fov = P.lerp(46, 40, z); S.camera.position.set(P.lerp(.2, .12, z) + Math.sin(t * 7.3) * .003, 1.06 + Math.sin(t * 11) * .003, P.lerp(.72, .64, z));
+    S.camera.fov = P.lerp(46, 40, z); S.camera.position.set(P.lerp(.2, .12, z) + Math.sin(t * 1.3) * .002, 1.06 + Math.sin(t * 1.9) * .0015, P.lerp(.72, .64, z));   // balanço lento de estrada (o tremido rápido fazia os vértices do PS1 pularem: braço/mão 'tremendo')
     S.camera.lookAt(-.36, P.lerp(.84, .9, z), .3); S.camera.updateProjectionMatrix();
   };
 };

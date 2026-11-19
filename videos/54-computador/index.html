@@ -27,7 +27,7 @@ window.SETUP = async () => {
     const t = TT - D, ligada = TT >= 3.7 ? 1 : 0;
     F.telaCodigo(pc, TT, ligada); vcr.led(TT >= 3.2); I.girar(P.suave(-.4, .9, TT));
     const tremor = ligada * (.75 + .25 * Math.sin(TT * 23) * Math.sin(TT * 7));
-    lamp.acender(1, S.camera);
+    V.luzSalaVerde(sala, TT, S.camera);                                              // sala verde e escura desde o começo (antes era luz de sala clara)
     const m = {};
     if (TT < D) {                                                                       // a fita vai da mão pra boca do videocassete (pelo lado direito dele, sem cruzar o corpo)
       const leva = P.suave(.2, 1.5, TT), entra = P.suave(1.7, 2.7, TT), sai = P.suave(2.8, 3.5, TT);

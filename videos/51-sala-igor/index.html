@@ -17,9 +17,8 @@ window.SETUP = async () => {
   I.girar(1);
   const tela = () => pc.localToWorld(new THREE.Vector3(0, .28, -.18));
   S.update = t => {
-    sala.video(t); lamp.acender(.35, S.camera); est.visible = true;
-    const brilho = .75 + .25 * Math.sin(t * 23) * Math.sin(t * 7);
-    P.luz({ ...F.LUZ_SALA, keyDir: rot(0, .1, 1), keyCor: '#' + new THREE.Color('#5fd88a').multiplyScalar(brilho).getHexString(), fillDir: rot(-.6, .6, -.4), fillCor: '#16321f', amb: '#141f18' });
+    sala.video(t); est.visible = true;
+    V.luzSalaVerde(sala, t, S.camera);                                                // sala esverdeada e escura (luz do monitor)
     // mãos no teclado, digita de vez em quando; cabeça vira um pouco quando percebe alguém (12,4)
     const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .016 * (t > .5 && t < 6.5 ? 1 : 0);
     const m = { R: rot(-.1, Y + .075 + tk(0), .2), L: rot(.1, Y + .075 + tk(2), .2), poloR: rot(-.9, -.3, -.2), poloL: rot(.9, -.3, -.2), plana: true, extra: .04,

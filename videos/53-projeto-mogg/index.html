@@ -22,7 +22,7 @@ window.SETUP = async () => {
   mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));
   const chi = F.chiadoVerde();
   S.update = t => {
-    sala.video(t + 27); lamp.acender(1, S.camera); I.girar(0);
+    sala.video(t + 27); I.girar(0);
     Ad.pose('idle', t); Gu.pose('idle', t + .5); V.girar(Gu, 'spine.005', [1, 0, 0], .2 * P.suave(2, 3, t));
     const abre = P.suave(1.0, 2.0, t), maos = P.suave(.2, .8, t) * (1 - P.suave(2.1, 2.6, t)), pega = t >= 8.6, close = t >= 3.2 && t < 8.6;
     const m = {};
@@ -37,7 +37,7 @@ window.SETUP = async () => {
     I.cabeca.rotation.x += .52; I.cabeca.rotation.y += -.3; I.cabeca.position.z += .03; I.cabeca.position.y -= .02;
     mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(t);
     const g = abre * (.75 + .25 * Math.sin(t * 9));
-    P.luz({ ...F.LUZ_SALA, fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#1d5f37').lerp(new THREE.Color('#39ff6a'), g * .45).getHexString() });
+    V.luzSalaVerde(sala, t, S.camera, { fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#16321f').lerp(new THREE.Color('#39ff6a'), g * .45).getHexString() });   // sala verde + brilho da maleta
     S.camera.up.set(0, close ? 0 : 1, close ? -1 : 0);
     if (t < 3.2) { S.camera.fov = 36; S.camera.position.set(.05, 1.06, 1.85); S.camera.lookAt(-.05, .98, .2); }
     else if (close) { const q = P.clamp((t - 3.2) / 5.4); S.camera.fov = 34; S.camera.position.set(FR.x + .01, FR.y + .5 - q * .08, FR.z + .05); S.camera.lookAt(FR.x, FR.y, FR.z); }
