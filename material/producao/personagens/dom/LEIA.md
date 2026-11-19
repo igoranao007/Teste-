@@ -4,13 +4,14 @@
 - Textura: `ROUPA=dom CAB=40,34,30 CONTRASTE=1.3 QUENTE=1.0,0.95,0.9 python3 tools/pintar_jashi_vasco.py tris.json character_256.png material/dom/rosto_alinhado_olhos.png texturas/dom_512.png`
   (tris.json: todos os triângulos do modelo base com objeto e material, exportados pelo Blender).
   Casaco branco de manga comprida aberto em V, blusa preta de zíper, fivela laranja, gola alta, calça escura, sapato preto.
-- Montagem e animação: `ROSTO_PLANO=-0.10 CALCA=1 blender ... montar_jashi.py -- texturas/dom_512.png dom.blend` → `animar_jashi.py` → `exportar_glb.py`
+- Montagem e animação: `ROSTO_PLANO=-0.10 CALCA=1 blender ... montar_jashi.py -- texturas/dom_512.png dom.blend` → `rosto_foto.py` → `animar_jashi.py` → `exportar_glb.py`
   (10 animações: idle walk run talk wave sit cower attack hit death). Arquivo 3D fora do git (licença do JashiPSX).
-- "Frankenstein" (escolha do diretor): corpo, roupa, animações e cabeça (cabelo, orelhas, nuca) do modelo do elenco; o ROSTO é uma placa
-  quase plana e oval (estilo PS1, como as caras chapadas dos jogos de terror) com a foto recortada justa da testa ao queixo
-  (`T.rostoPlanoDom()`, foto alinhada `material/dom/rosto_alinhado.png`), encostada na frente da cabeça, presa ao osso da cabeça.
-  A cabeça do elenco é montada com o rosto achatado (`ROSTO_PLANO=-0.10` no montar_jashi.py: sem nariz) e a frente só com pele (`ROSTO_LISO=1`).
-  Folha: `?semveu=1` · `?cabeca=meia|inteira|mascara|elenco` (versões anteriores) · ajuste `&esc=&dz=`.
+- Rosto (escolha do diretor): a CARA da cabeça do elenco foi trocada pela foto NA PRÓPRIA MALHA — sem placa por cima, sem vão:
+  `RZ1=1.965 RKX=0.8 RFYMIN=334 blender -b dom.blend --python tools/blender/rosto_foto.py -- material/dom/rosto_alinhado.png dom.blend`
+  (separa as faces da frente da cabeça, do queixo à testa e entre as orelhas, num objeto "rosto" com o mesmo esqueleto; UV planar de frente
+  na foto alinhada; a testa trava abaixo da aba do chapéu da foto). Rodar depois do montar_jashi.py (com `ROSTO_PLANO=-0.10`: frente sem nariz)
+  e antes do animar_jashi.py. Cabelo, orelhas e nuca são do modelo do elenco. Piscada e boca: `acessoriosDom` redesenha a foto num canvas.
+  Versões anteriores na folha: `?cabeca=plano|meia|inteira|mascara|elenco` (· `?semveu=1` pra ver a cabeça sem chapéu/véu/capa).
 - Detalhes amarelos na roupa: debrum da abertura do casaco, punhos e barra.
 - Capa de Hokage (`acessoriosDom`): branca, chamas amarelas na barra, "小人の隠れ家" (kobito no kakurega, "o esconderijo/toca do anão") na vertical
   nas costas (fonte IPAGothic), gola alta; presa ao tronco (spine.003).
