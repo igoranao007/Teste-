@@ -1,7 +1,7 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <!-- v4 PLANO 3 · 0:26–0:48 · POSTO: chega e para na bomba; frentista vem à janela ("Boa noite. Completa pra mim."), abastece calado
      ("Movimento fraco hoje, hein?" sem resposta; "Beleza... também não precisa conversar."); Nicolas imóvel com a maleta; Adryan paga, frentista vai embora. -->
-<script>VIDEO={w:1920,h:1080,fps:30,dur:22}</script>
+<script>VIDEO={w:1920,h:1080,fps:30,dur:24}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
 <div id="stage"></div>
@@ -38,9 +38,9 @@ window.SETUP = async () => {
     const v = fala('43', t, 'adryan');
     // Adryan: abaixa o vidro (botão na porta) quando o frentista chega; paga com notas tiradas do bolso
     car.janela(P.suave(5.1, 6.0, t));
-    const bolso = P.suave(19.8, 20.2, t) * (1 - P.suave(20.4, 20.8, t)), fora = P.suave(20.8, 21.4, t) * (1 - P.suave(21.9, 22.4, t));
+    const bolso = P.suave(19.8, 20.2, t) * (1 - P.suave(20.4, 20.8, t)), fora = P.suave(21.9, 22.5, t) * (1 - P.suave(23.4, 23.9, t));
     D.atualizar(t, { giro: t < 5 ? .25 * Math.sin(t * .9) : 0, falaAd: v, janela: P.clamp((t - 4.8) / 1.4), bolso, maoFora: fora,
-      olhaAd: .75 * (P.suave(5.3, 5.8, t) * (1 - P.suave(11.4, 11.9, t)) + P.suave(14, 14.4, t) * (1 - P.suave(19.8, 20.1, t)) + P.suave(20.6, 21.0, t) * (1 - P.suave(22.5, 23, t))) - .25 * P.suave(19.8, 20.1, t) * (1 - P.suave(20.4, 20.7, t)) });
+      olhaAd: .75 * (P.suave(5.3, 5.8, t) * (1 - P.suave(11.4, 11.9, t)) + P.suave(14, 14.4, t) * (1 - P.suave(19.8, 20.1, t)) + P.suave(21.4, 21.8, t) * (1 - P.suave(23.6, 24, t))) - .25 * P.suave(19.8, 20.1, t) * (1 - P.suave(20.4, 20.7, t)) });
     // FRENTISTA: bomba → janela (5–7) · janela → bomba (11,2–12,3) · tira o bico (12,6–13,5) · tampa (13,5–14,3) · abastece (14,8–18,3)
     //            · devolve o bico (18,7–19,9) · janela (19,9–20,9) · recebe e guarda no bolso (20,9–21,7) · vai embora (21,9–)
     // FRENTISTA (sequência completa, como num posto real): vai até a bomba (11,2–12,3) · estende o braço e pega o cabo (12,6–13,15)
@@ -49,12 +49,12 @@ window.SETUP = async () => {
     //   · volta à bomba (19,0–19,7) · pendura o bico (19,95–20,35) · solta (20,35–20,6) · janela (20,6–21,45) · recebe (21,5–21,8) · bolso · vai embora (22,4–)
     let anda = false;
     if (t < 5) { Fr.obj.position.set(1.05, 0, -3.45); Fr.obj.rotation.y = -1.2; Fr.pose('idle', t); }
-    else if (t < 11.2) { anda = V.caminhar(Fr, [1.05, -3.45], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
-    else if (t < 13.9) { anda = V.caminhar(Fr, JANELA, PB, t, 11.2, 12.3, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(-Math.PI / 2, ROT_BOMBA, P.suave(12.3, 12.6, t)); if (t > 13.35) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.35, 13.9, t)); Fr.pose('idle', t); } }
+    else if (t < 9.6) { anda = V.caminhar(Fr, [1.05, -3.45], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
+    else if (t < 13.9) { anda = V.caminhar(Fr, JANELA, PB, t, 9.6, 11.9, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(PB[0] - JANELA[0], PB[1] - JANELA[1]), ROT_BOMBA, P.suave(11.9, 12.35, t)); if (t > 13.35) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.35, 13.9, t)); Fr.pose('idle', t); } }
     else if (t < 19.0) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.9, 14.5, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(TAMPA[0] - PB[0], TAMPA[1] - PB[1]), ROT_CARRO, P.suave(14.5, 14.85, t)); Fr.pose('idle', t * .6); } }
     else if (t < 20.6) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.0, 19.7, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, ROT_BOMBA, P.suave(19.7, 19.95, t)); Fr.pose('idle', t); } }
-    else if (t < 22.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.6, 21.45, { de: ROT_BOMBA }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(21.45, 21.7, t)); Fr.pose('idle', t); } }
-    else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 22.4, 26.8, { de: 0 }); }
+    else if (t < 24.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.6, 22.9, { de: ROT_BOMBA }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(JANELA[0] - PB[0], JANELA[1] - PB[1]), 0, P.suave(22.9, 23.25, t)); Fr.pose('idle', t); } }
+    else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 24.4, 28.8, { de: 0 }); }
     Fr.obj.updateMatrixWorld(true);
     const curva = P.suave(14.5, 15.0, t) * (1 - P.suave(18.6, 19.0, t));                       // inclina o tronco pra alcançar a traseira
     if (curva > 0) { V.girar(Fr, 'spine.002', [1, 0, 0], .28 * curva); V.girar(Fr, 'spine.003', [1, 0, 0], .14 * curva); Fr.obj.updateMatrixWorld(true); }
@@ -90,20 +90,20 @@ window.SETUP = async () => {
     const maoTampa = P.suave(14.5, 14.65, t) * (1 - P.suave(14.82, 15.0, t)) + P.suave(18.7, 18.8, t) * (1 - P.suave(18.98, 19.1, t));
     if (maoTampa > 0) { car.updateMatrixWorld(true); V.pegar(Fr, 'L', tampa.borda(), v3(0, -.3, 1), v3(0, 1, 0), [.8, -.5, -.2], maoTampa, .3); }
     // pagamento: as notas saem do bolso do Adryan (19,6), vão pra janela, passam pra mão do frentista (21,2) e somem no bolso dele (21,7)
-    const pegaGrana = P.suave(21.45, 21.8, t) * (1 - P.suave(21.85, 22.15, t)), bolsoFr = P.suave(21.9, 22.2, t) * (1 - P.suave(22.25, 22.5, t));
+    const pegaGrana = P.suave(22.95, 23.3, t) * (1 - P.suave(23.35, 23.65, t)), bolsoFr = P.suave(23.4, 23.7, t) * (1 - P.suave(23.75, 24, t));
     if (pegaGrana > 0 || bolsoFr > 0) {
       const h = Fr.osso('hand.R').getWorldPosition(v3()), mAd = D.Ad.osso('hand.L').getWorldPosition(v3());
-      const quadril = v3(.2, .9, .05).applyAxisAngle(v3(0, 1, 0), Fr.obj.rotation.y).add(Fr.obj.position);
+      const quadril = direita(Fr.obj.rotation.y).multiplyScalar(.27).addScaledVector(frente(Fr.obj.rotation.y), .02).add(v3(0, .92, 0)).add(Fr.obj.position);   // bolso DIREITO (antes: lado trocado, o braço cruzava o corpo)
       Fr.modelo.alcancar('R', h.clone().lerp(mAd, pegaGrana).lerp(quadril, bolsoFr).toArray(), [.6, -.7, -.4], .04);
     }
-    notas.visible = t > 20.2 && t < 22.2;
-    if (t < 21.82) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
+    notas.visible = t > 20.2 && t < 23.7;
+    if (t < 23.32) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
     Me.obj.visible = false;
     // câmeras (nas tomadas pela janela, mais luz dentro do carro)
-    const janela = (t >= 15.4 && t < 17.4) || (t >= 18.6 && t < 20.0) || (t >= 20.9 && t < 22.4);
+    const janela = (t >= 15.4 && t < 17.4) || (t >= 18.6 && t < 20.0) || (t >= 20.9 && t < 24.4);
     P.luz({ keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: janela ? '#5f8068' : '#2c4232', fillDir: [-.1, .2, -1], fillCor: janela ? '#6fae82' : '#1c5a30' });
     if (t < 5) cam([14, 6, 13], [P.lerp(-10, 0, ch), .8, P.lerp(7, -1, ch)], 40);
-    else if (t < 11.4) cam([1.35, 1.72, -3.55], [.2, 1.0, -.35], 36);                                          // por cima do ombro do frentista
+    else if (t < 10.9) cam([1.35, 1.72, -3.55], [.2, 1.0, -.35], 36);                                          // por cima do ombro do frentista
     else if (t < 14.3) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                     // estende o braço e tira o bico do gancho
     else if (t < 15.4) cam([-1.05, 1.2, -1.85], [-1.85, .86, -.98], 42);                                     // abre a portinhola e encaixa o bico
     else if (t < 16.6) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                        // Adryan pela janela
@@ -111,7 +111,8 @@ window.SETUP = async () => {
     else if (t < 18.6) cam([-3.3, 1.5, -.15], [-2.05, 1.25, -1.4], 40);                                      // frentista calado, abastecendo
     else if (t < 20.0) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                        // "beleza... também não precisa conversar"
     else if (t < 20.9) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                   // pendura o bico de volta
-    else if (t < 22.4) cam([1.7, 1.3, -1.75], [.3, 1.0, -1.15], 36);                                       // a grana passando pela janela
+    else if (t < 22.4) cam([1.7, 1.3, -1.75], [.3, 1.0, -1.15], 36);                                       // Adryan prepara a grana; o frentista vem da bomba
+    else if (t < 24.4) cam([1.9, 1.5, -2.6], [.35, 1.0, -.9], 40);                                          // de lado: a grana passa de mão em mão na janela                                       // a grana passando pela janela
     else cam([1.8, 1.6, -4.2], [.2, 1.0, -.8], 42);
     C.halos(S.camera);
     window.C = C; window.dbgNaN = () => { const out = []; for (const [n, A] of [['ad', C.D.Ad], ['ni', C.D.Ni], ['fr', C.Fr]]) A.obj.traverse(o => { if (o.isBone && !isFinite(o.quaternion.x + o.quaternion.w + o.position.x)) out.push(n + ':' + o.name); }); return out; };

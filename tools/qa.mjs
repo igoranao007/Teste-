@@ -117,15 +117,18 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
   for (const [at, hh] of hist) for (const sd of ['L', 'R']) { if (veic(at.raiz)) continue; const h = hh.m[sd]; let i = 0;   // sentado em veículo: mãos no volante/maleta são paradas de propósito
     while (i < h.length) { let j = i, mx = 0; while (j + 1 < h.length && !h[j + 1][2]) { j++; mx = Math.max(mx, h[j][1].distanceTo(h[i][1])); if (mx > .004) break; }
       if (mx <= .004 && h[j][0] - h[i][0] >= 3) { add(out.anat, h[i][0], at.nome, 'braço congelado ' + sd + ' (s)', h[j][0] - h[i][0]); i = j + 1; } else i++; } }
-  // PÉ DESLIZANDO: andando, o pé de APOIO tem que parar no chão a cada meio ciclo. Em janelas de 0,45 s em que o corpo anda
-  // (> 0,2 m/s), se a menor velocidade horizontal do pé não cai abaixo de 0,25 m/s, ele está patinando.
+  // PÉ DESLIZANDO: andando, sempre tem um pé de APOIO parado no chão (o outro está no ar). Se por ≥ 0,17 s NENHUM dos dois
+  // pés fica parado (menor velocidade horizontal entre os dois > 0,3 m/s) com o corpo andando (> 0,2 m/s), o apoio está patinando.
+  // (versão anterior olhava cada pé sozinho em janelas de 0,45 s e dava alarme falso quando a janela caía na fase de balanço)
   for (const [at, hh] of hist) { if (veic(at.raiz) || at.raiz.userData?.noVeiculo) continue;
-    for (const sd of ['L', 'R']) { const h = hh.p[sd]; if (h.length < 4) continue; const vel = [];
-      for (let i = 1; i < h.length; i++) { const [t1, w1, , c1] = h[i], [t0, w0] = h[i - 1]; vel.push(c1 ? null : [t1, Math.hypot(w1.x - w0.x, w1.z - w0.z) / (t1 - t0)]); }
-      const corpo = hh.q ?? []; const n = Math.max(2, Math.round(.45 / (passo / 30)));
-      for (let i = 0; i + n <= vel.length; i += Math.ceil(n / 2)) { const jan = vel.slice(i, i + n); if (jan.some(x => !x)) continue;
-        const vc = (hh.c?.slice(i, i + n) ?? []).filter(x => x != null); const mc = vc.length ? vc.reduce((a2, b2) => a2 + b2, 0) / vc.length : 0;
-        const mn = Math.min(...jan.map(x => x[1])); if (mc > .2 && mn > .25 && mn < 20) add(out.anat, jan[0][0], at.nome, 'pé deslizando ' + sd + ' (cm/s)', mn * 100); } } }
+    const hL = hh.p.L, hR = hh.p.R; if (hL.length < 4 || hR.length < 4) continue; const corpo = hh.c ?? [], n = Math.max(2, Math.ceil(5 / passo));
+    const vp = (h, i) => h[i][3] ? null : Math.hypot(h[i][1].x - h[i - 1][1].x, h[i][1].z - h[i - 1][1].z) / (h[i][0] - h[i - 1][0]);
+    let run = [];
+    const fecha = () => { if (run.length >= n) add(out.anat, run[0][0], at.nome, 'pé deslizando (cm/s)', Math.max(...run.map(x => x[1])) * 100); run = []; };
+    for (let i = 1; i < Math.min(hL.length, hR.length); i++) { const a2 = vp(hL, i), b2 = vp(hR, i), c2 = corpo[i];
+      if (a2 == null || b2 == null || c2 == null) { fecha(); continue; }
+      const mn = Math.min(a2, b2); if (c2 > .2 && mn > .3 && mn < 20) run.push([hL[i][0], mn]); else fecha(); }
+    fecha(); }
   return out;
 }, [+a, +b, +passo]);
 // resumo: agrupa por (quem, o quê) com faixa de tempo

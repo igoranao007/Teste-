@@ -25,26 +25,34 @@ window.SETUP = async () => {
     const pis = PISCA.some(q => t >= q && t < q + .09), k = pis ? .12 : 1 - .05 * Math.sin(t * 120);
     const ab = P.suave(1.0, 2.2, t); co.portas(ab); A.assar(co, co.luzes(k, ab), '#07130b');
     P.luz({ keyDir: [0, .9, .3], keyCor: pis ? '#1a2a1e' : '#b4dcbf', fillDir: [0, .1, -1], fillCor: '#3b8a52', amb: pis ? '#0a140d' : '#25402e' });
-    // Gusta (escolta) e Adryan (com a maleta) saem do elevador e andam devagar pelo corredor conversando; param no fim (17,8)
+    // Gusta (escolta) e Adryan (com a maleta) saem assim que a porta abre (1,7) e andam no passo natural (~1,1 m/s) conversando;
+    // chegam no fim do corredor (11,0), viram um pro outro e a conversa continua parada (plano e contraplano)
     const vG = fala('50', t, 'gusta'), vA = fala('50', t, 'adryan');
     let z = Z0;
     for (const [A2, x, fase] of [[Gu, .4, 0], [Ad, -.4, .4]]) {
-      const anda = V.caminhar(A2, [x, Z0], [x, ZF], t, 2.4, 17.8, { fase, passo: 1.3 }); z = A2.obj.position.z;
+      const anda = V.caminhar(A2, [x, Z0], [x, ZF], t, 1.7, 11.0, { fase, ease: .14 }); z = A2.obj.position.z;
       A2.obj.rotation.y = 0; if (!anda) A2.pose('idle', t + fase);
     }
     V.segurarMaleta(Ad, mal, t); mal.pulsar(t);
     // olhares: conversam de lado; o Gusta olha pra maleta quando fala do Projeto Mogg; no fim viram um pro outro
-    const conversa = P.suave(2.8, 3.2, t), fim = P.suave(18.2, 19.2, t);
-    V.girar(Gu, 'spine.005', [0, 1, 0], -.38 * conversa * (1 - P.suave(14.2, 14.6, t)) - .3 * P.suave(15.6, 16, t) - .2 * fim);
+    const conversa = P.suave(2.8, 3.2, t), fim = P.suave(11.0, 11.8, t);
+    V.girar(Gu, 'spine.005', [0, 1, 0], -.38 * conversa * (1 - fim) - .12 * fim);
     V.girar(Gu, 'spine.005', [1, 0, 0], .3 * P.suave(14.2, 14.6, t) * (1 - P.suave(15.4, 15.8, t)));      // olha pra maleta
-    V.girar(Ad, 'spine.005', [0, 1, 0], .36 * conversa * (1 - P.suave(7.6, 8.2, t)) + .3 * P.suave(11.9, 12.3, t) + .15 * fim);
-    if (fim > 0) { Gu.obj.rotation.y = -.5 * fim; Ad.obj.rotation.y = .5 * fim; }
+    V.girar(Ad, 'spine.005', [0, 1, 0], .36 * conversa * (1 - P.suave(7.6, 8.2, t)) * (1 - fim) + .3 * P.suave(9.4, 9.9, t) * (1 - fim) + .12 * fim);
+    if (fim > 0) { Gu.obj.rotation.y = -1.3 * fim; Ad.obj.rotation.y = 1.3 * fim; }      // de frente um pro outro (de 3/4 pra câmera)
     V.falar(Gu, vG, t); V.falar(Ad, vA, t);
-    // câmera: parada no começo (porta do elevador), depois anda de costas na frente deles; no fim, plano e contraplano
-    if (t < 7) { S.camera.fov = 44; S.camera.position.set(.3, 1.4 + Math.sin(t * .8) * .01, 2.6); S.camera.lookAt(0, 1.3, -8); }
-    else if (t < 18.4) { S.camera.fov = 40; S.camera.position.set(-.2, 1.62, z + 2.3); S.camera.lookAt(0, 1.45, z); }
-    else if (t < 21.6) { S.camera.fov = 36; S.camera.position.set(-.9, 1.62, z + 1.5); S.camera.lookAt(.4, 1.55, z); }        // Gusta: "você vai entender..."
-    else { S.camera.fov = 38; S.camera.position.set(.9, 1.6, z + 1.6); S.camera.lookAt(-.4, 1.5, z); }                         // Adryan fica pensando
+    // câmera: parada na porta do elevador enquanto saem; depois anda de costas na frente deles; parados, plano e contraplano
+    //   12,1 Adryan "Por quê?" · 13,05 Gusta (Projeto Mogg) · 16,3 Adryan ouvindo · 17,7 Gusta · 22,5 Adryan pensando
+    const zG = Gu.obj.position.z, zA = Ad.obj.position.z;
+    const sobreG = () => { S.camera.fov = 38; S.camera.position.set(-1.05, 1.6, zA + 1.35); S.camera.lookAt(.35, 1.5, zG - .1); },        // por cima do ombro do Adryan → Gusta
+          sobreA = () => { S.camera.fov = 38; S.camera.position.set(1.05, 1.6, zG + 1.35); S.camera.lookAt(-.35, 1.48, zA - .1); };         // por cima do ombro do Gusta → Adryan
+    if (t < 5.4) { S.camera.fov = 44; S.camera.position.set(.3, 1.4 + Math.sin(t * .8) * .01, 2.6); S.camera.lookAt(0, 1.3, -8); }
+    else if (t < 12.1) { S.camera.fov = 40; S.camera.position.set(-.2, 1.62, z + 2.3); S.camera.lookAt(0, 1.45, z); }
+    else if (t < 13.05) sobreA();
+    else if (t < 16.3) sobreG();
+    else if (t < 17.7) sobreA();
+    else if (t < 22.5) sobreG();
+    else sobreA();
     S.camera.updateProjectionMatrix();
   };
 };

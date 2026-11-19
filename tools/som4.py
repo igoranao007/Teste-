@@ -6,7 +6,7 @@ import json, os, subprocess, math
 import numpy as np
 from scipy.io import wavfile
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); os.chdir(R)
-PLANOS = [('41-estrada', 17), ('42-nicolas', 9), ('43-posto', 22), ('44-mendigo', 37), ('45-titulo', 7), ('46-casmiron', 12),
+PLANOS = [('41-estrada', 17), ('42-nicolas', 9), ('43-posto', 24), ('44-mendigo', 37), ('45-titulo', 7), ('46-casmiron', 12),
           ('47-cabana', 12), ('48-senha', 10), ('49-olhos', 8), ('50-elevador', 24), ('51-sala-igor', 14), ('52-arquivos', 13),
           ('53-projeto-mogg', 12), ('54-computador', 16), ('55-tela-mogg', 9), ('56-final', 8)]
 INI = {}; acc = 0
@@ -99,12 +99,12 @@ cue('chiado', 0, d=2, gain=-6); cue('motor', 2, d=8); cue('pneus', 2, d=8); cue(
 # 42 nicolas
 cue('motor', P('42'), d=9, abafado=1, gain=-3); cue('radio', P('42'), d=9, gain=-6)
 # 43 posto
-cue('motor', P('43'), d=4.5, gain=-4); cue('pneus', P('43'), d=4.2, gain=-4); cue('lampada', P('43'), d=22, rede=60, pisca=0, gain=-12); cue('grilos', P('43'), d=22, gain=-8)
+cue('motor', P('43'), d=4.5, gain=-4); cue('pneus', P('43'), d=4.2, gain=-4); cue('lampada', P('43'), d=24, rede=60, pisca=0, gain=-12); cue('grilos', P('43'), d=24, gain=-8)
 cue('click', P('43') + 5.0, gain=-2); cue('turbina', P('43') + 5.1, d=.9, gain=-16); cue('click', P('43') + 13.15, gain=-4); cue('tick', P('43') + 14.65, gain=-4); cue('click', P('43') + 15.3, gain=-3); cue('turbina', P('43') + 15.4, d=2.9, gain=-10); cue('click', P('43') + 18.32, gain=-5); cue('tick', P('43') + 18.95, gain=-4); cue('click', P('43') + 20.3, gain=-4)
 import math as _m
-for a, b, L in ((5, 7, 1.91), (11.2, 12.3, 2.9), (13.9, 14.5, .76), (19.0, 19.7, .76), (20.6, 21.45, 2.9)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2)
-cue('paper', P('43') + 21.8, gain=-6)
-passos('43', 22.4, 26.8, 6.3, 'frentista', 'concreto', gain=-6)          # vai embora: some ao longe
+for a, b, L in ((5, 7, 1.91), (9.6, 11.9, 2.9), (13.9, 14.5, .76), (19.0, 19.7, .76), (20.6, 22.9, 2.9)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2)
+cue('paper', P('43') + 23.3, gain=-6)
+passos('43', 24.4, 28.8, 6.3, 'frentista', 'concreto', gain=-6)          # vai embora: some ao longe
 # 44 mendigo
 cue('lampada', P('44'), d=37, rede=60, pisca=0, gain=-12); cue('grilos', P('44'), d=37, gain=-8); cue('motor', P('44') + .6, d=31, abafado=1, gain=-8)
 passos('44', .2, 3.6, 2.5, 'metalis', 'arrasto', gain=-3, e=.15); passos('44', 31.4, 32.3, .67, 'metalis', 'arrasto', gain=-5, passo=.9)
@@ -130,7 +130,7 @@ for t in (3, 3.8, 4.6, 5.4, 6.2, 7.0): cue('heart', P('49') + t, gain=-2)
 cue('boom', P('49') + 7.8, gain=-8)
 # 50 elevador
 cue('lampada', P('50'), d=24, rede=60, pisca=[.4, .55, 4.9, 5.05, 9.6, 9.72, 16.2, 16.3], gain=2); cue('ding', P('50') + .8); cue('whoosh_slow', P('50') + 1.0, gain=-4)
-passos('50', 2.4, 17.8, 10.3, 'gusta', 'corredor', gain=-5, passo=1.3, pan=.15); passos('50', 2.4, 17.8, 10.3, 'adryan', 'corredor', gain=-6, passo=1.3, pan=-.15, fase=.4 / 1.083)
+passos('50', 1.7, 11.0, 10.3, 'gusta', 'corredor', gain=-5, pan=.15, e=.14); passos('50', 1.7, 11.0, 10.3, 'adryan', 'corredor', gain=-6, pan=-.15, fase=.4 / 1.083, e=.14)
 # 51 sala do Igor
 cue('rede', P('51'), d=14, gain=-8)
 t = .5
