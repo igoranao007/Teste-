@@ -1,7 +1,9 @@
 QA 41-estrada: APROVADO  (atores: adryan, nicolas)
 QA 42-nicolas: APROVADO  (atores: adryan, nicolas)
 QA 43-posto: APROVADO  (atores: adryan, nicolas, frentista, metalis)
-QA 44-mendigo: APROVADO  (atores: adryan, nicolas, frentista, metalis)
+QA 44-mendigo: 2 problema(s)  (atores: adryan, nicolas, frentista, metalis)
+  ANATOMIA  metalis · mão torcida R  ×476  4.57–30.6s  máx 115
+  ANATOMIA  metalis · salto de mão R  ×3  27.47–27.53s  máx 39
 QA 45-titulo: APROVADO  (atores: adryan, nicolas, frentista, metalis)
 QA 46-casmiron: APROVADO  (atores: )
 QA 47-cabana: APROVADO  (atores: adryan, nicolas, adryan, nicolas)

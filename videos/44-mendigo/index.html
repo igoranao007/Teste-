@@ -57,20 +57,20 @@ window.SETUP = async () => {
       [env(t, 24.8, 25.4, 25.45, 25.8), D.Ad.osso('hand.L').getWorldPosition(v3())],                 // pega a moeda
       [env(t, 25.5, 26.0, 26.25, 27.0), em(.22, .02, -.16)],                                         // olha a moeda na palma (abaixo do rosto)
       [env(t, 26.3, 27.05, 27.15, 27.7), Me.obj.position.clone().addScaledVector(dM, .16).addScaledVector(fM, .03).add(v3(0, .36, 0))],   // guarda no bolso
-      [env(t, 27.7, 28.3, 29.1, 29.8), em(.08, .12, .32)]];                                          // "sabia que podia contar contigo!"
+      [env(t, 27.35, 28.1, 29.1, 29.8), em(.08, .12, .32)]]   /* entra antes do bolso terminar: a média dos alvos não salta */;                                          // "sabia que podia contar contigo!"
     // um alvo só (média ponderada); cotovelo pra fora, pra baixo e pra trás DO CORPO dele
     let K = 0, soma = 0; const alvoM = v3(0, 0, 0); for (const [k, alvo] of alvos) if (k > 0) { K = Math.max(K, k); soma += k; alvoM.addScaledVector(alvo, k); }
     // borda da janela (à DIREITA dele), com o caminho por fora do corpo na chegada/saída
-    const wS = debr * (1 - K), h0 = Me.osso('RightHand').getWorldPosition(v3()), arco = Math.sin(Math.PI * debr) * (debr < 1 ? 1 : 0);
+    const bloco = 0, wS = debr * (1 - Math.max(K, bloco)),   /* moeda→olha→bolso→comemora: um bloco só (sem voltar pra borda no meio) */ h0 = Me.osso('RightHand').getWorldPosition(v3()), arco = Math.sin(Math.PI * debr) * (debr < 1 ? 1 : 0);
     const sol = SOLEIRA.clone().add(v3(.02 * Math.sin(t * .6), .03 * ergue, .01 * Math.sin(t * .45)));
     if (wS > 0) { const alvoS = debr >= 1 ? sol : h0.clone().lerp(sol, P.suave(0, 1, debr)).addScaledVector(dM, .14 * arco).add(v3(0, -.05 * arco, 0)); alvoM.addScaledVector(alvoS, wS); soma += wS; }
-    const kR = Math.max(K, P.suave(0, .35, debr));
+    const kR = Math.max(K, P.suave(0, .35, debr) * (1 - bloco));
     if (kR > 0) V.ik2(Me, 'RightArm', 'RightForeArm', 'RightHand', alvoM.multiplyScalar(1 / soma), dM.clone().add(v3(0, -.4, 0)).addScaledVector(fM, -.3).toArray(), kR);
-    // agarrando a borda: palma por cima, dedos passando pra dentro do carro e dobrando pra baixo
-    if (wS > 0) { const H = Me.osso('RightHand'), Fd = v3(0, -.45, 1).normalize(), zq = (new URLSearchParams(location.search).get('mz') || '0,-1,0').split(',').map(Number);
-      const Z = v3(...zq).addScaledVector(Fd, -v3(...zq).dot(Fd)).normalize(), X = new THREE.Vector3().crossVectors(Fd, Z);
-      const qW = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Fd, Z)), qP = H.parent.getWorldQuaternion(new THREE.Quaternion()).invert();
-      H.quaternion.slerp(qP.multiply(qW), P.suave(.4, 1, wS)); Me.obj.updateMatrixWorld(true); }
+    // agarrando a borda: a mão segue o antebraço (sem torcer o pulso) e só DOBRA o pulso pra baixo, por cima da borda
+    if (wS > 0) { const H = Me.osso('RightHand'), Fo = Me.osso('RightForeArm'), dir = H.getWorldPosition(v3()).sub(Fo.getWorldPosition(v3())).normalize();
+      const eixo = new THREE.Vector3().crossVectors(dir, v3(0, 1, 0)).normalize(); let ang = .85; if (dir.clone().applyAxisAngle(eixo, ang).y > dir.y) ang = -ang;
+      const qW = new THREE.Quaternion().setFromAxisAngle(eixo, ang * P.suave(.4, 1, wS)).multiply(H.getWorldQuaternion(new THREE.Quaternion()));
+      H.quaternion.copy(H.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(qW)); Me.obj.updateMatrixWorld(true); }
     // cabeça: fala, olha a moeda, abaixa no fim e levanta encarando o carro
     V.falarOsso(Me, 'Head', vM, t, 1.2);
     const olhaMoeda = env(t, 25.55, 26.0, 26.35, 26.7); if (olhaMoeda > 0) V.girar(Me, 'Head', [1, 0, 0], .35 * olhaMoeda);
