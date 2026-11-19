@@ -13,38 +13,73 @@ const { THREE } = P;
 window.SETUP = async () => {
   const S = F.noite({ fov: 42, perto: 14, longe: 70, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
   const C = await V.montarPosto(S), { D, Fr, Me, bico } = C, fala = await V.vozes();
-  Fr.obj.visible = false; bico.position.set(-2.65, 1.0, -2.3);
-  const PERTO = [.35, -1.75], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  Fr.obj.visible = false;
+  const PERTO = [.45, -1.4], ATRAS = [.62, -2.05], LOJA = [3.4, -5.6], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const SOLEIRA = v3(.62, .98, -.95);                                         // beirada da janela do motorista (vidro abaixado)
+  const olhos = V.olhosMetalis(Me); window.OLHOS = olhos; window.Me = Me; const _x = 0, moeda = V.dinheiro('moeda'); S.scene.add(moeda);
+  const angLerp = (a, b, u) => { let d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return a + d * u; };
+  const env = (t, a, b, c, d) => P.suave(a, b, t) * (1 - P.suave(c, d, t));
   S.update = t => {
+    Me.obj.visible = true;
     const sai = P.clamp((t - 32.2) / 4.6); C.naCurva(C.saida, sai ** 1.8, 0); if (t < 32.2) { D.car.position.set(0, .02, 0); D.car.rotation.y = Math.PI / 2; }
+    D.car.janela(1 - P.suave(31.2, 32.0, t));                                  // vidro aberto; sobe quando ele manda o Metalis cuidar da vida
     const vA = fala('44', t, 'adryan'), vM = fala('44', t, 'metalis');
-    D.atualizar(t, { giro: t > 32 ? .3 * P.suave(32.2, 33.5, t) : 0, falaAd: vA, maoFora: P.suave(26.3, 26.7, t) * (1 - P.suave(27.2, 27.6, t)),
-      olhaAd: .7 * P.suave(1.2, 1.8, t) * (1 - P.suave(23.4, 23.8, t)) - .45 * P.suave(23.5, 23.8, t) * (1 - P.suave(24.1, 24.4, t)) + .7 * P.suave(24.3, 24.7, t) * (1 - P.suave(31.8, 32.3, t)),
+    const bolso = env(t, 23.9, 24.3, 24.4, 24.7), fora = env(t, 24.5, 25.0, 25.5, 26.0);
+    D.atualizar(t, { giro: t > 32 ? .3 * P.suave(32.2, 33.5, t) : 0, falaAd: vA, bolso, maoFora: fora, janela: P.clamp((t - 30.9) / 1.2),
+      olhaAd: .7 * P.suave(1.2, 1.8, t) * (1 - P.suave(23.4, 23.8, t)) - .45 * env(t, 23.5, 23.8, 24.0, 24.3) + .7 * P.suave(24.2, 24.6, t) * (1 - P.suave(31.8, 32.3, t)),
       olhaNi: .35 * P.suave(3, 3.6, t) * (1 - P.suave(31, 32, t)) });
-    // Metalis: vem da loja até a janela (0,2–2,6); fala (talk) ou fica parado; estica a mão pra pegar (26,5–27,5); depois acompanha o carro com o corpo
-    if (!V.caminhar(Me, [3.2, -6.2], PERTO, t, .2, 2.6)) {
-      Me.obj.position.set(...[PERTO[0], 0, PERTO[1]]);
-      const alvoCar = D.car.position; Me.obj.rotation.y = t < 32 ? .15 : Math.atan2(alvoCar.x - PERTO[0], alvoCar.z - PERTO[1]) * P.suave(32, 33, t);
-      if (t > 26.4 && t < 27.6) Me.quadro('wave', 1.1);
-      else Me.pose(vM > 0 ? 'talk' : 'idle', t);
-    }
+    // METALIS — chega arrastando o pé (0,2–3,6), vira pra janela, se debruça com a mão na beirada; gesticula nas falas;
+    //           pega a moeda, olha pra ela e guarda; dá um passo pra trás quando o vidro sobe; acena; acompanha o carro e os olhos acendem
+    let andando = false;
+    if (t < 3.7) { andando = V.caminhar(Me, LOJA, PERTO, t, .2, 3.6, { passo: 1.2 }); if (!andando) Me.pose('idle', t); }
+    else if (t < 31.4) { Me.obj.position.set(PERTO[0], 0, PERTO[1]); Me.obj.rotation.y = angLerp(Math.atan2(PERTO[0] - LOJA[0], PERTO[1] - LOJA[1]), -.08, P.suave(3.6, 4.1, t));
+      if (vM > 0) Me.pose('idle', t, 'talk', .45, t); else Me.pose('idle', t); }
+    else if (t < 34.2) { andando = V.caminhar(Me, PERTO, ATRAS, t, 31.4, 32.3, { virar: false, passo: .9 }); Me.obj.rotation.y = .12;
+      if (!andando) { if (t > 32.4 && t < 34.1) Me.pose('wave', t - 32.4); else Me.pose('idle', t); } else Me.pose('walk', (t - 31.4) * -.8 * Me.dur('walk')); }
+    else { Me.obj.position.set(ATRAS[0], 0, ATRAS[1]); const c = D.car.position; Me.obj.rotation.y = angLerp(.12, Math.atan2(c.x - ATRAS[0], c.z - ATRAS[1]), P.suave(34.2, 35.2, t)); Me.pose('idle', t); }
+    Me.obj.updateMatrixWorld(true);
+    // debruçado na janela: tronco pra frente + mão esquerda na beirada
+    const debr = env(t, 4.0, 4.7, 30.9, 31.5);
+    if (debr > 0) { V.girar(Me, 'Spine', [1, 0, 0], .12 * debr); Me.obj.updateMatrixWorld(true); V.ik2(Me, 'LeftArm', 'LeftForeArm', 'LeftHand', SOLEIRA.clone().add(v3(-.06, 0, 0)), [1, -.3, -.6], debr); }
+    // mão direita: pede (palma pra frente) · dá de ombros · pega a moeda · olha a moeda · guarda no bolso · comemora
+    const mz = PERTO[1] + .32, alvos = [
+      [env(t, 10.4, 10.9, 13.4, 14.0), v3(.36, .8 + .03 * Math.sin(t * 3), mz)],                   // "vai me deixar na mão?" (mão aberta, pedindo)
+      [env(t, 20.6, 21.1, 23.0, 23.5), v3(.2 + .04 * Math.sin(t * 2.2), .88, mz - .05)],            // "é a vida..." (gesto aberto)
+      [env(t, 24.9, 25.35, 25.4, 25.6), D.Ad.osso('hand.L').getWorldPosition(v3())],                 // pega a moeda
+      [env(t, 25.45, 25.9, 26.2, 26.5), v3(.32, .74, PERTO[1] + .2)],                                // olha a moeda na palma
+      [env(t, 26.35, 26.7, 26.9, 27.3), v3(.25, .46, PERTO[1] + .02)],                               // guarda no bolso
+      [env(t, 27.8, 28.2, 29.2, 29.7), v3(.3, 1.02, mz - .08)]];                                     // "sabia que podia contar contigo!"
+    for (const [k, alvo] of alvos) if (k > 0) V.ik2(Me, 'RightArm', 'RightForeArm', 'RightHand', alvo, [-1, -.3, -.4], k);
+    // cabeça: fala, olha a moeda, abaixa no fim e levanta encarando o carro
+    V.falarOsso(Me, 'Head', vM, t, 1.2);
+    const olhaMoeda = env(t, 25.5, 25.9, 26.3, 26.6); if (olhaMoeda > 0) V.girar(Me, 'Head', [1, 0, 0], .35 * olhaMoeda);
+    // moeda: bolso do Adryan → mão dele → mão do Metalis → bolso
+    moeda.visible = t > 24.25 && t < 26.85;
+    if (t < 25.38) moeda.naMao(D.Ad, 'L', 1.1); else { const h = Me.osso('RightHand').getWorldPosition(v3()); moeda.position.copy(h).add(v3(0, .02, .02)); moeda.rotation.set(.6, 0, 0); moeda.scale.setScalar(1.3); }
+    // olhos amarelos: só quando ele encara o carro indo embora
+    const brilho = P.suave(35.1, 35.7, t); olhos.acender(brilho + (brilho > .9 ? .06 * Math.sin(t * 9) : 0), S.camera);
     // faróis no rosto dele quando o carro manobra pra sair
     const far = P.suave(32.6, 33.4, t) * (1 - P.suave(34.4, 35.6, t));
     const base = { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillDir: [-.1, .2, -1], fillCor: '#1c5a30' };
     if (far > 0) P.luz({ ...base, keyDir: [1, .25, .2], keyCor: '#' + new THREE.Color('#b9d8c2').lerp(new THREE.Color('#ffd23a'), far).multiplyScalar(1 + far * .6).getHexString() });
     else P.luz(base);
-    // câmeras: plano e contraplano
-    const ROSTO_M = [PERTO[0], .8, PERTO[1]], th = Me.obj.rotation.y, fr = [Math.sin(th), Math.cos(th)], frente = (d, lado, y) => [PERTO[0] + fr[0] * d + fr[1] * lado, y, PERTO[1] + fr[1] * d - fr[0] * lado];
-    if (t < 2.7) cam([5.6, 1.7, -4.8], [1.4, .8, -2.2], 40);                                                // ele chegando
-    else if (t < 31.8) {
-      const q = fala.quem('44', t);
-      if (q === 'metalis' || (t > 26.4 && t < 27.6)) cam(frente(.85, .28, .86), ROSTO_M, 44);                     // Metalis falando (de perto, junto da porta)
-      else if (t >= 23.4 && t < 24.4) cam([2.7, 1.25, .1], [.27, 1.0, 0], 40);                                  // Adryan olha o Nicolas (pelo para-brisa)
-      else cam([.75, 1.3, -2.75], [.27, 1.0, -.35], 38);                                                          // Adryan (por cima do ombro do Metalis)
-    }
-    else if (t < 34.2) cam([2.2, 1.15, -3.9], ROSTO_M, 44);                                                     // o carro sai, faróis no rosto
-    else { const u = P.suave(34.2, 37, t); cam(frente(P.lerp(1.3, .85, u), P.lerp(.5, .3, u), .88), ROSTO_M, P.lerp(40, 32, u)); }   // fica com ele
+    // câmeras: variar os enquadramentos (não repetir o mesmo close)
+    const mp = Me.obj.position, th = Me.obj.rotation.y, fr = [Math.sin(th), Math.cos(th)];
+    const ROSTO_M = [mp.x, .82, mp.z], frente = (d, lado, y) => [mp.x + fr[0] * d + fr[1] * lado, y, mp.z + fr[1] * d - fr[0] * lado];
+    const q = fala.quem('44', t);
+    if (t < 3.9) cam([3.3, 1.45, .7], [mp.x * .5 + .9, .7, mp.z * .5 - 1.4], 44);                          // ele chegando, chamando o Adryan
+    else if (t < 7.3) cam([1.35, 1.0, -1.04], [.46, .8, -1.2], 48);                                           // de dentro do carro, pela janela aberta
+    else if (t < 10.1) cam([1.25, 1.65, -2.85], [.22, 1.05, -.4], 34);                                        // Adryan respondendo (por cima do Metalis)
+    else if (t < 14.5) cam([-.38, .95, -1.02], [.46, .8, -1.22], 46);                                                     // Metalis pedindo (close pela janela)
+    else if (t < 20.2) cam([-.45, 1.6, -2.75], [.25, 1.05, -.4], 34);                                         // Adryan (do outro lado)
+    else if (t < 23.4) cam([1.2, .93, -1.0], [.46, .8, -1.2], 40);                                         // Metalis pela janela, de dentro (mais perto)
+    else if (t < 24.4) cam([2.7, 1.25, .1], [.27, 1.0, 0], 40);                                              // Adryan olha o Nicolas
+    else if (t < 27.4) cam([-.75, 1.2, -1.3], [.42, .92, -1.1], 42);                                         // a moeda passando
+    else if (t < 30.0) cam([1.3, 1.12, -1.22], [.46, .84, -1.25], 46);                                                    // Metalis feliz (pela janela, do outro lado)
+    else if (t < 31.8) cam([-.2, 1.35, -2.4], [.25, 1.0, -.6], 40);                                           // "vai cuidar da tua vida" + vidro subindo
+    else if (t < 34.2) cam([2.2, 1.15, -3.9], ROSTO_M, 44);                                                  // o carro sai, faróis no rosto
+    else { const u = P.suave(34.2, 37, t); cam(frente(P.lerp(1.5, 1.0, u), P.lerp(.55, .25, u), .9), ROSTO_M, P.lerp(40, 32, u)); }   // fica com ele: os olhos acendem
     C.halos(S.camera);
     window.dbgCam = () => { const r = new THREE.Raycaster(); r.setFromCamera(new THREE.Vector2(0, 0), S.camera); const h = r.intersectObjects(S.scene.children, true).slice(0, 3); return [S.camera.position.toArray(), h.map(x => [x.object.name, x.distance])]; };
   };

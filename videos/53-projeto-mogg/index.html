@@ -1,6 +1,6 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <!-- v4 PLANO 13 · O PROJETO MOGG (12 s): Igor abre a maleta (dois estalos), brilho verde no rosto; dentro, a fita VHS com a logo da Toca do Anão;
-     close na fita: "Então é isso. O Projeto Mogg."; ele pega a fita e a câmera acompanha a mão. Gusta e Nicolas em pé, observando. -->
+     close na fita: "Então é isso. O Projeto Mogg."; ele pega a fita e a câmera acompanha a mão. Gusta e Adryan em pé, observando. -->
 <script>VIDEO={w:1920,h:1080,fps:30,dur:12}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
@@ -15,15 +15,15 @@ const { THREE } = P;
 window.SETUP = async () => {
   const S = P.palco({ fov: 36, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
   const sala = await V.salaIgor4(cena), { I, Y, lamp } = sala, fala = await V.vozes();
-  const Gu = await E4.ator('gusta'), Ni = await E4.ator('nicolas'); cena.add(Gu.obj, Ni.obj);
-  Gu.obj.position.set(-.55, 0, 1.15); Gu.obj.rotation.y = Math.PI; Ni.obj.position.set(-1.25, 0, 1.55); Ni.obj.rotation.y = Math.PI;
+  const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj);
+  Ad.obj.position.set(-.55, 0, 1.15); Ad.obj.rotation.y = Math.PI; Gu.obj.position.set(-1.25, 0, 1.55); Gu.obj.rotation.y = Math.PI;
   const mal = T.maleta(); cena.add(mal); const fita = await T.fitaVHS(); mal.dentro.add(fita);
   const MESA = new THREE.Vector3(-.3, Y, .46), V3 = (x, y, z) => new THREE.Vector3(x, y, z);
   mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));
   const chi = F.chiadoVerde();
   S.update = t => {
     sala.video(t + 27); lamp.acender(1, S.camera); I.girar(0);
-    Gu.pose('idle', t); Ni.pose('idle', t + .5); V.girar(Ni, 'spine.005', [1, 0, 0], .2 * P.suave(2, 3, t));
+    Ad.pose('idle', t); Gu.pose('idle', t + .5); V.girar(Gu, 'spine.005', [1, 0, 0], .2 * P.suave(2, 3, t));
     const abre = P.suave(1.0, 2.0, t), maos = P.suave(.2, .8, t) * (1 - P.suave(2.1, 2.6, t)), pega = t >= 8.6, close = t >= 3.2 && t < 8.6;
     const m = {};
     if (maos > 0) { m.R = [MESA.x - .13, Y + .135, MESA.z - .03]; m.L = [MESA.x + .13, Y + .135, MESA.z - .03]; m.kR = m.kL = maos; }

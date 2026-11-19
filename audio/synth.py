@@ -503,6 +503,9 @@ def build(name):
             sr0, v = wavfile.read(os.path.join(ROOT, sg['file'])); v = v.astype(np.float64) / 32768
             if v.ndim > 1: v = v.mean(axis=1)
             if sr0 != SR: v = signal.resample_poly(v, SR, sr0)
+            if 'ganho' in sg:   # som de cena (ex.: vídeo no monitor): sem cadeia de voz e sem abaixar a trilha
+                v = v / (np.sqrt(np.mean(v[np.abs(v) > 1e-3] ** 2)) + 1e-9) * db(-18 + sg['ganho'])
+                i = N(sg['start']); j = min(i + len(v), len(voice)); voice[i:j] += v[:j - i]; continue
             v = peq(hp(v, 85), 3200, 2.5, .8); v = sat(v * 1.4, 1.2); v = v / (np.sqrt(np.mean(v[np.abs(v) > 1e-3] ** 2)) + 1e-9) * db(-18)
             i = N(sg['start']); j = min(i + len(v), len(voice)); voice[i:j] += v[:j - i]
             a0, a1 = N(max(0, sg['start'] - .15)), N(sg['start'] + sg['dur'] + .25); duck[a0:a1] = db(-11)

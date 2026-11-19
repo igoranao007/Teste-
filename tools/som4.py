@@ -7,7 +7,7 @@ import numpy as np
 from scipy.io import wavfile
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); os.chdir(R)
 PLANOS = [('41-estrada', 17), ('42-nicolas', 9), ('43-posto', 22), ('44-mendigo', 37), ('45-titulo', 7), ('46-casmiron', 12),
-          ('47-cabana', 12), ('48-senha', 10), ('49-olhos', 8), ('50-elevador', 14), ('51-sala-igor', 14), ('52-arquivos', 13),
+          ('47-cabana', 12), ('48-senha', 10), ('49-olhos', 8), ('50-elevador', 24), ('51-sala-igor', 14), ('52-arquivos', 13),
           ('53-projeto-mogg', 12), ('54-computador', 16), ('55-tela-mogg', 9), ('56-final', 8)]
 INI = {}; acc = 0
 for n, d in PLANOS: INI[n[:2]] = acc; acc += d
@@ -30,14 +30,15 @@ FALAS = [
  (C + 'adryan_p4d-1.wav', '44', 30.0, 'adryan', 'Vai cuidar da tua vida, Metalis.'),
  (C + 'metalis_p4e-1.wav', '44', 32.6, 'metalis', 'Boa viagem!'),
  (C + 'adryan_p7-1.wav', '47', 5.6, 'adryan', 'Me entrega a maleta. Espera aqui fora e fica de olho em qualquer movimento.'),
- (None, '48', 3.4, 'gusta', 'Senha?'),
+ (C + 'gusta_p8a-1.wav', '48', 3.4, 'gusta', 'Qual a senha?'),
  (C + 'adryan_p8-1.wav', '48', 4.8, 'adryan', '15/03 007 BIFF.'),
- (None, '48', 8.0, 'gusta', 'Pode entrar.'),
- (None, '50', 3.0, 'nicolas', 'Então... o Igor já sabe que a gente tá chegando?'),
- (None, '50', 5.6, 'gusta', 'Sabe. Mas não é qualquer pessoa que pode ficar sabendo dessa missão.'),
- (None, '50', 8.1, 'nicolas', 'Por quê?'),
- (None, '50', 9.2, 'gusta', 'Porque o Projeto Mogg é importante demais. Isso não pode ser comentado em qualquer lugar.'),
- (None, '50', 12.0, 'gusta', 'Você vai entender quando encontrar o Igor.'),
+ (C + 'gusta_p8b-1.wav', '48', 7.5, 'gusta', 'Pode entrar.'),
+ (C + 'adryan_p10a-1.wav', '50', 3.0, 'adryan', 'Então... o Igor já sabe que a gente tá chegando?'),
+ (C + 'gusta_p10s-1.wav', '50', 6.2, 'gusta', 'Sabe.'),
+ (C + 'gusta_p10a-1.wav', '50', 7.0, 'gusta', 'Mas não é qualquer pessoa que pode ficar sabendo dessa missão.'),
+ (C + 'adryan_p10b-1.wav', '50', 12.3, 'adryan', 'Por quê?'),
+ (C + 'gusta_p10b-1.wav', '50', 13.2, 'gusta', 'Porque o Projeto Mogg é importante demais.|Isso não pode ser comentado em qualquer lugar. Nem mesmo fora daqui.'),
+ (C + 'gusta_p10c-1.wav', '50', 19.9, 'gusta', 'Você vai entender quando encontrar o Igor.'),
  (C + 'igor_p11-1.wav', '51', 7.6, 'igor', 'Nem mesmo no meu aniversário eles conseguem se segurar...'),
  (C + 'igor_p12a-X.wav', '52', 2.2, 'igor', 'Trouxeram?'),
  (C + 'igor_p12b-1.wav', '52', 6.8, 'igor', 'Todos eles têm potencial. Um potencial que não pode ser desperdiçado.'),
@@ -64,6 +65,10 @@ for i, (arq, pl, t0, quem, texto) in enumerate(FALAS):
     for k, p in enumerate(partes):
         a = T + dur * k / len(partes); b = T + dur * (k + 1) / len(partes) + .25
         LEG.append({'text': p, 'quem': quem, 'startMs': int(a * 1000), 'endMs': int(b * 1000), 'semVoz': arq is None})
+# som do vídeo que o Igor está vendo no monitor (plano 51 → começo do 52): caixinha de som de PC, por baixo das falas
+VT = 'audio/voz/v4/mix/video_tela.wav'
+subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', 'material/cenarios/sala-igor/ref/video-tela-igor.mp4', '-vn', '-af', 'highpass=f=280,lowpass=f=3800,afade=t=out:st=15.2:d=0.7', '-ar', '48000', '-ac', '1', '-c:a', 'pcm_s16le', VT], check=True)
+SEG.append({'file': VT, 'start': round(INI['51'], 3), 'dur': 15.9, 'ganho': -7})
 json.dump(VOZ, open('material/voz-v4.json', 'w'))
 json.dump({'planos': PLANOS, 'legendas': LEG}, open('edicao/src/legendas4.json', 'w'), ensure_ascii=False, indent=1)
 Cs = []
@@ -77,14 +82,15 @@ cue('chiado', 0, d=2, gain=-6); cue('motor', 2, d=8); cue('pneus', 2, d=8); cue(
 cue('motor', P('42'), d=9, abafado=1, gain=-3); cue('radio', P('42'), d=9, gain=-6)
 # 43 posto
 cue('motor', P('43'), d=4.5, gain=-4); cue('pneus', P('43'), d=4.2, gain=-4); cue('lampada', P('43'), d=22, rede=60, pisca=0, gain=-12); cue('grilos', P('43'), d=22, gain=-8)
-cue('click', P('43') + 4.8, gain=-2); cue('turbina', P('43') + 11.4, d=6.5, gain=-10); cue('click', P('43') + 11.2, gain=-4)
-for k in range(5): cue('passo', P('43') + 9.2 + k * .55, gain=-8)
-for k in range(4): cue('tick', P('43') + 20.9 + k * .09, gain=-2)
-for k in range(5): cue('passo', P('43') + 21 + k * .55, gain=-10)
+cue('click', P('43') + 5.0, gain=-2); cue('turbina', P('43') + 5.1, d=.9, gain=-16); cue('click', P('43') + 13.1, gain=-4); cue('click', P('43') + 14.8, gain=-3); cue('turbina', P('43') + 14.9, d=3.4, gain=-10); cue('click', P('43') + 19.55, gain=-4)
+for t0, n in ((5.1, 4), (11.3, 2), (13.6, 2), (18.8, 1), (20.0, 2)):
+    for k in range(n): cue('passo', P('43') + t0 + k * .5, gain=-8)
+cue('paper', P('43') + 21.15, gain=-6)
+for k in range(8): cue('passo', P('43') + 22.1 + k * .55, gain=-10)
 # 44 mendigo
 cue('lampada', P('44'), d=37, rede=60, pisca=0, gain=-12); cue('grilos', P('44'), d=37, gain=-8); cue('motor', P('44') + .6, d=31, abafado=1, gain=-8)
-for k in range(5): cue('passo', P('44') + .2 + k * .5, gain=-9)
-for k in range(5): cue('tick', P('44') + 26.6 + k * .08, gain=-2)
+for k in range(7): cue('passo', P('44') + .4 + k * .5, gain=-10)
+cue('tick', P('44') + 25.35, gain=-1); cue('turbina', P('44') + 31.2, d=.8, gain=-16)
 cue('sobe', P('44') + 20, d=14, root=29, sem=3, gain=-8); cue('motor', P('44') + 32.2, d=4.8, rpm=1.4, gain=-2); cue('pneus', P('44') + 32.4, d=4.6, gain=-3)
 # 45 título
 cue('sobe', P('45'), d=4, root=31, sem=7, gain=-4); cue('boom', P('45') + 2.6, gain=2); cue('motor', P('45'), d=7, gain=-14)
@@ -105,8 +111,8 @@ cue('grilos', P('49'), d=8, gain=-6); cue('chiado', P('49') + 1.5, d=1.2, gain=-
 for t in (3, 3.8, 4.6, 5.4, 6.2, 7.0): cue('heart', P('49') + t, gain=-2)
 cue('boom', P('49') + 7.8, gain=-4)
 # 50 elevador
-cue('lampada', P('50'), d=14, rede=60, pisca=[.4, .55, 4.9, 5.05, 9.6, 9.72], gain=2); cue('ding', P('50') + .8); cue('whoosh_slow', P('50') + 1.0, gain=-4)
-for k in range(18): cue('passo', P('50') + 2.4 + k * .6, gain=-4)
+cue('lampada', P('50'), d=24, rede=60, pisca=[.4, .55, 4.9, 5.05, 9.6, 9.72, 16.2, 16.3], gain=2); cue('ding', P('50') + .8); cue('whoosh_slow', P('50') + 1.0, gain=-4)
+for k in range(25): cue('passo', P('50') + 2.6 + k * .6, gain=-5)
 # 51 sala do Igor
 cue('rede', P('51'), d=14, gain=-8)
 t = .5

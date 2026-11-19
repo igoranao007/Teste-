@@ -12,24 +12,27 @@ import * as V from '../../lib/v4.js';
 import * as E4 from '../../lib/elenco4.js';
 const { THREE } = P;
 window.SETUP = async () => {
-  const S = F.noite({ fov: 40, perto: 6, longe: 40, luz: { keyDir: [.3, .7, .7], keyCor: '#9fc4ab', amb: '#1e3326', fillCor: '#1c5a30' } }), cena = S.scene;
+  const S = F.noite({ fov: 40, perto: 6, longe: 40, luz: { keyDir: [.3, .7, .7], keyCor: '#9fc4ab', amb: '#2b4636', fillCor: '#24703c' } }), cena = S.scene;
   await V.montarCabana(S);
   const car = await F.carro(); car.position.set(0, .02, 8.6); car.rotation.y = Math.PI; car.luzes(0); cena.add(car);
   const Ni = await E4.ator('nicolas'); cena.add(Ni.obj); Ni.obj.position.set(1.55, 0, 9.4); Ni.obj.rotation.y = Math.PI;
-  const olhos = V.olhos(); olhos.position.set(8.5, .82, 13.5); olhos.rotation.y = -2.3; cena.add(olhos);
+  // os olhos na mata são do METALIS: ele parado no escuro entre as árvores, só a íris amarela acesa (mesmos olhos do posto)
+  const Me = await E4.ator('metalis'); cena.add(Me.obj); Me.obj.position.set(8.5, 0, 13.5); Me.obj.rotation.y = Math.atan2(1.55 - 8.5, 9.4 - 13.5);
+  Me.pose('idle', 0); const olhos = V.olhosMetalis(Me, { soIris: true });
+  for (const ml of Me.malhas) if (![].concat(ml.material).some(m => /olho/.test(m.name))) ml.visible = false;   // corpo some: no escuro só a íris aparece
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
-  const OLHO = olhos.position;
+  const OLHO = new THREE.Vector3(8.5, .8, 13.5);
   S.update = t => {
     Ni.pose('idle', t * .6);
     const vira = P.suave(2.2, 3.8, t); Ni.obj.rotation.y = Math.PI - 1.15 * vira;                // vira devagar pros olhos
     if (t > 4.4) V.girar(Ni, 'spine.005', [1, 0, 0], .06 * Math.sin(t * 23) * .3);              // tremendo de leve
     const pis = Math.floor(t * 30) === 165;                                                      // uma piscada
-    olhos.acender(P.suave(2.6, 3.2, t), pis); olhos.children.at(-1).quaternion.copy(S.camera.quaternion);
+    Me.pose('idle', t * .4); olhos.acender(pis ? 0 : P.suave(2.6, 3.2, t), S.camera);
     if (t < 2.2) cam([-1.2, 1.55, 6.0], [1.5, 1.1, 9.6], 42);                                     // Nicolas sozinho perto do carro
     else if (t < 3.4) cam([3.4, 1.3, 7.2], [1.5, 1.4, 9.4], 36);                                  // vira a cabeça
-    else if (t < 4.5) cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], 34);                       // por cima do ombro: os olhos na mata
+    else if (t < 4.5) cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], 20);                       // por cima do ombro: os olhos na mata
     else if (t < 6.4) { const u = P.suave(4.5, 6.4, t); cam([P.lerp(2.9, 2.6, u), 1.48, P.lerp(10.7, 10.45, u)], [1.55, 1.42, 9.4], P.lerp(30, 22, u)); }   // close no rosto
-    else cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], 26);                                    // de volta: continuam lá
+    else { const u = P.suave(6.4, 8, t); cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], P.lerp(16, 6.5, u)); }                                    // de volta: continuam lá
   };
 };
 </script></body></html>

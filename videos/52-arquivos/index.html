@@ -1,5 +1,5 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- v4 PLANO 12 · OS ARQUIVOS (13 s): a porta abre, Gusta (com a maleta) e Nicolas chegam; Igor tira a atenção do computador: "Trouxeram?";
+<!-- v4 PLANO 12 · OS ARQUIVOS (13 s): a porta abre, Gusta (com a maleta) e Adryan chegam; Igor tira a atenção do computador: "Trouxeram?";
      Gusta põe a maleta na mesa; Igor abre as pastas PIOLHO, RORAIMA, JV, PHANTOM ("Todos eles têm potencial..."); fecha e volta pra maleta: "Então... o Projeto Mogg." -->
 <script>VIDEO={w:1920,h:1080,fps:30,dur:13}</script>
 <script src="../../lib/boot.js"></script>
@@ -15,7 +15,7 @@ const { THREE } = P;
 window.SETUP = async () => {
   const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
   const sala = await V.salaIgor4(cena), { I, Y, lamp, est } = sala, fala = await V.vozes();
-  const Gu = await E4.ator('gusta'), Ni = await E4.ator('nicolas'); cena.add(Gu.obj, Ni.obj); T.poses(Gu.modelo);
+  const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj); T.poses(Ad.modelo);
   const mal = T.maleta(); cena.add(mal);
   const MESA = new THREE.Vector3(-.3, Y, .46), v3 = (x, y, z) => new THREE.Vector3(x, y, z);
   // as 4 fichas, deitadas na mesa uma por cima da outra
@@ -27,13 +27,13 @@ window.SETUP = async () => {
   S.update = t => {
     sala.video(t + 14); lamp.acender(1, S.camera); porta.scale.x = P.suave(0, .6, t);
     I.girar(1 - P.suave(1.0, 2.0, t));
-    // Gusta e Nicolas entram (0,3–3,6) até a frente da mesa
-    for (const [A2, a, b] of [[Gu, [-.9, 3.6], [-.55, 1.15]], [Ni, [-1.6, 3.9], [-1.25, 1.55]]]) if (!V.caminhar(A2, a, b, t, .3, 3.6)) { A2.obj.rotation.y = Math.PI; A2.pose('idle', t); }
+    // Adryan (com a maleta) e Gusta entram (0,3–3,6) até a frente da mesa
+    for (const [A2, a, b] of [[Ad, [-.9, 3.6], [-.55, 1.15]], [Gu, [-1.6, 3.9], [-1.25, 1.55]]]) if (!V.caminhar(A2, a, b, t, .3, 3.6)) { A2.obj.rotation.y = Math.PI; A2.pose('idle', t); }
     // maleta: na mão do Gusta até pousar (4,0–5,0)
     const pousa = P.suave(4.0, 5.0, t);
-    if (pousa <= 0) { mal.deitar(0); V.segurarMaleta(Gu, mal); }
-    else { Gu.obj.updateMatrixWorld(true); const ini = Gu.osso('hand.R').getWorldPosition(v3()).add(v3(0, -.35, 0)); mal.position.lerpVectors(ini, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .2; mal.deitar(P.suave(.3, .9, pousa));
-      if (pousa < 1) Gu.modelo.alcancar('R', mal.position.clone().add(v3(0, .14, .1)).toArray(), [.6, -.5, .5], .08); }
+    if (pousa <= 0) { mal.deitar(0); V.segurarMaleta(Ad, mal); }
+    else { Ad.obj.updateMatrixWorld(true); const ini = Ad.osso('hand.R').getWorldPosition(v3()).add(v3(0, -.35, 0)); mal.position.lerpVectors(ini, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .2; mal.deitar(P.suave(.3, .9, pousa));
+      if (pousa < 1) Ad.modelo.alcancar('R', mal.position.clone().add(v3(0, .14, .1)).toArray(), [.6, -.5, .5], .08); }
     mal.pulsar(t);
     // Igor: fala, abre as pastas (5,4–10,6), fecha e olha a maleta
     const ab = P.clamp((t - 5.4) / 5.2), qual = Math.min(3, Math.floor(ab * 4)), aberto = t > 5.4 && t < 10.6;
