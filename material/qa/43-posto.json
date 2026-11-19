@@ -1,46 +1,15 @@
 {
- "quando": "2026-11-19T14:35:11.223Z",
+ "quando": "2026-11-19T14:44:45.364Z",
  "resumo": {
   "anat": {
    "frentista · braço atravessa o corpo R (cotovelo)": {
-    "n": 3,
-    "t0": 18.43,
-    "t1": 23.13,
-    "max": 6
-   },
-   "frentista · salto de mão L": {
-    "n": 1,
-    "t0": 18.77,
-    "t1": 18.77,
-    "max": 34
-   },
-   "adryan · salto de mão L": {
     "n": 2,
-    "t0": 19.97,
-    "t1": 20.67,
-    "max": 30
-   },
-   "frentista · salto de mão R": {
-    "n": 1,
-    "t0": 23.1,
-    "t1": 23.1,
-    "max": 28
-   },
-   "frentista · pé deslizando (cm/s)": {
-    "n": 3,
-    "t0": 9.87,
-    "t1": 21.07,
-    "max": 309
+    "t0": 18.43,
+    "t1": 18.47,
+    "max": 4
    }
   },
   "cont": {},
-  "col": {
-   "frentista · mangueira atravessa o corpo (cm)": {
-    "n": 2,
-    "t0": 15.03,
-    "t1": 18.57,
-    "max": 3
-   }
-  }
+  "col": {}
  }
 }

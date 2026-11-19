@@ -33,7 +33,8 @@ window.SETUP = async () => {
     V.segurarMaleta(Ad, mal, t); mal.pulsar(t);
     // Gusta lá dentro, aparece pela fresta (do lado da maçaneta); levanta o queixo quando ouve a senha; depois abre
     // fora do arco da porta (raio 1,04 m da dobradiça): olha pela fresta; dá um passo pra trás quando abre de vez
-    const recua = V.caminhar(Gu, [-.7, 2.0], [-.15, 1.35], t, 8.1, 9.35, { virar: false, rot: 0, re: true }); Gu.obj.rotation.y = 0;   // de ré, de frente pra porta Gu.obj.position.y = .08;
+    const RG = Math.atan2(.55, -.65) - Math.PI, rotG = RG * P.suave(7.7, 8.1, t) * (1 - P.suave(9.35, 9.8, t));   // vira ~40° abrindo passagem e recua ALINHADO ao passo
+    const recua = V.caminhar(Gu, [-.7, 2.0], [-.15, 1.35], t, 8.1, 9.35, { virar: false, rot: RG, re: true }); Gu.obj.rotation.y = rotG; Gu.obj.position.y = .08;
     if (!recua) Gu.pose('idle', t, 'talk', .7 * fala.peso('48', t, 'gusta') * (1 - P.suave(7.7, 8.1, t)), t);   // o gesto de fala termina antes do passo pra trás
     V.girar(Gu, 'spine.005', [1, 0, 0], -.1 * P.suave(6.4, 7.2, t));
     if (t < 2.4) cam([1.8, 1.7, 7.2], [-1.2, 1.3, 3.0], 38);                                             // ele bate

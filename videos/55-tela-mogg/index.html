@@ -25,7 +25,7 @@ window.SETUP = async () => {
       pc.enter.position.y = .038 - desce * .008;
       S.camera.position.set(...dd(-.03, .46, .1)); S.camera.lookAt(...dd(0, 0, -.04));
     } else {
-      I.pose(t);                                                                    // fora do close (atrás do terminal) o Igor continua respirando
+      I.pose(t, { inclina: .02 * Math.sin(t * 1.1), R: dd(0, .05 + .006 * Math.sin(t * 1.7) * P.suave(3.8, 4.4, t), -.02), poloR: rot(-.9, .1, -.4), pegada: { R: { dedos: rot(0, -.6, 1), indice: rot(1, 0, 0) } } });   /* a mão fica no teclado, respirando */   // atrás do terminal o Igor continua respirando
       term.limpar();
       if (t < 3.0) { term.txt(F.digitado('PROJETO MOGG', t, .15, 22), 240, 58, 40, K.VERDE, { alinhar: 'center', peso: 800 });
         if (t > 1.0) { term.txt('> INICIAR', 190, 150, 18, K.CLARO); if (Math.floor(t * 3) % 2) term.caixa(296, 152, 10, 16, K.CLARO); } if (t > 1.2) term.txt('  SAIR', 190, 178, 18, '#1f9a45'); }

@@ -52,7 +52,8 @@ window.SETUP = async () => {
     else if (t < 9.6) { anda = V.caminhar(Fr, [1.05, -3.45], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
     else if (t < 13.9) { anda = V.caminhar(Fr, JANELA, PB, t, 9.6, 11.9, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(PB[0] - JANELA[0], PB[1] - JANELA[1]), ROT_BOMBA, P.suave(11.9, 12.35, t)); if (t > 13.35) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.35, 13.9, t)); Fr.pose('idle', t); } }
     else if (t < 19.0) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.9, 14.5, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(TAMPA[0] - PB[0], TAMPA[1] - PB[1]), ROT_CARRO, P.suave(14.5, 14.85, t)); Fr.pose('idle', t * .6); } }
-    else if (t < 20.85) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.0, 19.95, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(PB[0] - TAMPA[0], PB[1] - TAMPA[1]), ROT_BOMBA, P.suave(19.95, 20.2, t)) - .8 * P.suave(20.5, 20.85, t);   /* já começa a virar pra janela ao soltar o bico */ Fr.pose('idle', t); } }
+    else if (t < 20.85) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.25, 20.05, { de: ROT_CARRO - .9 }); if (!anda) { const rTP = Math.atan2(PB[0] - TAMPA[0], PB[1] - TAMPA[1]);   /* vira ~50° parado depois de fechar a portinhola, e anda */
+      Fr.obj.rotation.y = t < 19.25 ? ROT_CARRO - .9 * P.suave(18.98, 19.28, t) : angLerp(rTP, ROT_BOMBA, P.suave(20.05, 20.25, t)) - .8 * P.suave(20.5, 20.85, t); Fr.pose('idle', t); } }
     else if (t < 24.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.85, 23.0, { de: ROT_BOMBA - .8 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(JANELA[0] - PB[0], JANELA[1] - PB[1]), 0, P.suave(23.0, 23.3, t)); Fr.pose('idle', t); } }
     else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 24.4, 28.8, { de: 0 }); }
     Fr.obj.updateMatrixWorld(true);
@@ -72,7 +73,7 @@ window.SETUP = async () => {
     else if (t < 20.45) B = mix(carregado(), noSuporte(1), P.suave(20.2, 20.45, t));
     else if (t < 20.6) B = noSuporte(1 - P.suave(20.45, 20.6, t));
     else B = noSuporte();
-    const arco = Math.sin(Math.PI * P.clamp((t - 14.85) / .3)) + Math.sin(Math.PI * P.clamp((t - 18.45) / .3));   // encaixando/tirando (0→1→0, sem tranco)
+    const arco = Math.sin(Math.PI * P.clamp((t - 14.85) / .3)) + Math.sin(Math.PI * P.clamp((t - 18.25) / .5));   // encaixando/tirando (0→1→0, sem tranco)
     if (arco > 0) { const sp = Fr.osso('spine').getWorldPosition(v3()), dv = B.p.clone().sub(sp); dv.y = 0;          // o caminho do bico passa por fora da barriga
       if (dv.length() > 1e-4) B.p.addScaledVector(dv.normalize(), .07 * arco); }
     bico.position.copy(B.p); bico.quaternion.copy(B.q); bico.updateMatrixWorld(true); bico.obstaculos = [() => V.capsulasCorpo(Fr)]; bico.mangueira();   // a mangueira contorna o frentista
@@ -87,17 +88,19 @@ window.SETUP = async () => {
       // pegada definida NO GANCHO (bico em pé = rotação identidade): dedos na direção do braço até o cabo, indicador pra cima;
       // depois a mão gira junto com o bico (pegada rígida) — ao deitar o bico, a palma fica por cima e os dedos descem pro gatilho
       const dd = PEGA_D.clone().applyQuaternion(bico.quaternion), ii = v3(0, 1, 0).applyQuaternion(bico.quaternion);
-      V.pegar(Fr, 'R', alvoG, dd, ii, direita(r).multiplyScalar(.8).add(v3(0, -.5, 0)).addScaledVector(frente(r), -.3), pegaBico, .85); }
+      V.pegar(Fr, 'R', alvoG, dd, ii, direita(r).multiplyScalar(.8 + 1.6 * curva).add(v3(0, -.5 + .3 * curva, 0)).addScaledVector(frente(r), -.3), pegaBico, .85); }   /* inclinado: cotovelo mais pra fora */
     // mão esquerda: abre e fecha a portinhola
     tampa.abrir(P.suave(14.6, 14.82, t) * (1 - P.suave(18.78, 18.98, t)));
-    const maoTampa = P.suave(14.5, 14.65, t) * (1 - P.suave(14.82, 15.0, t)) + P.suave(18.7, 18.8, t) * (1 - P.suave(18.98, 19.1, t));
+    const maoTampa = P.suave(14.5, 14.65, t) * (1 - P.suave(14.82, 15.0, t)) + P.suave(18.55, 18.78, t) * (1 - P.suave(18.98, 19.15, t));
     if (maoTampa > 0) { car.updateMatrixWorld(true); V.pegar(Fr, 'L', tampa.borda(), v3(0, -.3, 1), v3(0, 1, 0), [.8, -.5, -.2], maoTampa, .3); }
     // pagamento: as notas saem do bolso do Adryan (19,6), vão pra janela, passam pra mão do frentista (21,2) e somem no bolso dele (21,7)
-    const pegaGrana = P.suave(23.1, 23.4, t) * (1 - P.suave(23.45, 23.7, t)), bolsoFr = P.suave(23.5, 23.75, t) * (1 - P.suave(23.8, 24, t));
+    const pegaGrana = P.suave(23.0, 23.4, t) * (1 - P.suave(23.45, 23.7, t)), bolsoFr = P.suave(23.5, 23.75, t) * (1 - P.suave(23.8, 24, t));
     if (pegaGrana > 0 || bolsoFr > 0) {
       const h = Fr.osso('hand.R').getWorldPosition(v3()), mAd = D.Ad.osso('hand.L').getWorldPosition(v3());
       const quadril = direita(Fr.obj.rotation.y).multiplyScalar(.27).addScaledVector(frente(Fr.obj.rotation.y), .02).add(v3(0, .92, 0)).add(Fr.obj.position);   // bolso DIREITO (antes: lado trocado, o braço cruzava o corpo)
-      Fr.modelo.alcancar('R', h.clone().lerp(mAd, pegaGrana).lerp(quadril, bolsoFr).toArray(), [.6, -.7, -.4], .04);
+      const r = Fr.obj.rotation.y, k = Math.max(pegaGrana, bolsoFr);                           // pegada orientada com mistura (antes: orientação forçada no 1º quadro → salto)
+      V.pegar(Fr, 'R', mAd.clone().lerp(quadril, bolsoFr), frente(r).lerp(v3(0, -1, 0), bolsoFr).normalize(), v3(0, 1, 0).lerp(frente(r), bolsoFr).normalize(),
+        direita(r).multiplyScalar(.8).add(v3(0, -.5, 0)), k, .45);
     }
     notas.visible = t > 20.2 && t < 23.75;
     if (t < 23.42) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);

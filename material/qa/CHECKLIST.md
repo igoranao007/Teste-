@@ -3,6 +3,8 @@
 Nenhum plano é aprovado sem passar por **tudo** abaixo. Vale pra toda produção nova e pra toda correção (regressão).
 
 ## 0. Antes de mexer
+- `python3 tools/sintaxe.py` (libs + script de cada plano). Já roda dentro do `qa_todos.sh`.
+- Ler `material/qa/NAO_REGREDIR.md` e `VERSOES.md`.
 - Rodar `bash tools/qa_todos.sh` e guardar o resultado ("antes").
 - Ler `material/qa/REGISTRO.md`: não repetir bug já resolvido.
 
@@ -20,6 +22,10 @@ Roda o plano quadro a quadro e reprova:
 | Colisão | corpo (cápsula r 16 cm) dentro de peça sólida | qualquer |
 | Colisão | dois personagens a menos de 30 cm | qualquer |
 | Colisão | lataria do carro (caixa orientada) dentro de peça sólida | qualquer |
+| Anatomia | braço (mão/cotovelo/antebraço) dentro do tronco | > 25% do raio |
+| Anatomia | braço congelado (mão parada < 4 mm no espaço do corpo) | ≥ 3 s |
+| Anatomia | pé deslizando (nenhum dos dois pés parado, corpo andando) | > 0,3 m/s por ≥ 0,17 s |
+| Colisão | objeto flexível (mangueira) dentro do tronco | > 20% do raio |
 
 Exceções explícitas (marcadas no código, nunca "no olho"): personagem dentro do próprio veículo (`userData.veiculo` /
 `userData.noVeiculo` ao entrar/sair), assento (`userData.assento = '<ator>'`), mesa com vão pras pernas (`userData.vaoPernas`),
@@ -50,7 +56,9 @@ peça flexível (`userData.flexivel`: mangueira), em pé em cima de plataforma, 
 - Rig sem dedos (Metalis): `V.ik2` a partir da pose neutra + mistura por slerp; um alvo por mão (média ponderada).
 
 ## 4. Movimento
-- Andar = `V.caminhar` (cadência pela distância, sem patinar; mistura parado↔andando; `de:` pra virar aos poucos).
+- Andar = `V.caminhar` (cadência pela distância; **trava do pé**; mistura parado↔andando; `de:` vira proporcional ao ângulo; `re:` de ré; `rot:` direção fixa).
+- Velocidade natural: 1,1–1,4 m/s andando (pico ≈ 1,22× a média com o ease padrão). Distância ÷ tempo sempre conferida.
+- Virada grande (> 90°) no arranque: começar a virar parado antes de andar.
 - Rota: nunca reta por cima de obstáculo — waypoint de desvio (`DESVIO`) e conferir no QA.
 - Degrau/plataforma: `V.chao(x, z, plataformas)` levanta o pé.
 - Fala: animação `talk` com `fala.peso()` (peso pela fala inteira), nunca pelo volume quadro a quadro.

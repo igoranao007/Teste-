@@ -103,7 +103,7 @@ cue('motor', P('42'), d=9, abafado=1, gain=-3); cue('radio', P('42'), d=9, gain=
 cue('motor', P('43'), d=4.5, gain=-4); cue('pneus', P('43'), d=4.2, gain=-4); cue('lampada', P('43'), d=24, rede=60, pisca=0, gain=-12); cue('grilos', P('43'), d=24, gain=-8)
 cue('click', P('43') + 5.0, gain=-2); cue('turbina', P('43') + 5.1, d=.9, gain=-16); cue('click', P('43') + 13.15, gain=-4); cue('tick', P('43') + 14.65, gain=-4); cue('click', P('43') + 15.3, gain=-3); cue('turbina', P('43') + 15.4, d=2.9, gain=-10); cue('click', P('43') + 18.32, gain=-5); cue('tick', P('43') + 18.95, gain=-4); cue('click', P('43') + 20.55, gain=-4)
 import math as _m
-for a, b, L, e in ((5, 7, 1.91, .18), (9.6, 11.9, 2.9, .18), (13.9, 14.5, .76, .18), (19.0, 19.95, .76, .18), (20.85, 23.0, 2.9, .18)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2, e=e)
+for a, b, L, e in ((5, 7, 1.91, .18), (9.6, 11.9, 2.9, .18), (13.9, 14.5, .76, .18), (19.25, 20.05, .76, .18), (20.85, 23.0, 2.9, .18)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2, e=e)
 cue('paper', P('43') + 23.4, gain=-6)
 passos('43', 24.4, 28.8, 6.3, 'frentista', 'concreto', gain=-6)          # vai embora: some ao longe
 # 44 mendigo
