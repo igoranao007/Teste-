@@ -21,7 +21,7 @@ window.SETUP = async () => {
     const mao = t >= 3.0 && t < 3.8; term.el.style.opacity = mao ? 0 : 1;
     if (mao) {
       const u = t - 3.0, desce = P.suave(.2, .4, u) * (1 - P.suave(.5, .7, u));
-      F.telaCodigo(pc, t); I.pose(t, { R: dd(0, .05 - desce * .03, -.02), poloR: rot(-.9, .1, -.4) }); I.animar(t);
+      F.telaCodigo(pc, t); I.pose(t, { R: dd(0, .05 - desce * .03, -.02), poloR: rot(-.9, .1, -.4), pegada: { R: { dedos: rot(0, -.6, 1), indice: rot(1, 0, 0) } } });   // aperta o Enter de palma pra baixo I.animar(t);
       pc.enter.position.y = .038 - desce * .008;
       S.camera.position.set(...dd(-.03, .46, .1)); S.camera.lookAt(...dd(0, 0, -.04));
     } else {

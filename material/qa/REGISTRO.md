@@ -21,13 +21,10 @@ foram adaptadas pra este motor.
 | 13 | "Arbusto preto" flutuando na estrada e na frente da loja | pacote de árvores com as 4 versões de detalhe visíveis; a LOD3 deslocada | só a LOD0 visível | QA 43 + visual |
 | 14 | Passos iguais em todo lugar, eco de corredor ao ar livre, alto | 1 som só, com eco de 2,2 s; em temporizador | superfície × personagem × variação, no contato real do pé (fases medidas no clipe), volume igualado | contagem: 79 pisadas, 6 superfícies |
 | 15 | Sons muito altos em alguns momentos | stingers 12 dB acima da mediana, estouro no mix | stingers −5…−9 dB; sem "guard" | medição de janelas de 400 ms |
+| 17 | **Mãos do Igor de lado/torcidas** (teclado, fita, Enter, pastas) — o que o diretor via como "mãos girando" | o IK do Igor só apontava os dedos; o giro da mão ficava livre (mesma causa do #4, num rig à parte) | `c.orientar()` no rig do Igor (`m.pegada`): palma pra baixo nas teclas, na fita e no Enter; 75% da torção no antebraço | QA 51/54: 65–70° → aprovado; closes 2 s, 8 s (54) e 3,5 s (55) |
 | 16 | Vidro do carro | sem vidro → depois claro demais | fumê preto (laterais/traseiro), para-brisa mais leve | visual |
 
 ## Pendências conhecidas (não corrigidas nesta rodada)
-- **Igor — mão esquerda ~65–70° de torção** medida no teclado (planos 51 e 54). O rig do Igor é montado de peças
-  (diferente do elenco v4) e a pose dele é a aprovada da versão anterior. Tentei distribuir a torção no antebraço
-  (`c.torcaoAnte`), mas a medida piorou e não houve melhora visível — revertido. Próximo passo: levar o Igor pro
-  `V.pegar` com pontos de contato no teclado e na fita.
 - **Gusta (48)**: transição curta de passo pra trás com salto de 32–36° na mão por 1–2 quadros (limite 28°).
 - **Corrida, pulo, aterrissagem**: não existem no filme; o sistema de passos ainda não tem corrida/aterrissagem.
 - **Colisão de mão × objeto** (dedos atravessando peças): o QA mede o corpo, não os dedos; verificado no visual.

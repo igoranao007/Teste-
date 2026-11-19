@@ -1,0 +1,27 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- ferramenta: mede a orientação da palma (braço solto) em cada personagem e clipe. Palma certa = virada pro corpo,
+     indicador pra frente. Resultado: ângulo de correção (giro no eixo do antebraço) por lado. -->
+<script>VIDEO={w:640,h:360,fps:30,dur:1}</script>
+<script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as E4 from '../../lib/elenco4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({}); const out = {}, W = (A, n) => A.osso(n).getWorldPosition(new THREE.Vector3());
+  const q = new URLSearchParams(location.search), corr = q.get('corr') !== '0';
+  for (const nome of ['adryan', 'gusta', 'nicolas', 'frentista']) {
+    const A = await E4.ator(nome, { semCorrecao: !corr }); S.scene.add(A.obj); A.obj.rotation.y = 0; out[nome] = {};
+    for (const clip of ['idle', 'walk', 'talk']) { A.pose(clip, .3); A.obj.updateMatrixWorld(true); out[nome][clip] = {};
+      for (const s of ['L', 'R']) {
+        const ded = W(A, 'f_middle.01.' + s).sub(W(A, 'hand.' + s)).normalize(), lat = W(A, 'f_index.01.' + s).sub(W(A, 'f_pinky.01.' + s));
+        lat.addScaledVector(ded, -lat.dot(ded)).normalize();
+        const alvo = new THREE.Vector3(0, 0, 1).addScaledVector(ded, -ded.z).normalize();          // indicador pra frente (+z do corpo)
+        const ang = Math.atan2(lat.clone().cross(alvo).dot(ded), lat.dot(alvo)) * 180 / Math.PI;
+        out[nome][clip][s] = { dedos: ded.toArray().map(v => +v.toFixed(2)), indicador: lat.toArray().map(v => +v.toFixed(2)), corrigir: Math.round(ang) };
+      } }
+    S.scene.remove(A.obj);
+  }
+  window.MAOS = out; S.update = () => {};
+};
+</script></body></html>

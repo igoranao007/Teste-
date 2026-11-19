@@ -22,7 +22,8 @@ window.SETUP = async () => {
     P.luz({ ...F.LUZ_SALA, keyDir: rot(0, .1, 1), keyCor: '#' + new THREE.Color('#5fd88a').multiplyScalar(brilho).getHexString(), fillDir: rot(-.6, .6, -.4), fillCor: '#16321f', amb: '#141f18' });
     // mãos no teclado, digita de vez em quando; cabeça vira um pouco quando percebe alguém (12,4)
     const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .016 * (t > .5 && t < 6.5 ? 1 : 0);
-    const m = { R: rot(-.1, Y + .075 + tk(0), .2), L: rot(.1, Y + .075 + tk(2), .2), poloR: rot(-.9, -.3, -.2), poloL: rot(.9, -.3, -.2), plana: true, extra: .04 };
+    const m = { R: rot(-.1, Y + .075 + tk(0), .2), L: rot(.1, Y + .075 + tk(2), .2), poloR: rot(-.9, -.3, -.2), poloL: rot(.9, -.3, -.2), plana: true, extra: .04,
+      pegada: { R: { dedos: rot(0, -.45, 1), indice: rot(1, 0, 0) }, L: { dedos: rot(0, -.45, 1), indice: rot(-1, 0, 0) } } };   // palmas pra baixo nas teclas
     const v = fala('51', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });
     I.cabeca.rotation.x += .1; I.cabeca.rotation.y += -.5 * P.suave(12.2, 12.9, t);
     // câmera: aproximação lenta pelas costas (vê a tela), depois gira em volta até o rosto
