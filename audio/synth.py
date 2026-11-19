@@ -337,6 +337,28 @@ def fx_grilos(d=6.0):                       # grilos: trinados agudos em pulsos,
 def fx_passo():                             # passo no concreto com eco de corredor
     d = 1.1; t = tt(d); x = lp(noise(d), 500) * np.exp(-t / .03) + .5 * bp(noise(d), 900, 2600) * np.exp(-t / .012)
     return reverb(x, 2.2, .5)
+def fx_pisada(p):                          # passo por superfície e por personagem; cada pisada varia um pouco (seed)
+    g = np.random.default_rng(int(p.get('seed', 0))); sup = p.get('sup', 'concreto'); peso = p.get('peso', 1.0)
+    v = 1 + g.uniform(-.12, .12); k = (1.25 - .35 * peso) * v          # mais leve → mais agudo e curto
+    d = .5; t = tt(d); nz = lambda: g.standard_normal(len(t))
+    if sup == 'concreto':                    # sola no piso de concreto do posto: estalo seco + baque, quase sem eco (ao ar livre)
+        x = lp(nz(), 380 * k) * np.exp(-t / (.028 * peso)) * peso + .55 * bp(nz(), 1400 * k, 4200 * k) * np.exp(-t / .009)
+        return reverb(x, .5, .08)
+    if sup == 'mato':                        # capim/terra: amassado abafado, mais longo, sem estalo
+        a = np.minimum(1, t / .015); x = (lp(nz(), 900 * k) * .8 + .35 * bp(nz(), 1800 * k, 5200 * k) * (g.random(len(t)) > .6)) * a * np.exp(-t / .07) + .5 * lp(nz(), 160) * np.exp(-t / .03) * peso
+        return x
+    if sup == 'madeira':                     # assoalho/degrau de madeira: baque oco com corpo
+        f0 = 120 * k; x = np.sin(2 * np.pi * f0 * t) * np.exp(-t / .06) * .8 + lp(nz(), 700 * k) * np.exp(-t / .025) + .25 * bp(nz(), 2000, 4000) * np.exp(-t / .006)
+        return reverb(x, .7, .12)
+    if sup == 'corredor':                    # concreto em corredor fechado: eco curto (antes era um eco enorme em tudo)
+        x = lp(nz(), 450 * k) * np.exp(-t / .025) * peso + .5 * bp(nz(), 1200 * k, 3800 * k) * np.exp(-t / .008)
+        return reverb(x, 1.1, .3)
+    if sup == 'carpete':                     # carpete do escritório: só um baque abafado
+        return lp(nz(), 240 * k) * np.minimum(1, t / .01) * np.exp(-t / .045) * peso
+    if sup == 'arrasto':                     # Metalis: tênis velho arrastando no concreto (raspa e solta)
+        a = np.minimum(1, t / .06); x = bp(nz(), 900 * k, 3600 * k) * a * np.exp(-t / .12) * .7 + .4 * lp(nz(), 300) * np.exp(-np.maximum(0, t - .1) / .02) * (t > .1)
+        return reverb(x, .5, .08)
+    return lp(nz(), 400) * np.exp(-t / .03)
 def fx_radio(d=6.0):                        # estática fraca de rádio fora de estação
     t = tt(d); x = bp(noise(d), 1200, 4200) * (.5 + .5 * np.abs(np.sin(2 * np.pi * .37 * t))) + .2 * np.sin(2 * np.pi * (700 + 200 * np.sin(2 * np.pi * .21 * t)) * t) * (np.sin(2 * np.pi * .13 * t) > .6)
     return x * _janela(t, d, .6, .8)
@@ -351,7 +373,7 @@ def fx_chiado_sobe(d=6.0):                  # chiado que cresce até o máximo
     x = fx_chiado(d, 1); t = tt(d); return x * (.06 + .94 * (t / d) ** 2.2) * np.clip((d - t) / .01, 0, 1)
 SFX.update({
  'motor': (lambda p: fx_motor(p.get('d', 6.0), p.get('abafado', 0), p.get('rpm', 1.0)), -17, False), 'pneus': (lambda p: fx_pneus(p.get('d', 6.0)), -24, True),
- 'grilos': (lambda p: fx_grilos(p.get('d', 6.0)), -27, True), 'passo': (lambda p: fx_passo(), -14, False), 'radio': (lambda p: fx_radio(p.get('d', 6.0)), -32, False),
+ 'grilos': (lambda p: fx_grilos(p.get('d', 6.0)), -27, True), 'passo': (lambda p: fx_passo(), -14, False), 'pisada': (lambda p: fx_pisada(p), -17, False), 'radio': (lambda p: fx_radio(p.get('d', 6.0)), -32, False),
  'estrondo': (lambda p: fx_estrondo(p.get('d', 1.0)), -1, False), 'sobe': (lambda p: fx_sobe(p.get('d', 8.0), p.get('root', 31), p.get('sem', 5)), -15, True),
  'chiado_sobe': (lambda p: fx_chiado_sobe(p.get('d', 6.0)), -5, True),
 })

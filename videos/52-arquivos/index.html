@@ -28,12 +28,13 @@ window.SETUP = async () => {
     sala.video(t + 14); lamp.acender(1, S.camera); porta.scale.x = P.suave(0, .6, t);
     I.girar(1 - P.suave(1.0, 2.0, t));
     // Adryan (com a maleta) e Gusta entram (0,3–3,6) até a frente da mesa
-    for (const [A2, a, b] of [[Ad, [-.9, 3.6], [-.55, 1.15]], [Gu, [-1.6, 3.9], [-1.25, 1.55]]]) if (!V.caminhar(A2, a, b, t, .3, 3.6)) { A2.obj.rotation.y = Math.PI; A2.pose('idle', t); }
+    for (const [A2, a, b] of [[Ad, [-.9, 3.6], [-.55, 1.15]], [Gu, [-1.6, 3.9], [-1.25, 1.55]]]) if (!V.caminhar(A2, a, b, t, .3, 3.6)) { A2.obj.rotation.y = V.angLerp(Math.atan2(b[0] - a[0], b[1] - a[1]), Math.PI, P.suave(3.6, 4.0, t)); A2.pose('idle', t); }
     // maleta: na mão do Gusta até pousar (4,0–5,0)
     const pousa = P.suave(4.0, 5.0, t);
     if (pousa <= 0) { mal.deitar(0); V.segurarMaleta(Ad, mal); }
     else { Ad.obj.updateMatrixWorld(true); const ini = Ad.osso('hand.R').getWorldPosition(v3()).add(v3(0, -.35, 0)); mal.position.lerpVectors(ini, MESA, pousa); mal.position.y += Math.sin(pousa * Math.PI) * .2; mal.deitar(P.suave(.3, .9, pousa));
-      if (pousa < 1) Ad.modelo.alcancar('R', mal.position.clone().add(v3(0, .14, .1)).toArray(), [.6, -.5, .5], .08); }
+      const solta = 1 - P.suave(5.0, 5.6, t);                                            // depois de pousar, a mão volta devagar
+      if (solta > 0) { const h = Ad.osso('hand.R').getWorldPosition(v3()), alca = MESA.clone().add(v3(0, .14, .1)); Ad.modelo.alcancar('R', (pousa < 1 ? mal.position.clone().add(v3(0, .14, .1)) : h.lerp(alca, solta)).toArray(), [.6, -.5, .5], .08); } }
     mal.pulsar(t);
     // Igor: fala, abre as pastas (5,4–10,6), fecha e olha a maleta
     const ab = P.clamp((t - 5.4) / 5.2), qual = Math.min(3, Math.floor(ab * 4)), aberto = t > 5.4 && t < 10.6;

@@ -41,12 +41,12 @@ window.SETUP = async () => {
     //            · devolve o bico (18,7–19,9) · janela (19,9–20,9) · recebe e guarda no bolso (20,9–21,7) · vai embora (21,9–)
     let anda = false;
     if (t < 5) { Fr.obj.position.set(2.0, 0, -3.3); Fr.obj.rotation.y = -1.2; Fr.pose('idle', t); }
-    else if (t < 11.2) { anda = V.caminhar(Fr, [2.0, -3.3], JANELA, t, 5, 7); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
-    else if (t < 13.5) { anda = V.caminhar(Fr, JANELA, PB, t, 11.2, 12.3); if (!anda) { Fr.obj.rotation.y = angLerp(-Math.PI / 2, ROT_BOMBA, P.suave(12.3, 12.6, t)); if (t > 13.1) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.1, 13.5, t)); Fr.pose('idle', t); } }
-    else if (t < 18.7) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.5, 14.2); if (!anda) { Fr.obj.rotation.y = ROT_CARRO; Fr.pose('idle', t * .6); } }
-    else if (t < 19.9) { anda = V.caminhar(Fr, TAMPA, PB, t, 18.7, 19.2); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, ROT_BOMBA, P.suave(19.2, 19.35, t)); Fr.pose('idle', t); } }
-    else if (t < 21.9) { anda = V.caminhar(Fr, PB, JANELA, t, 19.9, 20.8); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(20.8, 21, t)); Fr.pose('idle', t); } }
-    else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 22, 26.5); }
+    else if (t < 11.2) { anda = V.caminhar(Fr, [2.0, -3.3], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
+    else if (t < 13.5) { anda = V.caminhar(Fr, JANELA, PB, t, 11.2, 12.3, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(-Math.PI / 2, ROT_BOMBA, P.suave(12.3, 12.6, t)); if (t > 13.1) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.1, 13.5, t)); Fr.pose('idle', t); } }
+    else if (t < 18.7) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.5, 14.2, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = ROT_CARRO; Fr.pose('idle', t * .6); } }
+    else if (t < 20.1) { anda = V.caminhar(Fr, TAMPA, PB, t, 18.7, 19.4, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, ROT_BOMBA, P.suave(19.4, 19.75, t)); Fr.pose('idle', t); } }
+    else if (t < 21.9) { anda = V.caminhar(Fr, PB, JANELA, t, 20.1, 20.95, { de: ROT_BOMBA }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(20.95, 21.25, t)); Fr.pose('idle', t); } }
+    else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 22, 26.5, { de: 0 }); }
     Fr.obj.updateMatrixWorld(true);
     // bico
     let B;
@@ -56,18 +56,18 @@ window.SETUP = async () => {
     else if (t < 14.8) B = mix(carregado(), noTanque(t), P.suave(14.3, 14.8, t));
     else if (t < 18.3) B = noTanque(t);
     else if (t < 18.7) B = mix(noTanque(t), carregado(), P.suave(18.3, 18.7, t));
-    else if (t < 19.3) B = carregado();
-    else if (t < 19.6) B = mix(carregado(), noSuporte(), P.suave(19.3, 19.6, t));
+    else if (t < 19.5) B = carregado();
+    else if (t < 19.85) B = mix(carregado(), noSuporte(), P.suave(19.5, 19.85, t));
     else B = noSuporte();
     bico.position.copy(B.p); bico.quaternion.copy(B.q); bico.updateMatrixWorld(true); bico.mangueira();
     // mão direita do frentista: vai até o cabo do bico, segura enquanto ele está fora do suporte, solta
-    const pegar = P.suave(12.6, 13.1, t) * (1 - P.suave(19.6, 19.95, t));
+    const pegar = P.suave(12.6, 13.1, t) * (1 - P.suave(19.85, 20.2, t));
     const cabo = bico.localToWorld(v3(0, .1, .06));
     const curva = P.suave(14.2, 14.8, t) * (1 - P.suave(18.3, 18.8, t));                       // inclina o tronco pra alcançar a tampa
     if (curva > 0) { V.girar(Fr, 'spine.002', [1, 0, 0], .22 * curva); V.girar(Fr, 'spine.003', [1, 0, 0], .12 * curva); }
     if (pegar > 0) { const h = Fr.osso('hand.R').getWorldPosition(v3()); Fr.modelo.alcancar('R', h.lerp(cabo, pegar).toArray(), [.6, -.7, -.4], .04); V.punho(Fr, 'R', P.suave(.7, 1, pegar), window.SINAL ?? 1); }
     // pagamento: as notas saem do bolso do Adryan (19,6), vão pra janela, passam pra mão do frentista (21,2) e somem no bolso dele (21,7)
-    const pegaGrana = P.suave(20.8, 21.2, t) * (1 - P.suave(21.25, 21.6, t)), bolsoFr = P.suave(21.3, 21.6, t) * (1 - P.suave(21.7, 22, t));
+    const pegaGrana = P.suave(20.9, 21.2, t) * (1 - P.suave(21.25, 21.6, t)), bolsoFr = P.suave(21.3, 21.6, t) * (1 - P.suave(21.7, 22, t));
     if (pegaGrana > 0 || bolsoFr > 0) {
       const h = Fr.osso('hand.R').getWorldPosition(v3()), mAd = D.Ad.osso('hand.L').getWorldPosition(v3());
       const quadril = v3(.2, .9, .05).applyAxisAngle(v3(0, 1, 0), Fr.obj.rotation.y).add(Fr.obj.position);
