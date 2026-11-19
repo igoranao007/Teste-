@@ -26,7 +26,7 @@
   ],
   [
    "47-cabana",
-   12
+   19.5
   ],
   [
    "48-senha",
@@ -181,113 +181,113 @@
   {
    "text": "Qual a senha?",
    "quem": "gusta",
-   "startMs": 121400,
-   "endMs": 122514,
+   "startMs": 128900,
+   "endMs": 130014,
    "semVoz": false
   },
   {
    "text": "15/03 007 BIFF.",
    "quem": "adryan",
-   "startMs": 122800,
-   "endMs": 125762,
+   "startMs": 130300,
+   "endMs": 133262,
    "semVoz": false
   },
   {
    "text": "Pode entrar.",
    "quem": "gusta",
-   "startMs": 125500,
-   "endMs": 128038,
+   "startMs": 133000,
+   "endMs": 135538,
    "semVoz": false
   },
   {
    "text": "Então... o Igor já sabe que a gente tá chegando?",
    "quem": "adryan",
-   "startMs": 139000,
-   "endMs": 142038,
+   "startMs": 146500,
+   "endMs": 149538,
    "semVoz": false
   },
   {
    "text": "Sabe.",
    "quem": "gusta",
-   "startMs": 142200,
-   "endMs": 142979,
+   "startMs": 149700,
+   "endMs": 150479,
    "semVoz": false
   },
   {
    "text": "Mas não é qualquer pessoa que pode ficar sabendo dessa missão.",
    "quem": "gusta",
-   "startMs": 143000,
-   "endMs": 148131,
+   "startMs": 150500,
+   "endMs": 155631,
    "semVoz": false
   },
   {
    "text": "Por quê?",
    "quem": "adryan",
-   "startMs": 148300,
-   "endMs": 149022,
+   "startMs": 155800,
+   "endMs": 156522,
    "semVoz": false
   },
   {
    "text": "Porque o Projeto Mogg é importante demais.",
    "quem": "gusta",
-   "startMs": 149200,
-   "endMs": 152557,
+   "startMs": 156700,
+   "endMs": 160057,
    "semVoz": false
   },
   {
    "text": "Isso não pode ser comentado em qualquer lugar. Nem mesmo fora daqui.",
    "quem": "gusta",
-   "startMs": 152307,
-   "endMs": 155664,
+   "startMs": 159807,
+   "endMs": 163164,
    "semVoz": false
   },
   {
    "text": "Você vai entender quando encontrar o Igor.",
    "quem": "gusta",
-   "startMs": 155900,
-   "endMs": 158660,
+   "startMs": 163400,
+   "endMs": 166160,
    "semVoz": false
   },
   {
    "text": "Nem mesmo no meu aniversário eles conseguem se segurar...",
    "quem": "igor",
-   "startMs": 167600,
-   "endMs": 170830,
+   "startMs": 175100,
+   "endMs": 178330,
    "semVoz": false
   },
   {
    "text": "Trouxeram?",
    "quem": "igor",
-   "startMs": 176200,
-   "endMs": 178084,
+   "startMs": 183700,
+   "endMs": 185584,
    "semVoz": false
   },
   {
    "text": "Todos eles têm potencial. Um potencial que não pode ser desperdiçado.",
    "quem": "igor",
-   "startMs": 180800,
-   "endMs": 184868,
+   "startMs": 188300,
+   "endMs": 192368,
    "semVoz": false
   },
   {
    "text": "Então... o Projeto Mogg.",
    "quem": "igor",
-   "startMs": 185000,
-   "endMs": 186818,
+   "startMs": 192500,
+   "endMs": 194318,
    "semVoz": false
   },
   {
    "text": "Então é isso. O Projeto Mogg.",
    "quem": "igor",
-   "startMs": 193200,
-   "endMs": 195890,
+   "startMs": 200700,
+   "endMs": 203390,
    "semVoz": false
   },
   {
    "text": "Vamos ver o que a Toca do Anão escondeu.",
    "quem": "igor",
-   "startMs": 208000,
-   "endMs": 210337,
+   "startMs": 215500,
+   "endMs": 217837,
    "semVoz": false
   }
  ]
