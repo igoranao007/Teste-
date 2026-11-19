@@ -21,8 +21,13 @@ foram adaptadas pra este motor.
 | 13 | "Arbusto preto" flutuando na estrada e na frente da loja | pacote de árvores com as 4 versões de detalhe visíveis; a LOD3 deslocada | só a LOD0 visível | QA 43 + visual |
 | 14 | Passos iguais em todo lugar, eco de corredor ao ar livre, alto | 1 som só, com eco de 2,2 s; em temporizador | superfície × personagem × variação, no contato real do pé (fases medidas no clipe), volume igualado | contagem: 79 pisadas, 6 superfícies |
 | 15 | Sons muito altos em alguns momentos | stingers 12 dB acima da mediana, estouro no mix | stingers −5…−9 dB; sem "guard" | medição de janelas de 400 ms |
+| 18 | **Mãos de TODOS os personagens "girando"** (Adryan, Gusta, Nicolas, frentista): palma pra frente; andando, a mão virava "bandeja" a cada passo | o retarget deixou o antebraço sem pronação (palmas pra frente, como na pose T); o osso da mão é constante nos clipes, então a medição de *variação* (0°) não pegava — só olhando de perto | pronação de 82° no antebraço + pulso neutro do rig em toda pose (`lib/elenco4.js`), pros 4 personagens do mesmo esqueleto; Metalis conferido (outro rig, ok) | inspeção visual por personagem × clipe (`videos/_pose`), QA de todos os planos aprovado |
 | 17 | **Mãos do Igor de lado/torcidas** (teclado, fita, Enter, pastas) — o que o diretor via como "mãos girando" | o IK do Igor só apontava os dedos; o giro da mão ficava livre (mesma causa do #4, num rig à parte) | `c.orientar()` no rig do Igor (`m.pegada`): palma pra baixo nas teclas, na fita e no Enter; 75% da torção no antebraço | QA 51/54: 65–70° → aprovado; closes 2 s, 8 s (54) e 3,5 s (55) |
 | 16 | Vidro do carro | sem vidro → depois claro demais | fumê preto (laterais/traseiro), para-brisa mais leve | visual |
+
+## Lição (processo)
+Medição não substitui olhar. Toda correção de anatomia passa também pela inspeção por personagem × clipe em `videos/_pose`
+(`node tools/fotos.mjs _pose "0.2,0.5" "ator=<nome>&clip=<clipe>&cam=0,.95,1.9,0,.9,0,34" saida.jpg`), de frente e de lado.
 
 ## Pendências conhecidas (não corrigidas nesta rodada)
 - **Gusta (48)**: transição curta de passo pra trás com salto de 32–36° na mão por 1–2 quadros (limite 28°).

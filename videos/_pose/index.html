@@ -1,0 +1,16 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- inspeção: um personagem numa pose, câmera fixa (?ator=gusta&clip=walk&t=.3&cam=...) -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as E4 from '../../lib/elenco4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 30, fundo: '#556655' }); P.luz({ keyDir: [.3, .8, .6], keyCor: '#ffffff', amb: '#909090', fillCor: '#707070' });
+  const q = new URLSearchParams(location.search), A = await E4.ator(q.get('ator') ?? 'gusta'); S.scene.add(A.obj); window.A = A;
+  const clip = q.get('clip') ?? 'idle';
+  S.camera.position.set(0, 1.1, 2.4); S.camera.lookAt(0, 1, 0);
+  S.update = t => { A.pose(clip, t); };
+};
+</script></body></html>

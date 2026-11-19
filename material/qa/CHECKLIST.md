@@ -25,7 +25,8 @@ Exceções explícitas (marcadas no código, nunca "no olho"): personagem dentro
 `userData.noVeiculo` ao entrar/sair), assento (`userData.assento = '<ator>'`), mesa com vão pras pernas (`userData.vaoPernas`),
 peça flexível (`userData.flexivel`: mangueira), em pé em cima de plataforma, subindo degrau ≤ 25 cm, peça carregável < 55 cm.
 
-## 2. Teste visual (`node tools/fotos.mjs <plano> "t1,t2,…" "cam=x,y,z,ax,ay,az,fov" saida.jpg`)
+## 2. Teste visual
+- **Inspeção por personagem × clipe** (`videos/_pose`): cada ator em idle, walk, talk, de frente e de lado. Mãos: palma pro corpo no braço solto, sem "bandeja" no balanço. (`node tools/fotos.mjs <plano> "t1,t2,…" "cam=x,y,z,ax,ay,az,fov" saida.jpg`)
 - Toda interação vista de perto, de **dois ângulos**, nos quadros de início, meio e fim.
 - Mãos: o objeto está NA palma? Os dedos fecham em volta? A mão segue a orientação do objeto?
 - O objeto atravessa algo (lataria, bomba, mesa)? Some ou teletransporta?
