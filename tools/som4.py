@@ -83,7 +83,7 @@ OFF = {'concreto': 4.8, 'mato': 1.3, 'madeira': -3.2, 'corredor': -.4, 'carpete'
 PES = json.load(open('material/qa/pes.json'))          # fração do ciclo 'walk' em que cada pé toca o chão (videos/_pes)
 def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18, fase=0.0):
     """um som por CONTATO do pé (como notify de animação): o motor anda u·L/passo ciclos (+fase em ciclos)."""
-    pc = passo * ALT[quem] / 1.75; v = 1 / (1 - e)
+    pc = PES[quem].get('passada', passo * ALT[quem] / 1.75); v = 1 / (1 - e)   # passada medida no clipe
     def u_de(u0): return v * u0 * u0 / (2 * e) if u0 < e else (1 - v * (1 - u0) ** 2 / (2 * e) if u0 > 1 - e else v * (u0 - e / 2))
     cont = sorted((n + PES[quem][pe] - fase, pe) for n in range(-1, int(L / pc) + 3) for pe in ('L', 'R'))
     for c, pe in cont:
@@ -107,7 +107,7 @@ cue('paper', P('43') + 21.8, gain=-6)
 passos('43', 22.4, 26.8, 6.3, 'frentista', 'concreto', gain=-6)          # vai embora: some ao longe
 # 44 mendigo
 cue('lampada', P('44'), d=37, rede=60, pisca=0, gain=-12); cue('grilos', P('44'), d=37, gain=-8); cue('motor', P('44') + .6, d=31, abafado=1, gain=-8)
-passos('44', .2, 1.63, 1.51, 'metalis', 'arrasto', gain=-3, passo=1.2, e=.12); passos('44', 1.63, 3.6, 2.07, 'metalis', 'arrasto', gain=-3, passo=1.2, e=.12, fase=1.51 / (1.2 * 1.1 / 1.75)); passos('44', 31.4, 32.3, .67, 'metalis', 'arrasto', gain=-5, passo=.9)
+passos('44', .2, 3.6, 2.5, 'metalis', 'arrasto', gain=-3, e=.15); passos('44', 31.4, 32.3, .67, 'metalis', 'arrasto', gain=-5, passo=.9)
 cue('tick', P('44') + 25.35, gain=-1); cue('turbina', P('44') + 31.2, d=.8, gain=-16)
 cue('sobe', P('44') + 20, d=14, root=29, sem=3, gain=-8); cue('motor', P('44') + 32.2, d=4.8, rpm=1.4, gain=-2); cue('pneus', P('44') + 32.4, d=4.6, gain=-3)
 # 45 título

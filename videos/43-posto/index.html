@@ -72,7 +72,7 @@ window.SETUP = async () => {
     else if (t < 20.2) B = mix(carregado(), noSuporte(1), P.suave(19.95, 20.2, t));
     else if (t < 20.35) B = noSuporte(1 - P.suave(20.2, 20.35, t));
     else B = noSuporte();
-    bico.position.copy(B.p); bico.quaternion.copy(B.q); bico.updateMatrixWorld(true); bico.mangueira();
+    bico.position.copy(B.p); bico.quaternion.copy(B.q); bico.updateMatrixWorld(true); bico.obstaculos = [() => V.capsulasCorpo(Fr)]; bico.mangueira();   // a mangueira contorna o frentista
     // mão direita: pegada orientada no cabo (palma por cima, dedos no gatilho) — a mão segue a orientação do bico
     const pegaBico = P.suave(12.6, 13.15, t) * (1 - P.suave(20.35, 20.6, t));
     if (pegaBico > 0) { const r = Fr.obj.rotation.y, U = v3(0, 0, 1).applyQuaternion(bico.quaternion), F = v3(0, 1, 0).applyQuaternion(bico.quaternion);

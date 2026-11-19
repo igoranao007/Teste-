@@ -33,7 +33,7 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
   const osso = (at, re) => at.sk.bones.find(b => re.test(b.name));
   for (const at of atores) {
     at.o = {}; for (const [k, re] of Object.entries({ hL: /^(hand\.?L|LeftHand)$/, hR: /^(hand\.?R|RightHand)$/, fL: /^(forearm\.?L|LeftForeArm)$/, fR: /^(forearm\.?R|RightForeArm)$/,
-      mL: /^f_middle\.?01\.?L$/, mR: /^f_middle\.?01\.?R$/, cab: /^(spine\.?005|Head|head)$/, pesc: /^(spine\.?004|Neck|neck)$/, pL: /^(foot\.?L|LeftFoot)$/, pR: /^(foot\.?R|RightFoot)$/, qd: /^(spine|Hips|hips)$/ })) at.o[k] = osso(at, re);
+      mL: /^f_middle\.?01\.?L$/, oL: /^(upper_arm\.?L|LeftArm)$/, oR: /^(upper_arm\.?R|RightArm)$/, mR: /^f_middle\.?01\.?R$/, cab: /^(spine\.?005|Head|head)$/, pesc: /^(spine\.?004|Neck|neck)$/, pL: /^(foot\.?L|LeftFoot)$/, pR: /^(foot\.?R|RightFoot)$/, qd: /^(spine|Hips|hips)$/ })) at.o[k] = osso(at, re);
   }
   // local "neutro" de um osso = bind do pai⁻¹ · bind do osso
   const neutroLocal = (at, bo) => { const bw = at.bind.get(bo), pw = at.bind.get(bo.parent); const l = pw ? new M4().copy(pw).invert().multiply(bw) : bw.clone(); const q = new Q(); l.decompose(new V3(), q, new V3()); return q; };
@@ -48,6 +48,12 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
   const veic = o => { for (let x = o; x; x = x.parent) if (x.userData?.veiculo) return x; return null; };
   const anc = (n, at) => { const va = veic(at.raiz) || at.raiz.userData?.noVeiculo; if (va && veic(n) === va) return true; if (n.userData?.flexivel) return true; for (let x = at.raiz; x; x = x.parent) if (x === n) return true; for (let x = n; x; x = x.parent) if (x === at.raiz) return true; return false; };
   const out = { anat: [], cont: [], col: [], atores: atores.map(a => a.nome) }, ant = new Map(); let camAnt = null;
+  // cápsula do tronco: do quadril ao pescoço/cabeça, raio = 42% da distância entre os ombros
+  const capsula = at => { const O = at.o; if (!O.qd || !(O.pesc || O.cab) || !O.oL || !O.oR) return null; const a = O.qd.getWorldPosition(new V3()), b = (O.pesc ?? O.cab).getWorldPosition(new V3());
+    const r = O.oL.getWorldPosition(new V3()).distanceTo(O.oR.getWorldPosition(new V3())) * .42; return { a, b, r }; };
+  const distSeg = (p, a, b) => { const ab = b.clone().sub(a), t = Math.max(0, Math.min(1, p.clone().sub(a).dot(ab) / ab.lengthSq())); return p.distanceTo(a.clone().addScaledVector(ab, t)); };
+  const flex = []; sc.traverse(n => { if (n.isMesh && n.userData?.flexivel) flex.push(n); });
+  const hist = new Map();   // mão no espaço do corpo (braço congelado) e pé (deslize)
   const add = (lista, t, quem, oque, val) => lista.push([+t.toFixed(2), quem, oque, Math.round(val)]);
   for (let t = t0; t <= t1 + 1e-6; t += passo / 30) {
     await window.__seek(t); sc.updateMatrixWorld(true);
@@ -70,6 +76,15 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
       const tc = tw(torcao(at, O.cab)) + tw(torcao(at, O.pesc)); if (tc > 75) add(out.anat, t, k, 'pescoço torcido', tc);
       const raizY = at.raiz.getWorldPosition(new V3()).y;
       for (const pe of [O.pL, O.pR]) if (pe && Math.abs(raizY) < .05) { const y = pe.getWorldPosition(new V3()).y; if (y < -.04) add(out.anat, t, k, 'pé abaixo do chão', y * 100); }
+      // BRAÇO × CORPO: mão, cotovelo e meio do antebraço não podem entrar no tronco (75% do raio)
+      const cap = capsula(at);
+      if (cap) for (const sd of ['L', 'R']) { const H = O['h' + sd], F = O['f' + sd]; if (!H || !F) continue; const ph = H.getWorldPosition(new V3()), pf = F.getWorldPosition(new V3());
+        for (const [nm, pt] of [['mão', ph], ['cotovelo', pf], ['antebraço', pf.clone().lerp(ph, .5)]]) { const d = distSeg(pt, cap.a, cap.b); if (d < cap.r * .75) add(out.anat, t, k, `braço atravessa o corpo ${sd} (${nm})`, (cap.r - d) * 100); } }
+      // histórico pra braço congelado e pé deslizando
+      const hh = hist.get(at) ?? hist.set(at, { m: { L: [], R: [] }, p: { L: [], R: [] } }).get(at);
+      for (const sd of ['L', 'R']) { const H = O['h' + sd]; if (H) hh.m[sd].push([t, at.raiz.worldToLocal(H.getWorldPosition(new V3())), corte]);
+        const pe = O['p' + sd]; if (pe) { const w = pe.getWorldPosition(new V3()); hh.p[sd].push([t, w, w.y - at.raiz.getWorldPosition(new V3()).y, corte]); } }
+      { const rq = at.raiz.getWorldPosition(new V3()); hh.c ??= []; hh.c.push(hh.ult && !corte ? Math.hypot(rq.x - hh.ult.x, rq.z - hh.ult.z) / (passo / 30) : null); hh.ult = rq; }
       // continuidade
       const q = (O.qd ?? at.raiz).getWorldPosition(new V3()), ql = at.raiz.parent ? at.raiz.parent.worldToLocal(q.clone()) : q;   // relativo a quem carrega (carro)
       if (pa.q && !corte && ql.distanceTo(pa.q) / passo > .25) add(out.cont, t, k, 'teletransporte (cm)', ql.distanceTo(pa.q) * 100); pa.q = ql;
@@ -83,6 +98,11 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
         const nm = [n, n.parent, n.parent?.parent].map(x => x?.name).filter(x => x && x !== 'Scene').join('<') || ('peça@' + bx.getCenter(new V3()).toArray().map(v => v.toFixed(1)).join(',') + ' ' + bx.getSize(new V3()).toArray().map(v => v.toFixed(1)).join('×'));
         add(out.col, t, k, 'atravessa ' + nm, Math.round(bx.max.y * 100)); }
     }
+    // OBJETOS × PERSONAGEM: mangueira (flexível) e peças pequenas não podem atravessar o tronco de ninguém
+    for (const at of vis) { const cap = capsula(at); if (!cap) continue;
+      for (const n of flex) { if (!visivel(n)) continue; const pos = n.geometry.attributes.position; let pior = 0;
+        for (let i = 0; i < pos.count; i += 6) { const v = new V3().fromBufferAttribute(pos, i).applyMatrix4(n.matrixWorld); const d = distSeg(v, cap.a, cap.b); if (d < cap.r * .8) pior = Math.max(pior, cap.r - d); }
+        if (pior > 0) add(out.col, t, at.nome, (n.name || 'objeto flexível') + ' atravessa o corpo (cm)', pior * 100); } }
     // VEÍCULOS: a lataria (malha principal) contra o cenário
     sc.traverse(v => { if (!v.userData?.veiculo || !visivel(v)) return; let corpo = null; v.traverse(n => { if (!corpo && n.isMesh && /^sedan_blue$/.test(n.name)) corpo = n; }); if (!corpo) return;
       if (!corpo.geometry.boundingBox) corpo.geometry.computeBoundingBox();
@@ -93,6 +113,19 @@ const res = await p.evaluate(async ([t0, t1, passo]) => {
     for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) { const A = (vis[i].o.qd ?? vis[i].raiz).getWorldPosition(new V3()), B = (vis[j].o.qd ?? vis[j].raiz).getWorldPosition(new V3());
       A.y = B.y = 0; if (A.distanceTo(B) < .3) add(out.col, t, vis[i].nome + '×' + vis[j].nome, 'corpos sobrepostos (cm)', A.distanceTo(B) * 100); }
   }
+  // BRAÇO CONGELADO: mão parada (< 4 mm no espaço do corpo) por 3 s ou mais dentro do mesmo plano de câmera
+  for (const [at, hh] of hist) for (const sd of ['L', 'R']) { if (veic(at.raiz)) continue; const h = hh.m[sd]; let i = 0;   // sentado em veículo: mãos no volante/maleta são paradas de propósito
+    while (i < h.length) { let j = i, mx = 0; while (j + 1 < h.length && !h[j + 1][2]) { j++; mx = Math.max(mx, h[j][1].distanceTo(h[i][1])); if (mx > .004) break; }
+      if (mx <= .004 && h[j][0] - h[i][0] >= 3) { add(out.anat, h[i][0], at.nome, 'braço congelado ' + sd + ' (s)', h[j][0] - h[i][0]); i = j + 1; } else i++; } }
+  // PÉ DESLIZANDO: andando, o pé de APOIO tem que parar no chão a cada meio ciclo. Em janelas de 0,45 s em que o corpo anda
+  // (> 0,2 m/s), se a menor velocidade horizontal do pé não cai abaixo de 0,25 m/s, ele está patinando.
+  for (const [at, hh] of hist) { if (veic(at.raiz) || at.raiz.userData?.noVeiculo) continue;
+    for (const sd of ['L', 'R']) { const h = hh.p[sd]; if (h.length < 4) continue; const vel = [];
+      for (let i = 1; i < h.length; i++) { const [t1, w1, , c1] = h[i], [t0, w0] = h[i - 1]; vel.push(c1 ? null : [t1, Math.hypot(w1.x - w0.x, w1.z - w0.z) / (t1 - t0)]); }
+      const corpo = hh.q ?? []; const n = Math.max(2, Math.round(.45 / (passo / 30)));
+      for (let i = 0; i + n <= vel.length; i += Math.ceil(n / 2)) { const jan = vel.slice(i, i + n); if (jan.some(x => !x)) continue;
+        const vc = (hh.c?.slice(i, i + n) ?? []).filter(x => x != null); const mc = vc.length ? vc.reduce((a2, b2) => a2 + b2, 0) / vc.length : 0;
+        const mn = Math.min(...jan.map(x => x[1])); if (mc > .2 && mn > .25 && mn < 20) add(out.anat, jan[0][0], at.nome, 'pé deslizando ' + sd + ' (cm/s)', mn * 100); } } }
   return out;
 }, [+a, +b, +passo]);
 // resumo: agrupa por (quem, o quê) com faixa de tempo

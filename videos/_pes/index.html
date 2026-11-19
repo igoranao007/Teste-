@@ -15,7 +15,10 @@ window.SETUP = async () => {
     // contato = começo do apoio: primeiro quadro em que o pé desce até perto do mínimo (5% da amplitude)
     const c = {}; for (const s of ['L', 'R']) { const y = ys[s], mn = Math.min(...y), mx = Math.max(...y), lim = mn + (mx - mn) * .08;
       for (let i = 0; i < N; i++) if (y[i] <= lim && y[(i - 1 + N) % N] > lim) { c[s] = +(i / N).toFixed(3); break; } }
-    out[nome] = { ...c, dur: +d.toFixed(3) }; S.scene.remove(A.obj);
+    // passada: na fase de apoio o pé anda pra trás em relação ao corpo; o corpo avança 2× isso por ciclo (2 passos)
+    const zs = { L: [], R: [] }; for (let i = 0; i < N; i++) { A.pose('walk', d * i / N); A.obj.updateMatrixWorld(true); for (const s of ['L', 'R']) zs[s].push(A.obj.worldToLocal(pe(s).getWorldPosition(new THREE.Vector3())).z * A.obj.scale.z); }
+    const amp = s => Math.max(...zs[s]) - Math.min(...zs[s]), escala = A.obj.scale.x;
+    out[nome] = { ...c, dur: +d.toFixed(3), passada: +(((amp("L") + amp("R")) / 2) * 2).toFixed(3), k: +(A.obj.children[0]?.scale.x ?? 1).toFixed(3) }; S.scene.remove(A.obj);
   }
   window.PES = out; S.update = () => {};
 };

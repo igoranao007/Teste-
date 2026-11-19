@@ -1,7 +1,26 @@
 {
- "quando": "2026-11-19T11:47:55.871Z",
+ "quando": "2026-11-19T12:58:54.948Z",
  "resumo": {
-  "anat": {},
+  "anat": {
+   "metalis · salto de mão R": {
+    "n": 1,
+    "t0": 3.73,
+    "t1": 3.73,
+    "max": 31
+   },
+   "metalis · pé deslizando L (cm/s)": {
+    "n": 3,
+    "t0": 0.73,
+    "t1": 2.83,
+    "max": 47
+   },
+   "metalis · pé deslizando R (cm/s)": {
+    "n": 4,
+    "t0": 0.27,
+    "t1": 3.07,
+    "max": 36
+   }
+  },
   "cont": {},
   "col": {}
  }
