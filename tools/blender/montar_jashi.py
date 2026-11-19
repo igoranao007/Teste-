@@ -29,6 +29,13 @@ if VOL != 1:   # cabelo mais cheio (cachos): só o volume de cima/trás, rosto f
         w = mw @ v.co
         if w.z > 1.93 or (w.y > 0.0 and w.z > 1.82):
             v.co = inv @ (C + (w - C) * VOL)
+ROSTO_PLANO = os.environ.get('ROSTO_PLANO')     # ex.: -0.10 — achata a frente do rosto (sem nariz) pra uma placa de rosto encostar por cima (Dom)
+if ROSTO_PLANO:
+    yl = float(ROSTO_PLANO); n = 0
+    for v in bm.verts:
+        w = mw @ v.co
+        if 1.70 < w.z < 1.98 and abs(w.x) < 0.08 and w.y < yl: w.y = yl; v.co = inv @ w; n += 1
+    print('ROSTO_PLANO vertices:', n)
 bm.to_mesh(h.data); bm.free()
 print('OCULOS removidos:', len(fora))
 import os
