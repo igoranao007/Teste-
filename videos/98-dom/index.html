@@ -16,7 +16,7 @@ window.SETUP = async () => {
   // ?base=procedural: o modelo antigo (corpo simples + cabeça com a foto). Padrão: o mesmo modelo base do elenco (JashiPSX), com animações
   const jashi = q.get('base') !== 'procedural';
   let D, c, A;
-  if (jashi) { A = await E4.ator('dom'); S.scene.add(A.obj); A.pose(q.get('clip') || 'idle', +(q.get('t') || 1)); D = await T.acessoriosDom(A, { cabecaOriginal: q.get('cabeca') === 'elenco', cabeca: q.get('cabeca') }); }
+  if (jashi) { A = await E4.ator('dom'); S.scene.add(A.obj); A.pose(q.get('clip') || 'idle', +(q.get('t') || 1)); D = await T.acessoriosDom(A, { cabecaOriginal: q.get('cabeca') === 'elenco', cabeca: q.get('cabeca'), semVeu: q.get('semveu') === '1', ...(q.get('esc') ? { escRosto: +q.get('esc') } : {}), ...(q.get('dz') ? { dz: +q.get('dz') } : {}), ...(q.get('corte') ? { corteZ: +q.get('corte') } : {}) }); }
   else { D = await T.dom(); S.scene.add(D.obj); c = D.corpo; c.braco('L', [.18, -1, -.02], [.1, -1, .12], [0, -1, .1]); c.braco('R', [-.18, -1, -.02], [-.1, -1, .12], [0, -1, .1]); c.guardar(); D.assentar(); }
   const b = new THREE.Box3().setFromObject(jashi ? A.obj : D.obj), h = b.max.y, cab = jashi ? A.osso('spine.005').getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, .1, 0)) : D.cabeca.getWorldPosition(new THREE.Vector3());
   const V = { frente: [0, h * .55, 4.4, 0, h * .5, 0, 30], tres: [2.5, h * .62, 3.6, 0, h * .5, 0, 30], lado: [4.4, h * .55, 0, 0, h * .5, 0, 30],
