@@ -6,7 +6,7 @@ por causa do tamanho). Pra voltar: `git checkout v4.3-estavel -- lib videos tool
 ## v4.3 (estável) — tag `v4.3-estavel` (commit fdd8ad9) · `out/historico/v4.3-720p.mp4`
 - Base desta rodada. Problemas que o diretor achou nela: BUG 01–04 abaixo.
 
-## v4.4 — esta versão
+## v4.4 (estável) — tag `v4.4-estavel`
 **Mudanças**
 - Metalis (44): caminhada única com passada medida; virada suave; gestos com alvos relativos ao corpo (ombro), cotovelo pra fora;
   mão no peitoril viva (respira, ergue nas falas); câmeras de 3/4 por fora.
@@ -23,4 +23,6 @@ por causa do tamanho). Pra voltar: `git checkout v4.3-estavel -- lib videos tool
 **Testes**: `bash tools/qa_todos.sh` (resultado em `RESUMO.txt`), `quadros_vazios.py`, folha 1 qps do filme inteiro,
 quadro a quadro de 43 (bico/mangueira/grana), 44 (Metalis), 50 (elevador), `NAO_REGREDIR.md`.
 
-**Resultado**: ver relatório da entrega.
+**Resultado**: QA quadro a quadro (PASSO=1) aprovado em todos os planos com personagem; `quadros_vazios.py` = 0;
+folha 1 qps dos 232 s revisada; 720p 63 MB. Tag `v4.4-estavel` · `out/historico/v4.4-720p.mp4`.
+Pendências documentadas em `AUDITORIA_v4.4.md` (o que não dá pra medir automaticamente).
