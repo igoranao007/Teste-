@@ -6,8 +6,12 @@
   Casaco branco de manga comprida aberto em V, blusa preta de zíper, fivela laranja, gola alta, calça escura, sapato preto.
 - Montagem e animação: `CALCA=1 blender ... montar_jashi.py -- texturas/dom_512.png dom.blend` → `animar_jashi.py` → `exportar_glb.py`
   (10 animações: idle walk run talk wave sit cower attack hit death). Arquivo 3D fora do git (licença do JashiPSX).
-- "Frankenstein" (escolha do diretor): corpo, roupa e animações do modelo do elenco + a CABEÇA DA FOTO do primeiro modelo
-  (`T.cabecaDom()`), presa ao osso da cabeça no lugar da original (que fica escondida). `?cabeca=elenco` mostra a cabeça pintada.
+- "Frankenstein" (escolha do diretor): corpo, roupa, animações e cabeça (cabelo, orelhas, nuca) do modelo do elenco; só a FRENTE do rosto
+  vem da foto do primeiro modelo (`T.cabecaDom({ soFrente: true })`, máscara presa ao osso da cabeça). A textura é pintada com `ROSTO_LISO=1`
+  (frente da cabeça só pele, sem traços), pra nada aparecer por trás da máscara. `?cabeca=elenco` tira a máscara.
+- Detalhes amarelos na roupa: debrum da abertura do casaco, punhos e barra.
+- Capa de Hokage (`acessoriosDom`): branca, chamas amarelas na barra, "小人の隠れ家" (kobito no kakurega, "o esconderijo/toca do anão") na vertical
+  nas costas (fonte IPAGothic), gola alta; presa ao tronco (spine.003).
 - Chapéu cônico laranja/branco com 火 e véu: `await T.acessoriosDom(A)` (lib/tgp.js), presos ao osso da cabeça; `D.atualizar(t, { boca, pisca })`.
 - Uso: `const A = await E4.ator('dom'); cena.add(A.obj); const D = await T.acessoriosDom(A);` e a cada quadro `D.atualizar(t, { boca, pisca })` · folha: `videos/98-dom` (?v=frente|tres|lado|costas|rosto &clip=walk).
 - Versão antiga (corpo simples + cabeça procedural): `videos/98-dom?base=procedural`.

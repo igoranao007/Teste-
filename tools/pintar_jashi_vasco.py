@@ -117,12 +117,13 @@ for x, y, p, t in lista:
     if ROUPA == 'dom' and k not in ('pele_cab', 'cabelo'):
         # DOM: casaco branco (manga comprida até o pulso) aberto em V sobre blusa preta de zíper, fivela laranja, gola alta branca;
         # calça escura e sapato preto
-        CASACO, BLUSA, ZIPER, LARANJA, CALCA_D, SAP = (218, 214, 205), (20, 20, 23), (120, 122, 126), (226, 112, 30), (36, 37, 44), (18, 18, 20)
+        CASACO, BLUSA, ZIPER, LARANJA, CALCA_D, SAP, AMAR = (226, 222, 212), (20, 20, 23), (120, 122, 126), (226, 112, 30), (36, 37, 44), (18, 18, 20), (236, 190, 40)
         frente = n[1] < -0.2
-        if t['obj'] == 'arms': c = [q * dobra(OB[x, y], 'manga', 0.8) for q in CASACO] if ax < PULSO else [PELE[i] * dobra(o, 'pele', 0.9) for i in range(3)]
+        if t['obj'] == 'arms': c = [q * dobra(OB[x, y], 'manga', 0.5) for q in (AMAR if PULSO - 0.045 < ax < PULSO - 0.012 else CASACO)] if ax < PULSO else [PELE[i] * dobra(o, 'pele', 0.9) for i in range(3)]   # punho amarelo
         elif k == 'chuteira': c = [q * dobra(o, k, 0.8) for q in SAP]
         elif Z < 0.96 and t['obj'] == 'body':
             cor = CASACO if (Z > 0.80 and not (frente and ax < 0.05)) else CALCA_D                # barra do casaco cobre o quadril (aberta na frente)
+            if cor == CASACO and Z < 0.83: cor = AMAR                                                # barra amarela
             c = [q * dobra(OB[x, y], 'calcao', 0.35 if cor == CASACO else 0.6) for q in cor]
         elif k == 'pele': c = [PELE[i] * dobra(o, k, 0.9) for i in range(3)]
         else:
@@ -132,6 +133,7 @@ for x, y, p, t in lista:
                 if ax < v and Z > 1.10:
                     cor = BLUSA
                     if ax < 0.006: cor = ZIPER                                                    # zíper
+                elif ax < v + 0.014 and Z > 1.10: cor = AMAR                                       # debrum amarelo na abertura
                 if abs(Z - 1.24) < 0.016 and ax < 0.045: cor = LARANJA                            # fivela laranja
                 if Z <= 1.10 and ax < 0.007: cor = (150, 148, 140)                                # fecho do casaco
             if Z > 1.64 and rn_ < 0.13: cor = BLUSA if (frente and ax < 0.05) else CASACO        # gola alta branca (blusa preta na frente)
@@ -159,7 +161,7 @@ for x, y, p, t in lista:
         mx, my = X / ESC * 512 + 256, (CZ - Z) / ESC * 512 + 256
         w = max(0.0, min(1.0, (1 - math.hypot((mx - 256) / 88, (my - 285) / 150)) / 0.3)) * (ss(-0.1, -0.55, n[1]) if n[1] > -0.55 else 1)
         base = [PELE[i] * dobra(o, k, 0.8) for i in range(3)]
-        if w > 0: f = amostra(mx, my); base = [base[i] * (1 - w) + f[i] * w for i in range(3)]
+        if w > 0 and os.environ.get('ROSTO_LISO') != '1': f = amostra(mx, my); base = [base[i] * (1 - w) + f[i] * w for i in range(3)]   # ROSTO_LISO=1: só pele (o rosto vem de uma máscara por cima)
         c = base
     elif k == 'cabelo':
         c = [CAB[i] * dobra(o, k, 1.0) for i in range(3)]
