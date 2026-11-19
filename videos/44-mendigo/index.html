@@ -14,7 +14,7 @@ window.SETUP = async () => {
   const S = F.noite({ fov: 42, perto: 14, longe: 70, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
   const C = await V.montarPosto(S), { D, Fr, Me, bico } = C, fala = await V.vozes();
   Fr.obj.visible = false;
-  const PERTO = [.45, -1.4], ATRAS = [.62, -2.05], LOJA = [3.4, -5.6], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const PERTO = [.45, -1.4], ATRAS = [.62, -2.05], LOJA = [2.4, -4.25], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
   const SOLEIRA = v3(.62, .98, -.95);                                         // beirada da janela do motorista (vidro abaixado)
   const olhos = V.olhosMetalis(Me); window.OLHOS = olhos; window.Me = Me; const _x = 0, moeda = V.dinheiro('moeda'); S.scene.add(moeda);
@@ -32,8 +32,10 @@ window.SETUP = async () => {
     // METALIS — chega arrastando o pé (0,2–3,6), vira pra janela, se debruça com a mão na beirada; gesticula nas falas;
     //           pega a moeda, olha pra ela e guarda; dá um passo pra trás quando o vidro sobe; acena; acompanha o carro e os olhos acendem
     let andando = false;
-    if (t < 3.7) { andando = V.caminhar(Me, LOJA, PERTO, t, .2, 3.6, { passo: 1.2, de: -2.4 }); if (!andando) Me.pose('idle', t); }
-    else if (t < 31.4) { Me.obj.position.set(PERTO[0], 0, PERTO[1]); Me.obj.rotation.y = angLerp(Math.atan2(PERTO[0] - LOJA[0], PERTO[1] - LOJA[1]), .32, P.suave(3.6, 4.1, t));
+    if (t < 3.7) { const DESVIO = [1.15, -3.35];                                          // contorna a ilha das bombas (degrau de 21 cm)
+      const L1 = Math.hypot(DESVIO[0] - LOJA[0], DESVIO[1] - LOJA[1]), pm = 1.2 * 1.1 / 1.75;
+      andando = t < 1.63 ? V.caminhar(Me, LOJA, DESVIO, t, .2, 1.63, { passo: 1.2, de: -2.4, ease: .12 }) : V.caminhar(Me, DESVIO, PERTO, t, 1.63, 3.6, { passo: 1.2, de: Math.atan2(DESVIO[0] - LOJA[0], DESVIO[1] - LOJA[1]), ease: .12, fase: L1 / pm * Me.dur('walk') }); if (!andando) Me.pose('idle', t); }
+    else if (t < 31.4) { Me.obj.position.set(PERTO[0], 0, PERTO[1]); Me.obj.rotation.y = angLerp(Math.atan2(PERTO[0] - 1.15, PERTO[1] + 3.35), .32, P.suave(3.6, 4.1, t));
       Me.pose('idle', t, 'talk', .45 * fala.peso('44', t, 'metalis'), t); }
     else if (t < 34.2) { andando = V.caminhar(Me, PERTO, ATRAS, t, 31.4, 32.3, { virar: false, passo: .9 }); Me.obj.rotation.y = .32;
       if (!andando) { const w = P.suave(32.3, 32.7, t) * (1 - P.suave(33.7, 34.1, t)); Me.pose('idle', t, 'wave', w, t - 32.3); } else Me.pose('walk', -(t - 31.4) * .9 * Me.dur('walk'), 'idle', 1 - Math.min(P.suave(31.4, 31.7, t), 1 - P.suave(32.0, 32.3, t)), t); }

@@ -32,7 +32,7 @@ window.SETUP = async () => {
       const anda = V.caminhar(A2, [x, Z0], [x, ZF], t, 2.4, 17.8, { fase, passo: 1.3 }); z = A2.obj.position.z;
       A2.obj.rotation.y = 0; if (!anda) A2.pose('idle', t + fase);
     }
-    V.segurarMaleta(Ad, mal); mal.pulsar(t);
+    V.segurarMaleta(Ad, mal, t); mal.pulsar(t);
     // olhares: conversam de lado; o Gusta olha pra maleta quando fala do Projeto Mogg; no fim viram um pro outro
     const conversa = P.suave(2.8, 3.2, t), fim = P.suave(18.2, 19.2, t);
     V.girar(Gu, 'spine.005', [0, 1, 0], -.38 * conversa * (1 - P.suave(14.2, 14.6, t)) - .3 * P.suave(15.6, 16, t) - .2 * fim);

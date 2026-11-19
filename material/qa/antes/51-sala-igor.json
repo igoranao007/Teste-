@@ -1,0 +1,28 @@
+{
+ "quando": "2026-11-19T09:49:27.516Z",
+ "resumo": {
+  "anat": {
+   "arms#0 · mão torcida L": {
+    "n": 211,
+    "t0": 0,
+    "t1": 14,
+    "max": 65
+   }
+  },
+  "cont": {},
+  "col": {
+   "arms#0 · atravessa desk1<Scene": {
+    "n": 211,
+    "t0": 0,
+    "t1": 14,
+    "max": 71
+   },
+   "arms#0 · atravessa office_chair_black<Scene": {
+    "n": 211,
+    "t0": 0,
+    "t1": 14,
+    "max": 104
+   }
+  }
+ }
+}

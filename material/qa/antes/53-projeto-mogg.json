@@ -1,0 +1,21 @@
+{
+ "quando": "2026-11-19T09:49:22.034Z",
+ "resumo": {
+  "anat": {},
+  "cont": {},
+  "col": {
+   "arms#0 · atravessa desk1<Scene": {
+    "n": 181,
+    "t0": 0,
+    "t1": 12,
+    "max": 71
+   },
+   "arms#0 · atravessa office_chair_black<Scene": {
+    "n": 181,
+    "t0": 0,
+    "t1": 12,
+    "max": 104
+   }
+  }
+ }
+}

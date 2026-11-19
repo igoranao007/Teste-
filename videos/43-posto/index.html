@@ -13,80 +13,105 @@ const { THREE } = P;
 window.SETUP = async () => {
   const S = F.noite({ fov: 42, perto: 14, longe: 70, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
   const C = await V.montarPosto(S), { D, Fr, bico } = C, fala = await V.vozes();
-  const JANELA = [.4, -1.7], PB = [-2.3, -2.3], TAMPA = [-1.95, -1.46], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const JANELA = [.4, -1.7], PB = [-2.5, -1.92], TAMPA = [-1.95, -1.46], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
   const { car } = D, Me = C.Me; Me.obj.visible = false;
   const notas = V.dinheiro('notas'); S.scene.add(notas);
-  const CAP = v3(-1.85, .9, -.97);                                  // boca do tanque (tampa traseira, lado do motorista)
+  const CAP = v3(-1.85, .88, -.95);                                  // boca do tanque (tampa traseira, lado do motorista)
   const ROT_BOMBA = Math.atan2(bico.suporte.x - PB[0], bico.suporte.z - PB[1]), ROT_CARRO = 0;
   const angLerp = (a, b, u) => { let d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return a + d * u; };
-  // pose do bico: no suporte | carregado ao lado do quadril (relativo ao frentista) | enfiado na boca do tanque
-  const qY = a => new THREE.Quaternion().setFromAxisAngle(v3(0, 1, 0), a);
-  const noSuporte = () => ({ p: bico.suporte.clone(), q: new THREE.Quaternion() });
-  const carregado = () => { const r = Fr.obj.rotation.y, p = v3(.26, .78, .22).applyAxisAngle(v3(0, 1, 0), r).add(Fr.obj.position);
-    return { p, q: qY(r + Math.PI).multiply(new THREE.Quaternion().setFromAxisAngle(v3(1, 0, 0), -1.0)) }; };
-  const noTanque = t => { const q = qY(Math.PI).multiply(new THREE.Quaternion().setFromAxisAngle(v3(1, 0, 0), -1.22 + .03 * Math.sin(t * 2.3)));
-    const ponta = v3(0, .38, -.117).multiplyScalar(bico.scale.x).applyQuaternion(q); return { p: CAP.clone().sub(ponta), q }; };
+  // BICO (referência: fotos de abastecimento): em uso o eixo do corpo do bico (Y do modelo) vira a FRENTE (mangueira → ponteira)
+  // e o lado do gatilho (−Z do modelo) fica pra BAIXO; a mão segura o cabo por cima, dedos envolvendo o gatilho.
+  const tampa = V.tampaTanque(car), K = bico.scale.x, GRIP = v3(0, .09, -.05), PONTA = v3(0, .38, -.117), UP = v3(0, 1, 0);
+  const frente = r => v3(Math.sin(r), 0, Math.cos(r)), direita = r => v3(-Math.cos(r), 0, Math.sin(r));
+  const poseBico = (q, gripW) => ({ q, p: gripW.clone().sub(GRIP.clone().multiplyScalar(K).applyQuaternion(q)) });
+  const noSuporte = (sobe = 0) => ({ q: new THREE.Quaternion(), p: bico.suporte.clone().add(v3(.1 * sobe, .16 * sobe, 0)) });   // sobe: tirar/pendurar (sai pra fora e pra cima do gancho)
+  const carregado = () => { const r = Fr.obj.rotation.y, f = frente(r), d = direita(r);
+    const F = f.clone().multiplyScalar(.95).add(v3(0, -.3, 0)), G = Fr.obj.position.clone().addScaledVector(d, .24).addScaledVector(f, .1).add(v3(0, .78, 0)); return poseBico(V.base(F, UP), G); };   // carregado na horizontal, ponteira um pouco pra baixo (pulso reto, braço solto)
+  const noTanque = (t, fundo = 1) => { const F = v3(.0, -.2, 1), q = V.base(F, UP), ponta = PONTA.clone().multiplyScalar(K).applyQuaternion(q);
+    const alvo = CAP.clone().addScaledVector(F.clone().normalize(), P.lerp(-.13, .035, fundo) + .004 * Math.sin(t * 2.1)); return { q, p: alvo.sub(ponta) }; };
   const mix = (A, B, u) => ({ p: A.p.clone().lerp(B.p, u), q: A.q.clone().slerp(B.q, u) });
+  const PEGA_D = v3(bico.suporte.x - PB[0], -.35, bico.suporte.z - PB[1]).normalize();          // direção do braço até o cabo, no gancho
   S.update = t => {
     // carro chegando e parado
     const ch = P.suave(0, 5, t); C.naCurva(C.curva, 1 - (1 - P.clamp(t / 5)) ** 2.2);
     const v = fala('43', t, 'adryan');
     // Adryan: abaixa o vidro (botão na porta) quando o frentista chega; paga com notas tiradas do bolso
     car.janela(P.suave(5.1, 6.0, t));
-    const bolso = P.suave(19.2, 19.6, t) * (1 - P.suave(19.8, 20.2, t)), fora = P.suave(20.1, 20.7, t) * (1 - P.suave(21.3, 21.9, t));
+    const bolso = P.suave(19.8, 20.2, t) * (1 - P.suave(20.4, 20.8, t)), fora = P.suave(20.8, 21.4, t) * (1 - P.suave(21.9, 22.4, t));
     D.atualizar(t, { giro: t < 5 ? .25 * Math.sin(t * .9) : 0, falaAd: v, janela: P.clamp((t - 4.8) / 1.4), bolso, maoFora: fora,
-      olhaAd: .75 * (P.suave(5.3, 5.8, t) * (1 - P.suave(11.4, 11.9, t)) + P.suave(14, 14.4, t) * (1 - P.suave(19.2, 19.5, t)) + P.suave(20.0, 20.4, t) * (1 - P.suave(22, 22.5, t))) - .25 * P.suave(19.2, 19.5, t) * (1 - P.suave(19.8, 20.1, t)) });
+      olhaAd: .75 * (P.suave(5.3, 5.8, t) * (1 - P.suave(11.4, 11.9, t)) + P.suave(14, 14.4, t) * (1 - P.suave(19.8, 20.1, t)) + P.suave(20.6, 21.0, t) * (1 - P.suave(22.5, 23, t))) - .25 * P.suave(19.8, 20.1, t) * (1 - P.suave(20.4, 20.7, t)) });
     // FRENTISTA: bomba → janela (5–7) · janela → bomba (11,2–12,3) · tira o bico (12,6–13,5) · tampa (13,5–14,3) · abastece (14,8–18,3)
     //            · devolve o bico (18,7–19,9) · janela (19,9–20,9) · recebe e guarda no bolso (20,9–21,7) · vai embora (21,9–)
+    // FRENTISTA (sequência completa, como num posto real): vai até a bomba (11,2–12,3) · estende o braço e pega o cabo (12,6–13,15)
+    //   · tira o bico do gancho, pra cima e pra fora (13,15–13,6) · leva até a traseira do carro (13,6–14,3) · abre a portinhola (14,3–14,65)
+    //   · encaixa o bico (14,65–15,15) · segura enquanto abastece (até 18,3) · tira o bico (18,3–18,7) · fecha a portinhola (18,7–19,0)
+    //   · volta à bomba (19,0–19,7) · pendura o bico (19,95–20,35) · solta (20,35–20,6) · janela (20,6–21,45) · recebe (21,5–21,8) · bolso · vai embora (22,4–)
     let anda = false;
-    if (t < 5) { Fr.obj.position.set(2.0, 0, -3.3); Fr.obj.rotation.y = -1.2; Fr.pose('idle', t); }
-    else if (t < 11.2) { anda = V.caminhar(Fr, [2.0, -3.3], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
-    else if (t < 13.5) { anda = V.caminhar(Fr, JANELA, PB, t, 11.2, 12.3, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(-Math.PI / 2, ROT_BOMBA, P.suave(12.3, 12.6, t)); if (t > 13.1) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.1, 13.5, t)); Fr.pose('idle', t); } }
-    else if (t < 18.7) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.5, 14.2, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = ROT_CARRO; Fr.pose('idle', t * .6); } }
-    else if (t < 20.1) { anda = V.caminhar(Fr, TAMPA, PB, t, 18.7, 19.4, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, ROT_BOMBA, P.suave(19.4, 19.75, t)); Fr.pose('idle', t); } }
-    else if (t < 21.9) { anda = V.caminhar(Fr, PB, JANELA, t, 20.1, 20.95, { de: ROT_BOMBA }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(20.95, 21.25, t)); Fr.pose('idle', t); } }
-    else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 22, 26.5, { de: 0 }); }
+    if (t < 5) { Fr.obj.position.set(1.05, 0, -3.45); Fr.obj.rotation.y = -1.2; Fr.pose('idle', t); }
+    else if (t < 11.2) { anda = V.caminhar(Fr, [1.05, -3.45], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
+    else if (t < 13.9) { anda = V.caminhar(Fr, JANELA, PB, t, 11.2, 12.3, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(-Math.PI / 2, ROT_BOMBA, P.suave(12.3, 12.6, t)); if (t > 13.35) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.35, 13.9, t)); Fr.pose('idle', t); } }
+    else if (t < 19.0) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.9, 14.5, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(TAMPA[0] - PB[0], TAMPA[1] - PB[1]), ROT_CARRO, P.suave(14.5, 14.85, t)); Fr.pose('idle', t * .6); } }
+    else if (t < 20.6) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.0, 19.7, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, ROT_BOMBA, P.suave(19.7, 19.95, t)); Fr.pose('idle', t); } }
+    else if (t < 22.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.6, 21.45, { de: ROT_BOMBA }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(21.45, 21.7, t)); Fr.pose('idle', t); } }
+    else { anda = V.caminhar(Fr, JANELA, [4.5, -6.5], t, 22.4, 26.8, { de: 0 }); }
     Fr.obj.updateMatrixWorld(true);
+    const curva = P.suave(14.5, 15.0, t) * (1 - P.suave(18.6, 19.0, t));                       // inclina o tronco pra alcançar a traseira
+    if (curva > 0) { V.girar(Fr, 'spine.002', [1, 0, 0], .28 * curva); V.girar(Fr, 'spine.003', [1, 0, 0], .14 * curva); Fr.obj.updateMatrixWorld(true); }
     // bico
     let B;
-    if (t < 13.1) B = noSuporte();
-    else if (t < 13.5) B = mix(noSuporte(), carregado(), P.suave(13.1, 13.5, t));
-    else if (t < 14.3) B = carregado();
-    else if (t < 14.8) B = mix(carregado(), noTanque(t), P.suave(14.3, 14.8, t));
-    else if (t < 18.3) B = noTanque(t);
-    else if (t < 18.7) B = mix(noTanque(t), carregado(), P.suave(18.3, 18.7, t));
-    else if (t < 19.5) B = carregado();
-    else if (t < 19.85) B = mix(carregado(), noSuporte(), P.suave(19.5, 19.85, t));
+    if (t < 13.15) B = noSuporte();
+    else if (t < 13.4) B = noSuporte(P.suave(13.15, 13.4, t));
+    else if (t < 13.95) B = mix(noSuporte(1), carregado(), P.suave(13.4, 13.95, t));
+    else if (t < 14.85) B = carregado();
+    else if (t < 15.15) B = mix(carregado(), noTanque(t, 0), P.suave(14.85, 15.15, t));
+    else if (t < 18.3) B = noTanque(t, P.suave(15.15, 15.35, t));
+    else if (t < 18.45) B = noTanque(t, 1 - P.suave(18.3, 18.45, t));
+    else if (t < 18.75) B = mix(noTanque(t, 0), carregado(), P.suave(18.45, 18.75, t));
+    else if (t < 19.95) B = carregado();
+    else if (t < 20.2) B = mix(carregado(), noSuporte(1), P.suave(19.95, 20.2, t));
+    else if (t < 20.35) B = noSuporte(1 - P.suave(20.2, 20.35, t));
     else B = noSuporte();
     bico.position.copy(B.p); bico.quaternion.copy(B.q); bico.updateMatrixWorld(true); bico.mangueira();
-    // mão direita do frentista: vai até o cabo do bico, segura enquanto ele está fora do suporte, solta
-    const pegar = P.suave(12.6, 13.1, t) * (1 - P.suave(19.85, 20.2, t));
-    const cabo = bico.localToWorld(v3(0, .1, .06));
-    const curva = P.suave(14.2, 14.8, t) * (1 - P.suave(18.3, 18.8, t));                       // inclina o tronco pra alcançar a tampa
-    if (curva > 0) { V.girar(Fr, 'spine.002', [1, 0, 0], .22 * curva); V.girar(Fr, 'spine.003', [1, 0, 0], .12 * curva); }
-    if (pegar > 0) { const h = Fr.osso('hand.R').getWorldPosition(v3()); Fr.modelo.alcancar('R', h.lerp(cabo, pegar).toArray(), [.6, -.7, -.4], .04); V.punho(Fr, 'R', P.suave(.7, 1, pegar), window.SINAL ?? 1); }
+    // mão direita: pegada orientada no cabo (palma por cima, dedos no gatilho) — a mão segue a orientação do bico
+    const pegaBico = P.suave(12.6, 13.15, t) * (1 - P.suave(20.35, 20.6, t));
+    if (pegaBico > 0) { const r = Fr.obj.rotation.y, U = v3(0, 0, 1).applyQuaternion(bico.quaternion), F = v3(0, 1, 0).applyQuaternion(bico.quaternion);
+      // no gancho o cabo fica de pé: a mão fecha nele como numa barra (dedos na horizontal, indicador pra cima);
+      // em uso: palma por cima, dedos descendo pela frente do cabo até o gatilho (pulso quase reto)
+      const uso = P.suave(13.4, 13.95, t) * (1 - P.suave(19.95, 20.25, t));
+      const alvoG = bico.localToWorld(GRIP.clone()), hor = alvoG.clone().sub(Fr.obj.position); hor.y = 0; hor.normalize();
+      const dedosGancho = hor, dedosUso = U.clone().negate().multiplyScalar(.8).addScaledVector(F, .45).addScaledVector(direita(r), -.2);
+      // pegada definida NO GANCHO (bico em pé = rotação identidade): dedos na direção do braço até o cabo, indicador pra cima;
+      // depois a mão gira junto com o bico (pegada rígida) — ao deitar o bico, a palma fica por cima e os dedos descem pro gatilho
+      const dd = PEGA_D.clone().applyQuaternion(bico.quaternion), ii = v3(0, 1, 0).applyQuaternion(bico.quaternion);
+      V.pegar(Fr, 'R', alvoG, dd, ii, direita(r).multiplyScalar(.8).add(v3(0, -.5, 0)).addScaledVector(frente(r), -.3), pegaBico, .85); }
+    // mão esquerda: abre e fecha a portinhola
+    tampa.abrir(P.suave(14.6, 14.82, t) * (1 - P.suave(18.78, 18.98, t)));
+    const maoTampa = P.suave(14.5, 14.65, t) * (1 - P.suave(14.82, 15.0, t)) + P.suave(18.7, 18.8, t) * (1 - P.suave(18.98, 19.1, t));
+    if (maoTampa > 0) { car.updateMatrixWorld(true); V.pegar(Fr, 'L', tampa.borda(), v3(0, -.3, 1), v3(0, 1, 0), [.8, -.5, -.2], maoTampa, .3); }
     // pagamento: as notas saem do bolso do Adryan (19,6), vão pra janela, passam pra mão do frentista (21,2) e somem no bolso dele (21,7)
-    const pegaGrana = P.suave(20.9, 21.2, t) * (1 - P.suave(21.25, 21.6, t)), bolsoFr = P.suave(21.3, 21.6, t) * (1 - P.suave(21.7, 22, t));
+    const pegaGrana = P.suave(21.45, 21.8, t) * (1 - P.suave(21.85, 22.15, t)), bolsoFr = P.suave(21.9, 22.2, t) * (1 - P.suave(22.25, 22.5, t));
     if (pegaGrana > 0 || bolsoFr > 0) {
       const h = Fr.osso('hand.R').getWorldPosition(v3()), mAd = D.Ad.osso('hand.L').getWorldPosition(v3());
       const quadril = v3(.2, .9, .05).applyAxisAngle(v3(0, 1, 0), Fr.obj.rotation.y).add(Fr.obj.position);
       Fr.modelo.alcancar('R', h.clone().lerp(mAd, pegaGrana).lerp(quadril, bolsoFr).toArray(), [.6, -.7, -.4], .04);
     }
-    notas.visible = t > 19.6 && t < 21.68;
-    if (t < 21.2) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
+    notas.visible = t > 20.2 && t < 22.2;
+    if (t < 21.82) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
     Me.obj.visible = false;
     // câmeras (nas tomadas pela janela, mais luz dentro do carro)
-    const janela = (t >= 14 && t < 17.4) || (t >= 18.6 && t < 21.9);
+    const janela = (t >= 15.4 && t < 17.4) || (t >= 18.6 && t < 20.0) || (t >= 20.9 && t < 22.4);
     P.luz({ keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: janela ? '#5f8068' : '#2c4232', fillDir: [-.1, .2, -1], fillCor: janela ? '#6fae82' : '#1c5a30' });
     if (t < 5) cam([14, 6, 13], [P.lerp(-10, 0, ch), .8, P.lerp(7, -1, ch)], 40);
     else if (t < 11.4) cam([1.35, 1.72, -3.55], [.2, 1.0, -.35], 36);                                          // por cima do ombro do frentista
-    else if (t < 14) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                          // tira o bico da bomba
-    else if (t < 16.4) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                       // Adryan pela janela
-    else if (t < 17.4) cam([1.4, 1.15, 1.75], [.25, .92, .35], 38);                                        // Nicolas imóvel com a maleta
-    else if (t < 18.6) cam([-3.3, 1.5, -.15], [-2.05, 1.45, -1.6], 40);                                     // frentista calado
-    else if (t < 20.6) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);
-    else if (t < 21.9) cam([1.7, 1.3, -1.75], [.3, 1.0, -1.15], 36);                                       // a grana passando pela janela
+    else if (t < 14.3) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                     // estende o braço e tira o bico do gancho
+    else if (t < 15.4) cam([-1.05, 1.2, -1.85], [-1.85, .86, -.98], 42);                                     // abre a portinhola e encaixa o bico
+    else if (t < 16.6) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                        // Adryan pela janela
+    else if (t < 17.4) cam([1.4, 1.15, 1.75], [.25, .92, .35], 38);                                         // Nicolas imóvel com a maleta
+    else if (t < 18.6) cam([-3.3, 1.5, -.15], [-2.05, 1.25, -1.4], 40);                                      // frentista calado, abastecendo
+    else if (t < 20.0) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                        // "beleza... também não precisa conversar"
+    else if (t < 20.9) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                   // pendura o bico de volta
+    else if (t < 22.4) cam([1.7, 1.3, -1.75], [.3, 1.0, -1.15], 36);                                       // a grana passando pela janela
     else cam([1.8, 1.6, -4.2], [.2, 1.0, -.8], 42);
     C.halos(S.camera);
     window.C = C; window.dbgNaN = () => { const out = []; for (const [n, A] of [['ad', C.D.Ad], ['ni', C.D.Ni], ['fr', C.Fr]]) A.obj.traverse(o => { if (o.isBone && !isFinite(o.quaternion.x + o.quaternion.w + o.position.x)) out.push(n + ':' + o.name); }); return out; };

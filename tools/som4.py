@@ -80,13 +80,18 @@ ALT = {'adryan': 1.76, 'gusta': 1.80, 'nicolas': 1.62, 'frentista': 1.74, 'metal
 PESO = {'adryan': .9, 'gusta': 1.0, 'nicolas': .8, 'frentista': 1.0, 'metalis': .6}
 _seed = [0]
 OFF = {'concreto': 4.8, 'mato': 1.3, 'madeira': -3.2, 'corredor': -.4, 'carpete': -.5, 'arrasto': -2.3}   # iguala o volume percebido entre superfícies (medido: RMS 300 ms)
-def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18):
-    pm = passo * ALT[quem] / 1.75 / 2; v = 1 / (1 - e); n = int(L / pm)
+PES = json.load(open('material/qa/pes.json'))          # fração do ciclo 'walk' em que cada pé toca o chão (videos/_pes)
+def passos(pl, t0, t1, L, quem, sup, gain=0, passo=1.45, pan=0, e=.18, fase=0.0):
+    """um som por CONTATO do pé (como notify de animação): o motor anda u·L/passo ciclos (+fase em ciclos)."""
+    pc = passo * ALT[quem] / 1.75; v = 1 / (1 - e)
     def u_de(u0): return v * u0 * u0 / (2 * e) if u0 < e else (1 - v * (1 - u0) ** 2 / (2 * e) if u0 > 1 - e else v * (u0 - e / 2))
-    for k in range(1, n + 1):                                     # acha o instante em que a distância andada cruza k·pm
-        alvo, a, b = k * pm / L, 0.0, 1.0
+    cont = sorted((n + PES[quem][pe] - fase, pe) for n in range(-1, int(L / pc) + 3) for pe in ('L', 'R'))
+    for c, pe in cont:
+        d = c * pc
+        if d <= .02 or d > L: continue
+        alvo, a, b = d / L, 0.0, 1.0
         for _ in range(30): m = (a + b) / 2; a, b = (m, b) if u_de(m) < alvo else (a, m)
-        _seed[0] += 1; cue('pisada', P(pl) + t0 + a * (t1 - t0), sup=sup, peso=PESO[quem], seed=_seed[0], gain=gain + OFF[sup] + (-1.5 if k % 2 else 0), pan=pan + (.06 if k % 2 else -.06))
+        _seed[0] += 1; cue('pisada', P(pl) + t0 + a * (t1 - t0), sup=sup, peso=PESO[quem], seed=_seed[0], gain=gain + OFF[sup] + (-1.5 if pe == 'L' else 0), pan=pan + (.06 if pe == 'R' else -.06))
 # camadas longas de clima
 cue('drone', 0, d=26, root=31, gain=-4); cue('drone', P('44') + 20, d=17, root=29, gain=-3); cue('drone', P('46'), d=37, root=31, gain=-2); cue('drone', P('51'), d=55, root=31, gain=-3)
 # 41 estrada
@@ -95,14 +100,14 @@ cue('chiado', 0, d=2, gain=-6); cue('motor', 2, d=8); cue('pneus', 2, d=8); cue(
 cue('motor', P('42'), d=9, abafado=1, gain=-3); cue('radio', P('42'), d=9, gain=-6)
 # 43 posto
 cue('motor', P('43'), d=4.5, gain=-4); cue('pneus', P('43'), d=4.2, gain=-4); cue('lampada', P('43'), d=22, rede=60, pisca=0, gain=-12); cue('grilos', P('43'), d=22, gain=-8)
-cue('click', P('43') + 5.0, gain=-2); cue('turbina', P('43') + 5.1, d=.9, gain=-16); cue('click', P('43') + 13.1, gain=-4); cue('click', P('43') + 14.8, gain=-3); cue('turbina', P('43') + 14.9, d=3.4, gain=-10); cue('click', P('43') + 19.55, gain=-4)
+cue('click', P('43') + 5.0, gain=-2); cue('turbina', P('43') + 5.1, d=.9, gain=-16); cue('click', P('43') + 13.15, gain=-4); cue('tick', P('43') + 14.65, gain=-4); cue('click', P('43') + 15.3, gain=-3); cue('turbina', P('43') + 15.4, d=2.9, gain=-10); cue('click', P('43') + 18.32, gain=-5); cue('tick', P('43') + 18.95, gain=-4); cue('click', P('43') + 20.3, gain=-4)
 import math as _m
-for a, b, L in ((5, 7, 2.26), (11.2, 12.3, 2.74), (13.5, 14.2, .94), (18.7, 19.4, .94), (20.1, 20.95, 2.74)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2)
-cue('paper', P('43') + 21.15, gain=-6)
-passos('43', 22, 26.5, 6.3, 'frentista', 'concreto', gain=-6)          # vai embora: some ao longe
+for a, b, L in ((5, 7, 1.91), (11.2, 12.3, 2.9), (13.9, 14.5, .76), (19.0, 19.7, .76), (20.6, 21.45, 2.9)): passos('43', a, b, L, 'frentista', 'concreto', gain=-2)
+cue('paper', P('43') + 21.8, gain=-6)
+passos('43', 22.4, 26.8, 6.3, 'frentista', 'concreto', gain=-6)          # vai embora: some ao longe
 # 44 mendigo
 cue('lampada', P('44'), d=37, rede=60, pisca=0, gain=-12); cue('grilos', P('44'), d=37, gain=-8); cue('motor', P('44') + .6, d=31, abafado=1, gain=-8)
-passos('44', .2, 3.6, 5.13, 'metalis', 'arrasto', gain=-3, passo=1.2); passos('44', 31.4, 32.3, .67, 'metalis', 'arrasto', gain=-5, passo=.9)
+passos('44', .2, 1.63, 1.51, 'metalis', 'arrasto', gain=-3, passo=1.2, e=.12); passos('44', 1.63, 3.6, 2.07, 'metalis', 'arrasto', gain=-3, passo=1.2, e=.12, fase=1.51 / (1.2 * 1.1 / 1.75)); passos('44', 31.4, 32.3, .67, 'metalis', 'arrasto', gain=-5, passo=.9)
 cue('tick', P('44') + 25.35, gain=-1); cue('turbina', P('44') + 31.2, d=.8, gain=-16)
 cue('sobe', P('44') + 20, d=14, root=29, sem=3, gain=-8); cue('motor', P('44') + 32.2, d=4.8, rpm=1.4, gain=-2); cue('pneus', P('44') + 32.4, d=4.6, gain=-3)
 # 45 título
@@ -125,7 +130,7 @@ for t in (3, 3.8, 4.6, 5.4, 6.2, 7.0): cue('heart', P('49') + t, gain=-2)
 cue('boom', P('49') + 7.8, gain=-8)
 # 50 elevador
 cue('lampada', P('50'), d=24, rede=60, pisca=[.4, .55, 4.9, 5.05, 9.6, 9.72, 16.2, 16.3], gain=2); cue('ding', P('50') + .8); cue('whoosh_slow', P('50') + 1.0, gain=-4)
-passos('50', 2.4, 17.8, 10.3, 'gusta', 'corredor', gain=-5, passo=1.3, pan=.15); passos('50', 2.4, 17.8, 10.3, 'adryan', 'corredor', gain=-6, passo=1.3, pan=-.15)
+passos('50', 2.4, 17.8, 10.3, 'gusta', 'corredor', gain=-5, passo=1.3, pan=.15); passos('50', 2.4, 17.8, 10.3, 'adryan', 'corredor', gain=-6, passo=1.3, pan=-.15, fase=.4 / 1.083)
 # 51 sala do Igor
 cue('rede', P('51'), d=14, gain=-8)
 t = .5

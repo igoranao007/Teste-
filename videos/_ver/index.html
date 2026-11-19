@@ -1,0 +1,20 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- inspeção: uma peça isolada com eixos. ?arq=Props/Gas_Station/Gas%20_Pump_Handler.glb&cam=... -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:1}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as V from '../../lib/v4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco ? P.palco({ fov: 30 }) : null; const cena = S.scene;
+  P.luz({ keyDir: [.3, .8, .6], keyCor: '#ffffff', amb: '#808080', fillCor: '#606060' });
+  const q = new URLSearchParams(location.search), peca = await V.peca(q.get('arq') ?? 'Props/Gas_Station/Gas _Pump_Handler.glb', { verde: false });
+  cena.add(peca); window.PECA = peca;
+  for (const [c, d] of [['#ff0000', [1, 0, 0]], ['#00ff00', [0, 1, 0]], ['#0000ff', [0, 0, 1]]]) cena.add(P.caixa(d[0] ? .5 : .01, d[1] ? .5 : .01, d[2] ? .5 : .01, P.mat({ cor: c, semLuz: true }), { pos: d.map(x => x * .25) }));
+  S.camera.position.set(.8, .4, .8); S.camera.lookAt(0, .15, 0);
+  S.update = () => {};
+};
+</script></body></html>
