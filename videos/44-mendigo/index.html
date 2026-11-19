@@ -48,7 +48,7 @@ window.SETUP = async () => {
     // a mão ESQUERDA segura a vara da trouxa (presa no osso da mão): fica com a animação. Quem agarra a janela é a DIREITA,
     // que solta a borda pra gesticular (pedir, pegar a moeda...) e volta a agarrar
     const ergue = [8.4, 16.4, 23.7, 29.6].reduce((m, q) => Math.max(m, env(t, q, q + .25, q + .55, q + .85)), 0);
-    if (debr > 0) { V.girar(Me, 'Spine', [1, 0, 0], .02 * debr); Me.obj.updateMatrixWorld(true); }
+    if (debr > 0) { Me.obj.position.y += .07 * debr; V.girar(Me, 'Spine', [1, 0, 0], .02 * debr); Me.obj.updateMatrixWorld(true); }   /* na ponta dos pés pra espiar por cima da janela */
     // mão direita: pede (palma pra cima, na frente do peito) · dá de ombros (pro lado) · pega a moeda · olha a moeda · guarda no bolso · comemora
     const em = (f, d, y) => OMB.clone().addScaledVector(fM, f).addScaledVector(dM, d).add(v3(0, y, 0));
     const alvos = [
@@ -89,18 +89,18 @@ window.SETUP = async () => {
     const ROSTO_M = [mp.x, 1.03, mp.z], frente = (d, lado, y) => [mp.x + fr[0] * d + fr[1] * lado, y, mp.z + fr[1] * d - fr[0] * lado];
     const q = fala.quem('44', t);
     if (t < 4.95) cam([3.3, 1.45, .7], [mp.x * .5 + .9, .7, mp.z * .5 - 1.4], 44);                          // ele chegando, chamando o Adryan
-    else if (t < 7.3) cam([.2, 1.2, -.36], [.27, 1.0, -1.15], 46);                                             // ponto de vista do Adryan: o Metalis agarrado na janela                                           // na janela do carro (um pouco mais aberto: rosto + mão na beirada)
+    else if (t < 7.3) cam([.2, 1.13, -.3], [.27, 1.01, -1.2], 52);                                             // ponto de vista do Adryan: o Metalis agarrado na janela                                           // na janela do carro (um pouco mais aberto: rosto + mão na beirada)
     else if (t < 10.1) cam([1.25, 1.65, -2.85], [.22, 1.05, -.4], 34);                                        // Adryan respondendo (por cima do Metalis)
-    else if (t < 14.5) cam([.22, 1.18, -.4], [.25, 1.0, -1.15], 38);                                          // POV do Adryan, mais perto                                                     // Metalis pedindo (close pela janela)
+    else if (t < 14.5) cam([.2, 1.12, -.36], [.26, 1.02, -1.2], 44);                                          // POV do Adryan, mais perto                                                     // Metalis pedindo (close pela janela)
     else if (t < 20.2) cam([-.45, 1.6, -2.75], [.25, 1.05, -.4], 34);                                         // Adryan (do outro lado)
-    else if (t < 23.4) cam([1.5, .98, -.8], [.22, 1.0, -1.2], 36);                                         // Metalis pela janela, de dentro (mais perto)
+    else if (t < 23.4) cam([.2, 1.13, -.3], [.22, 1.01, -1.2], 54);                                         // POV: "é a vida..."                                         // Metalis pela janela, de dentro (mais perto)
     else if (t < 24.4) cam([2.7, 1.25, .1], [.27, 1.0, 0], 40);                                              // Adryan olha o Nicolas
     else if (t < 27.4) cam([-.75, 1.2, -1.3], [.42, .92, -1.1], 42);                                         // a moeda passando
-    else if (t < 30.0) cam([.2, 1.2, -.36], [.27, 1.0, -1.15], 44);                                           // POV do Adryan: Metalis feliz                                                    // Metalis feliz (pela janela, do outro lado)
+    else if (t < 30.0) cam([.2, 1.13, -.3], [.27, 1.02, -1.2], 54);                                           // POV do Adryan: Metalis feliz                                                    // Metalis feliz (pela janela, do outro lado)
     else if (t < 31.8) cam([-.2, 1.35, -2.4], [.25, 1.0, -.6], 40);                                           // "vai cuidar da tua vida" + vidro subindo
     else if (t < 34.2) cam([2.2, 1.15, -3.9], ROSTO_M, 44);                                                  // o carro sai, faróis no rosto
     else { const u = P.suave(34.2, 37, t); cam(frente(P.lerp(1.5, 1.0, u), P.lerp(.55, .25, u), .9), ROSTO_M, P.lerp(40, 32, u)); }   // fica com ele: os olhos acendem
-    const pov = (t >= 4.95 && t < 7.3) || (t >= 10.1 && t < 14.5) || (t >= 27.4 && t < 30.0); D.Ad.obj.visible = !pov;   // POV: a câmera está na cabeça dele
+    const pov = (t >= 4.95 && t < 7.3) || (t >= 10.1 && t < 14.5) || (t >= 20.2 && t < 23.4) || (t >= 27.4 && t < 30.0); D.Ad.obj.visible = !pov;   // POV: a câmera está na cabeça dele
     C.halos(S.camera);
     window.dbgCam = () => { const r = new THREE.Raycaster(); r.setFromCamera(new THREE.Vector2(0, 0), S.camera); const h = r.intersectObjects(S.scene.children, true).slice(0, 3); return [S.camera.position.toArray(), h.map(x => [x.object.name, x.distance])]; };
   };
