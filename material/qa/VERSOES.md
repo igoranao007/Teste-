@@ -37,3 +37,7 @@ Pendências documentadas em `AUDITORIA_v4.4.md` (o que não dá pra medir automa
 **Testes**: QA quadro a quadro de todos os planos (aprovados; exceção documentada: deslize do Gusta em 48 · 8,13 s, atrás da porta fechada, fora de quadro);
 `quadros_vazios.py` = 0; folha de 47–48 a 2 qps revisada; fotos de cada etapa da saída do carro e da portinhola.
 **Resultado**: filme 3:59,5 · 720p · `out/historico/v4.5-720p.mp4`.
+
+## v4.6 — tag `v4.6-estavel`
+- Fita do Igor na palma (53/54); Metalis 1,38 m agarrando a janela (mão direita), POV do Adryan nos closes; vidro do motorista desce inteiro.
+- Problemas: `REGISTRO.md` #39–#41. QA quadro a quadro: todos aprovados (exceção documentada: Gusta 48 · 8,13 s, fora de quadro).

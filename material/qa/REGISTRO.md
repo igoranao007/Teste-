@@ -44,6 +44,9 @@ foram adaptadas pra este motor.
 | 36 | **Porta secreta aberta "de cara" pra pedir senha** (48) | sem portinhola | portinhola de correr na altura dos olhos; senha pela fresta (ponto de vista do Gusta); fecha, ele sai do arco da porta e abre | QA 48; fotos |
 | 37 | **Sem som de porta / batida** (47, 48) | batida era um "corte" genérico | sons sintetizados: trinco, porta do carro abrindo/batendo, nós dos dedos na madeira, portinhola, rangido, trinco da cabana — no instante do contato | cues em `tools/som4.py` |
 | 38 | Mão do Gusta cruzando o rosto pra correr a tampa | mão direita numa tampa que corre pra esquerda | mão esquerda; cotovelo relativo ao corpo (ele gira) | QA 48 |
+| 39 | **Fita VHS flutuando** (53 · 9,8–12 s; 54 · 0–1,6 s) | a fita ia pro ALVO do IK; quando o braço não alcançava, ficava no ar | a fita segue a PALMA de verdade (osso da mão + dedo médio); no 54 passa pro trilho do videocassete só ao encaixar | fotos 53: 9,9–11,9 · 54: 0,2–3,0 |
+| 40 | **Mão do Metalis "no ar" em vez de segurar a janela** (44) | ombro a 67 cm, braço de 21 cm: a mão alcançava no máximo 88 cm, a borda está a 99 cm; parava 17 cm abaixo e 22 cm fora da porta | Metalis 1,10 → 1,38 m (passada medida de novo), encostado na porta, de frente pro Adryan; agarra a borda com a mão DIREITA (a esquerda segura a garrafa), pulso dobrando por cima da borda sem torcer; solta pra gesticular e volta | posição da mão a 4 cm da borda; QA 44 (mão torcida 115° → 0) |
+| 41 | "Bloco preto" na frente do rosto do Metalis | coluna dianteira da moldura da porta entre a câmera e ele; vidro do motorista descia só 39 cm (sobrava faixa preta) | planos pelo ponto de vista do Adryan (de dentro do carro); vidro desce 48 cm | raycast + fotos |
 
 ## Lição (processo)
 Toda edição passa por `python3 tools/sintaxe.py` antes do QA (bug #20 e #29).

@@ -28,3 +28,5 @@ Se um item quebrar, a versão não é entregue (volta pra última estável — v
 | 21 | Metalis: mão não passa na frente do rosto ao apoiar na janela | 44 (4–5 s) | fotos 4,0–5,0 |
 | 22 | Igor: cabeça presa ao pescoço, monitor fora do rosto ao pegar a fita | 53 (8,6–12 s) | fotos |
 | 23 | Carro na mesma escala do Adryan nos planos com os dois do lado de fora | 47, 48 | visual |
+| 24 | Fita VHS sempre na palma do Igor (pega na maleta, leva ao videocassete) | 53, 54 | fotos 53 · 10,5 / 11,9; 54 · 0,8 / 1,9 |
+| 25 | Metalis agarra a borda da janela com a mão direita (pulso dobrado, sem torcer) e solta pra gesticular | 44 | QA 44; POV 5,5 / 29,6 |
