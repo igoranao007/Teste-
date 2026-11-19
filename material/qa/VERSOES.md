@@ -34,3 +34,6 @@ Pendências documentadas em `AUDITORIA_v4.4.md` (o que não dá pra medir automa
 - Sons novos: porta do carro abrindo/batendo, batidas na porta, portinhola, rangido, trinco.
 - 44 (0:54): mão do Metalis não cruza mais o rosto. 53 (3:17): cabeça do Igor e câmera corrigidas.
 **Problemas encontrados → corrigidos**: `REGISTRO.md` #33–#38.
+**Testes**: QA quadro a quadro de todos os planos (aprovados; exceção documentada: deslize do Gusta em 48 · 8,13 s, atrás da porta fechada, fora de quadro);
+`quadros_vazios.py` = 0; folha de 47–48 a 2 qps revisada; fotos de cada etapa da saída do carro e da portinhola.
+**Resultado**: filme 3:59,5 · 720p · `out/historico/v4.5-720p.mp4`.
