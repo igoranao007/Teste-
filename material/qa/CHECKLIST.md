@@ -30,6 +30,10 @@ peça flexível (`userData.flexivel`: mangueira), em pé em cima de plataforma, 
   medindo posição E torção (eixo lateral do osso). Inversões periódicas no ritmo do passo são balanço normal; contínuas = bug.
 - Determinismo: o mesmo instante tem que dar a mesma pose (testar `__seek(t)` duas vezes e comparar). Nada pode acumular entre quadros.
 
+## 1c. Depois do render (obrigatório)
+- `python3 tools/quadros_vazios.py out/the-green-path-v4.mp4`: acha câmera apontando pro nada (quadro sem bordas: só névoa/preto).
+- Folha a 1 qps do filme **inteiro** (não só dos trechos mexidos).
+
 ## 2. Teste visual
 - **Inspeção por personagem × clipe** (`videos/_pose`): cada ator em idle, walk, talk, de frente e de lado. Mãos: palma pro corpo no braço solto, sem "bandeja" no balanço. (`node tools/fotos.mjs <plano> "t1,t2,…" "cam=x,y,z,ax,ay,az,fov" saida.jpg`)
 - Toda interação vista de perto, de **dois ângulos**, nos quadros de início, meio e fim.
