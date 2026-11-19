@@ -21,6 +21,10 @@
    7
   ],
   [
+   "57-maleta",
+   14
+  ],
+  [
    "46-casmiron",
    12
   ],
@@ -62,7 +66,15 @@
   ],
   [
    "56-final",
-   8
+   7
+  ],
+  [
+   "58-dom",
+   15
+  ],
+  [
+   "59-embreve",
+   6
   ]
  ],
  "legendas": [
@@ -174,120 +186,169 @@
   {
    "text": "Me entrega a maleta. Espera aqui fora e fica de olho em qualquer movimento.",
    "quem": "adryan",
-   "startMs": 111600,
-   "endMs": 117537,
+   "startMs": 125600,
+   "endMs": 131537,
    "semVoz": false
   },
   {
    "text": "Qual a senha?",
    "quem": "gusta",
-   "startMs": 128900,
-   "endMs": 130014,
+   "startMs": 142900,
+   "endMs": 144014,
    "semVoz": false
   },
   {
    "text": "15/03 007 BIFF.",
    "quem": "adryan",
-   "startMs": 130300,
-   "endMs": 133262,
+   "startMs": 144300,
+   "endMs": 147262,
    "semVoz": false
   },
   {
    "text": "Pode entrar.",
    "quem": "gusta",
-   "startMs": 133000,
-   "endMs": 135538,
+   "startMs": 147000,
+   "endMs": 149538,
    "semVoz": false
   },
   {
    "text": "Então... o Igor já sabe que a gente tá chegando?",
    "quem": "adryan",
-   "startMs": 146500,
-   "endMs": 149538,
+   "startMs": 160500,
+   "endMs": 163538,
    "semVoz": false
   },
   {
    "text": "Sabe.",
    "quem": "gusta",
-   "startMs": 149700,
-   "endMs": 150479,
+   "startMs": 163700,
+   "endMs": 164479,
    "semVoz": false
   },
   {
    "text": "Mas não é qualquer pessoa que pode ficar sabendo dessa missão.",
    "quem": "gusta",
-   "startMs": 150500,
-   "endMs": 155631,
+   "startMs": 164500,
+   "endMs": 169631,
    "semVoz": false
   },
   {
    "text": "Por quê?",
    "quem": "adryan",
-   "startMs": 155800,
-   "endMs": 156522,
+   "startMs": 169800,
+   "endMs": 170522,
    "semVoz": false
   },
   {
    "text": "Porque o Projeto Mogg é importante demais.",
    "quem": "gusta",
-   "startMs": 156700,
-   "endMs": 160057,
+   "startMs": 170700,
+   "endMs": 174057,
    "semVoz": false
   },
   {
    "text": "Isso não pode ser comentado em qualquer lugar. Nem mesmo fora daqui.",
    "quem": "gusta",
-   "startMs": 159807,
-   "endMs": 163164,
+   "startMs": 173807,
+   "endMs": 177164,
    "semVoz": false
   },
   {
    "text": "Você vai entender quando encontrar o Igor.",
    "quem": "gusta",
-   "startMs": 163400,
-   "endMs": 166160,
+   "startMs": 177400,
+   "endMs": 180160,
    "semVoz": false
   },
   {
    "text": "Nem mesmo no meu aniversário eles conseguem se segurar...",
    "quem": "igor",
-   "startMs": 175100,
-   "endMs": 178330,
+   "startMs": 189100,
+   "endMs": 192330,
    "semVoz": false
   },
   {
    "text": "Trouxeram?",
    "quem": "igor",
-   "startMs": 183700,
-   "endMs": 185584,
+   "startMs": 197700,
+   "endMs": 199584,
    "semVoz": false
   },
   {
    "text": "Todos eles têm potencial. Um potencial que não pode ser desperdiçado.",
    "quem": "igor",
-   "startMs": 188300,
-   "endMs": 192368,
+   "startMs": 202300,
+   "endMs": 206368,
    "semVoz": false
   },
   {
    "text": "Então... o Projeto Mogg.",
    "quem": "igor",
-   "startMs": 192500,
-   "endMs": 194318,
+   "startMs": 206500,
+   "endMs": 208318,
    "semVoz": false
   },
   {
    "text": "Então é isso. O Projeto Mogg.",
    "quem": "igor",
-   "startMs": 200700,
-   "endMs": 203390,
+   "startMs": 214700,
+   "endMs": 217390,
    "semVoz": false
   },
   {
    "text": "Vamos ver o que a Toca do Anão escondeu.",
    "quem": "igor",
-   "startMs": 215500,
-   "endMs": 217837,
+   "startMs": 229500,
+   "endMs": 231837,
+   "semVoz": false
+  },
+  {
+   "text": "O que eu disse, caralho? Que não era pra abrir a maleta!",
+   "quem": "adryan",
+   "startMs": 97000,
+   "endMs": 100534,
+   "semVoz": false
+  },
+  {
+   "text": "Como assim? Não abri nada, pô.",
+   "quem": "nicolas",
+   "startMs": 100400,
+   "endMs": 102650,
+   "semVoz": true
+  },
+  {
+   "text": "Não sei por que o Igor deu a confiança em você.",
+   "quem": "adryan",
+   "startMs": 103900,
+   "endMs": 107133,
+   "semVoz": false
+  },
+  {
+   "text": "Como, caralho, isso aconteceu? Como?!",
+   "quem": "igor",
+   "startMs": 253000,
+   "endMs": 256328,
+   "semVoz": false
+  },
+  {
+   "text": "Finalmente... depois de tanto tempo, nos encontramos.",
+   "quem": "dom",
+   "startMs": 257800,
+   "endMs": 260732,
+   "semVoz": false
+  },
+  {
+   "text": "Dessa vez você não vai escapar, Igor.",
+   "quem": "dom",
+   "startMs": 260482,
+   "endMs": 263415,
+   "semVoz": false
+  },
+  {
+   "text": "Dom?! É você?",
+   "quem": "igor",
+   "startMs": 265100,
+   "endMs": 266626,
    "semVoz": false
   }
  ]
