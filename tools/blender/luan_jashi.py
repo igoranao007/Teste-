@@ -181,20 +181,86 @@ for s in (-1, 1):
     a = s * math.radians(50); p, fora = frente_da_mascara(a, 1.79, -0.006)
     eixo = (fora + Vector((0, -0.35, -0.12))).normalized()
     cilindro(f'filtro_{"E" if s > 0 else "D"}', p, eixo, 0.026, 0.031, 0.026, 12, [M_ESC, M_BRI, M_FILT], tampa_brilho=True)
-# tiras (de cada lado da máscara até a nuca, acima e abaixo da orelha)
-for nome, z0, z1 in (('tira_cima', 1.845, 1.905), ('tira_baixo', 1.765, 1.775)):
-    bm = bmesh.new(); pts = []
-    a0 = math.radians(66); N = 18
-    for k in range(N + 1):
-        a = a0 + (2 * math.pi - 2 * a0) * k / N; z = z0 + (z1 - z0) * math.sin(math.pi * k / N)
-        hit, nrm = raio(a, z)
-        if hit is None: continue
-        fora = Vector((math.sin(a), -math.cos(a), 0)); pts.append((hit + fora * 0.006, fora))
-    vs = [(bm.verts.new(p + Vector((0, 0, 0.007))), bm.verts.new(p - Vector((0, 0, 0.007)))) for p, f in pts]
-    for (a1, b1), (a2, b2) in zip(vs, vs[1:]): bm.faces.new((a1, a2, b2, b1))
+def tubo(nome, caminhos, esp, mats, fechado=False, idx_mat=None):
+    """tubo de seção quadrada ao longo de cada caminho (lista de pontos); preso no osso da cabeça"""
+    bm = bmesh.new()
+    for ci, pts in enumerate(caminhos):
+        n = len(pts); aneis = []
+        for i, p in enumerate(pts):
+            if fechado: t = (pts[(i + 1) % n] - pts[(i - 1) % n]).normalized()
+            else: t = (pts[min(i + 1, n - 1)] - pts[max(i - 1, 0)]).normalized()
+            up = Vector((0, 0, 1)) if abs(t.z) < 0.9 else Vector((0, 1, 0))
+            a1 = t.cross(up).normalized(); a2 = t.cross(a1).normalized()
+            aneis.append([bm.verts.new(p + (a1 * sx + a2 * sy) * esp / 2) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
+        pares = list(zip(aneis, aneis[1:])) + ([(aneis[-1], aneis[0])] if fechado else [])
+        for A_, B_ in pares:
+            for k in range(4):
+                f = bm.faces.new((A_[k], B_[k], B_[(k + 1) % 4], A_[(k + 1) % 4])); f.material_index = idx_mat[ci] if idx_mat else 0
+        if not fechado: bm.faces.new(list(reversed(aneis[0]))); bm.faces.new(aneis[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(nome); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new(nome, me); bpy.context.scene.collection.objects.link(o)
+    for m in mats: me.materials.append(m)
+    prender_cabeca(o); return o
+def pele_frente(x, z, extra):          # ponto na frente do rosto (raio vindo de -Y)
+    h = bvh.ray_cast(Vector((x, -0.5, z)), Vector((0, 1, 0)))
+    return (h[0] + Vector((0, -extra, 0))) if h[0] is not None else Vector((x, -0.13, z))
+def pele_lado(s, y, z, extra):          # ponto na lateral da cabeça (raio vindo de +-X)
+    h = bvh.ray_cast(Vector((s * 0.5, y, z)), Vector((-s, 0, 0)))
+    return (h[0] + Vector((s * extra, 0, 0))) if h[0] is not None else Vector((s * 0.11, y, z))
+# ---- ÓCULOS 3D (armação preta retangular, ponte e hastes até atrás da orelha) — no lugar da armação pintada do modelo
+M_OCU = mat_cor('oculos', (12, 12, 13))
+YF = min(pele_frente(x, 1.89, 0).y for x in (-0.06, -0.03, 0.03, 0.06)) - 0.012    # plano da armação, à frente do rosto
+def aro(s):
+    x0, x1, z0, z1, r = 0.011, 0.083, 1.866, 1.913, 0.008
+    cant = []
+    for cx, cz, a0 in ((x1 - r, z1 - r, 0), (x0 + r, z1 - r, 90), (x0 + r, z0 + r, 180), (x1 - r, z0 + r, 270)):
+        for k in range(3):
+            a = math.radians(a0 + 45 * k); cant.append((cx + r * math.cos(a), cz + r * math.sin(a)))
+    pts = []
+    for x, z in cant:
+        yb = pele_frente(s * x, z, 0).y
+        y = min(YF + 0.010 * (x / 0.083) ** 2, yb - 0.008)            # curva acompanhando o rosto, sem encostar na pele
+        pts.append(Vector((s * x, y, z)))
+    return pts
+ponte = [Vector((-0.013, YF - 0.001, 1.902)), Vector((0, YF - 0.003, 1.905)), Vector((0.013, YF - 0.001, 1.902))]
+hastes = []
+for s in (-1, 1):
+    h = [Vector((s * 0.083, YF + 0.004, 1.905))]
+    for y in (-0.085, -0.06, -0.03, 0.0, 0.025, 0.045):
+        p = pele_lado(s, y, 1.903 - (0.006 if y > 0.02 else 0), 0.006); h.append(p)
+    p = pele_lado(s, 0.062, 1.878, 0.004); h.append(p)                  # dobra pra baixo atrás da orelha
+    hastes.append(h)
+tubo('oculos_aros', [aro(-1), aro(1)], 0.0062, [M_OCU], fechado=True)
+tubo('oculos_ponte_hastes', [ponte] + hastes, 0.0048, [M_OCU])
+# ---- TIRAS da máscara: de cima (sobe na frente da orelha até o alto da cabeça, por baixo do cabelo) e de baixo (pela nuca),
+# largas e coladas na pele, com fivela onde encostam na máscara
+def faixa(nome, pts_lado, larg=0.016):
+    bm = bmesh.new(); prev = None
+    for i, (p, nrm) in enumerate(pts_lado):
+        t = (pts_lado[min(i + 1, len(pts_lado) - 1)][0] - pts_lado[max(i - 1, 0)][0]).normalized(); s_ = t.cross(nrm).normalized()
+        q = [p - s_ * larg / 2, p + s_ * larg / 2, p + s_ * larg / 2 + nrm * 0.003, p - s_ * larg / 2 + nrm * 0.003]
+        anel = [bm.verts.new(c) for c in q]
+        if prev:
+            for k in range(4): bm.faces.new((prev[k], anel[k], anel[(k + 1) % 4], prev[(k + 1) % 4]))
+        prev = anel
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new(nome); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(nome, me); bpy.context.scene.collection.objects.link(o); me.materials.append(M_ESC)
-    prender_cabeca(o)
+    prender_cabeca(o); return o
+def na_cabeca(a, z, extra=0.003):
+    o_ = Vector((0.5 * math.sin(a), -0.5 * math.cos(a), z)); d_ = Vector((-math.sin(a), math.cos(a), 0))
+    h = bvh.ray_cast(o_, d_)
+    if h[0] is None: return None
+    n_ = h[1].normalized(); return (h[0] + n_ * extra, n_)
+for s in (-1, 1):
+    cima = [na_cabeca(s * math.radians(a), z) for a, z in ((76, 1.836), (84, 1.858), (90, 1.885), (95, 1.915), (99, 1.945), (103, 1.975), (108, 2.0))]
+    faixa(f'tira_cima_{s}', [c for c in cima if c])
+baixo = [na_cabeca(math.radians(a), 1.792 - 0.030 * min(1.0, (180 - abs(180 - a) - 76) / 104)) for a in range(76, 285, 8)]
+faixa('tira_baixo', [c for c in baixo if c], 0.014)
+for s in (-1, 1):                                                       # fivelas
+    p, fora = frente_da_mascara(s * math.radians(74), 1.82, -0.012)
+    cilindro(f'fivela_{s}', p, fora, 0.010, 0.010, 0.010, 4, [M_ESC, M_BRI, M_ESC])
 bmH.free()
 
 # ---------------------------------------------------------------- 3) armadura: cascas da própria malha
@@ -240,4 +306,47 @@ casca2(B, 'cinto', lambda c, n: 0.90 < c.z < 0.99, 0.010, 0.010)
 casca2(B, 'joelheiras', lambda c, n: 0.42 < c.z < 0.57 and n.y < -0.25, 0.014, 0.012)
 casca2(B, 'caneleiras', lambda c, n: 0.16 < c.z < 0.40 and n.y < 0.1, 0.010, 0.010)
 casca2(B, 'cano_bota', lambda c, n: 0.06 < c.z < 0.15, 0.008, 0.008)
+# ---------------------------------------------------------------- 4) gola blindada (gorjal) em volta do pescoço: placas com aro luminoso em cima
+def gola():
+    bm = bmesh.new(); N = 20; aneis = []
+    for k, (zf, zb, r) in enumerate(((1.655, 1.675, 0.140), (1.690, 1.760, 0.112), (1.700, 1.785, 0.116))):
+        anel = []
+        for i in range(N):
+            a = 2 * math.pi * i / N; fr = (1 - math.cos(a)) / 2                      # 0 na frente, 1 atrás
+            z = zf + (zb - zf) * fr ** 0.8
+            rr = r * (1.0 + 0.10 * math.cos(a) ** 2)                                 # mais largo nos lados
+            anel.append(bm.verts.new(Vector((rr * 1.12 * math.sin(a), 0.012 - rr * math.cos(a) * 0.95, z))))
+        aneis.append(anel)
+    dentro = [bm.verts.new(v.co + (Vector((0, 0.012, v.co.z)) - Vector((v.co.x, v.co.y, v.co.z))).normalized() * 0.012) for v in aneis[2]]
+    fs = []
+    for A_, B_, mi in ((aneis[0], aneis[1], 0), (aneis[1], aneis[2], 1), (aneis[2], dentro, 0)):   # faixa fina do meio = linha de energia
+        for i in range(N):
+            f = bm.faces.new((A_[i], A_[(i + 1) % N], B_[(i + 1) % N], B_[i])); f.material_index = mi
+    for i in range(0, N, 2):                                                         # frisos verticais (placas)
+        pass
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    uvl = bm.loops.layers.uv.new('UVMap')
+    for f in bm.faces:
+        for l in f.loops: p = l.vert.co; l[uvl].uv = (math.atan2(p.x, -p.y) * 1.5, p.z * 6)
+    me = bpy.data.meshes.new('gola'); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new('gola', me); bpy.context.scene.collection.objects.link(o); me.materials.append(M_ARM); me.materials.append(M_BRI)
+    for p in me.polygons: p.use_smooth = False
+    g3 = o.vertex_groups.new(name='spine.003'); g4 = o.vertex_groups.new(name='spine.004')
+    for v in me.vertices:
+        t = max(0.0, min(1.0, (v.co.z - 1.67) / 0.10)); g3.add([v.index], 1 - t, 'REPLACE'); g4.add([v.index], t, 'REPLACE')
+    m = o.modifiers.new('Armature', 'ARMATURE'); m.object = A; o.parent = A; o.matrix_parent_inverse = A.matrix_world.inverted()
+gola()
+# ---------------------------------------------------------------- 5) linhas de energia luminosas (como no conceito)
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'linhas_energia.py')).read())
+L_TRONCO = [('frente', [(-0.10, 1.63), (-0.125, 1.50), (-0.125, 1.38), (-0.165, 1.30), (-0.165, 1.12), (-0.13, 1.02)]),
+            ('frente', [(0.165, 1.62), (0.19, 1.46), (0.19, 1.32), (0.155, 1.22), (0.155, 1.02)]),
+            ('costas', [(-0.11, 1.66), (-0.11, 1.42), (-0.15, 1.34), (-0.15, 1.02)]),
+            ('costas', [(0.11, 1.66), (0.11, 1.42), (0.15, 1.34), (0.15, 1.02)])]
+linhas('linhas_tronco', [B], L_TRONCO, M_BRI, A)
+L_PERNA = []
+for s in (-1, 1):
+    L_PERNA += [('frente', [(s * 0.085, 0.92), (s * 0.085, 0.74), (s * 0.115, 0.68), (s * 0.115, 0.58)]),
+                ('lado+' if s > 0 else 'lado-', [(0.02, 0.93), (0.02, 0.72), (-0.01, 0.66), (-0.01, 0.58)]),
+                ('costas', [(s * 0.14, 0.90), (s * 0.14, 0.60)])]
+linhas('linhas_pernas', [B], L_PERNA, M_BRI, A)
 bpy.ops.wm.save_as_mainfile(filepath=OUT); print('LUAN OK', OUT)
