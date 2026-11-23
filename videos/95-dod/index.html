@@ -12,7 +12,7 @@ window.SETUP = async () => {
   const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#29292b',
     luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillDir: [.8, .1, .3], fillCor: '#8a8a90', amb: '#55555a' } });
   S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#333336' }), { pos: [0, -.01, 0] }));
-  const D = await T.dod({ corpo: q.get('corpo') || 'soldado' }); S.scene.add(D.obj); const c = D.corpo;
+  const D = await T.dod({ corpo: q.get('corpo') || 'farda' }); S.scene.add(D.obj); const c = D.corpo;
   c.braco('R', [-.15, -1, .05], [-.05, -1, .1]); c.braco('L', [.15, -1, .05], [.05, -1, .1]); c.guardar(); D.assentar(); S.scene.updateMatrixWorld(true);
   const b = new THREE.Box3().setFromObject(D.obj), h = b.max.y, cab = D.cabeca.getWorldPosition(new THREE.Vector3());
   const V = { frente: [0, h * .55, 4.6, 0, h * .5, 0, 30], tres: [2.6, h * .62, 3.7, 0, h * .5, 0, 30], lado: [4.6, h * .55, 0, 0, h * .5, 0, 30],
