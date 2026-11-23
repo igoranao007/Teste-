@@ -20,7 +20,7 @@ QA: `blender -b <arquivo>.blend -P tools/blender/qa_personagem.py` · ver: `vide
 ## Detalhes
 - Escala: 1,30 m no motor. Esqueleto próprio (22 ossos, nomes do motor) nas proporções dele (cabeça enorme, braços curtos);
   pesos por região com transição suave (a cabeça gira inteira; o toco do braço não puxa o corpo).
-- **Bigode** (as duas versões): estreito como o do Chaplin (largura do nariz), peça fechada colada no rosto — cada vértice por raio na pele, cresce pela normal (acompanha a
+- **Bigode** (as duas versões): estilo Chaplin, CENTRADO no eixo do nariz e da boca (o rosto do modelo fica em x = −0,16 e é girado 6,5°: o bigode segue esses marcos, medidos na textura), logo abaixo do nariz, peça fechada colada no rosto — cada vértice por raio na pele, cresce pela normal (acompanha a
   curvatura), logo acima da boca (boca medida em 2,15–2,31 e olhos a partir de 2,64, unidades do modelo).
 - **Militar**: camisa verde-musgo (casca própria, sombreamento de tecido) com gola; colete cáqui-marrom com espessura; 2 fileiras MOLLE
   na frente e 3 atrás; 3 porta-carregadores com aba; 2 bolsos de peito; cinto de couro com fivela de metal; calça verde-escura;

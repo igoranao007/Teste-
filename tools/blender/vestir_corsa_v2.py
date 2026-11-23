@@ -284,5 +284,48 @@ for v in pesc.data.vertices:                                       # base no pes
     z = (MW @ v.co).z; t = min(1, max(0, (z - 1.65) / .17))       # base presa no tronco, topo acompanha a cabeça
     if z < 1.64: pesc.vertex_groups['spine.003'].add([v.index], 1.0, 'REPLACE'); continue
     pesc.vertex_groups['spine.004'].add([v.index], 1 - t * .7, 'REPLACE'); pesc.vertex_groups['spine.005'].add([v.index], t * .7, 'REPLACE')
+# PLUMAGEM do pescoço: 4 camadas de penas sobrepostas (de cima pra baixo), cada uma com a borda de baixo em pontas que abrem
+# um pouco pra fora — a plumagem aparece na silhueta e na textura (base escura, ponta clara, raque das penas).
+CREME_P, BABADOR_P, NUCA_P = (196, 168, 120), (58, 42, 30), (128, 92, 58)   # tons quentes da cabeça do pardal
+def penas_f(x, y, w, h):                                           # u = .5 frente · v: 0 = base da pena (em cima) → 1 = ponta
+    a = (x / w) * 2 * math.pi; fr = max(0, math.cos(a - math.pi)) ** 1.4; tr = max(0, math.cos(a)) ** 1.2
+    c = mix(mix(CREME_P, BABADOR_P, fr), NUCA_P, tr)
+    v = y / (h - 1)
+    c = mix(c, (30, 22, 15), .3 * (1 - v))                          # base da pena (debaixo da camada de cima) mais escura
+    if v > .85: c = mix(c, (230, 205, 160), .1)                     # ponta levemente mais clara
+    k = ruido(x // 2, y, 233)
+    return mix(c, (0, 0, 0), .08 * k)
+mt('c2_penas', 32, 16, penas_f)
+def forma_pesc(z):                                                 # (meia-largura, meia-profundidade, centro y) do pescoço na altura z
+    for (z0, a0, b0, y0), (z1, a1, b1, y1) in zip(ANEIS_P, ANEIS_P[1:]):
+        if z0 <= z <= z1:
+            t = (z - z0) / (z1 - z0); return a0 + (a1 - a0) * t, b0 + (b1 - b0) * t, y0 + (y1 - y0) * t
+    return ANEIS_P[-1][1:]
+bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NF = 16
+for zt, comp, abre in ((1.80, .05, 1.1), (1.765, .05, 1.11), (1.73, .05, 1.12), (1.695, .055, 1.13)):
+    a_, b_, yc = forma_pesc(zt); a2, b2, yc2 = forma_pesc(zt - comp)
+    topo = []; base = []
+    for k in range(NF):
+        t = 2 * math.pi * k / NF
+        topo.append(bm.verts.new(MWi @ Vector((a_ * 1.03 * math.sin(t), yc - b_ * 1.03 * math.cos(t), zt))))
+    for k in range(NF * 2):
+        t = 2 * math.pi * k / (NF * 2); ponta = k % 2 == 0
+        f_ = abre if ponta else abre * .93; dz = 0 if ponta else comp * .35
+        base.append(bm.verts.new(MWi @ Vector((a2 * f_ * math.sin(t), yc2 - b2 * f_ * math.cos(t), zt - comp + dz))))
+    for k in range(NF):
+        k1 = (k + 1) % NF; p0, v0, p1 = base[2 * k], base[2 * k + 1], base[(2 * k + 2) % (2 * NF)]
+        u0 = (.5 + k / NF) % 1; u1 = u0 + 1 / NF; um = (u0 + u1) / 2
+        for vs, uvs in (((topo[k], p0, v0), ((u0, 0), (u0, 1), (um, .65))), ((topo[k], v0, topo[k1]), ((u0, 0), (um, .65), (u1, 0))), ((topo[k1], v0, p1), ((u1, 0), (um, .65), (u1, 1)))):
+            f = bm.faces.new(vs)
+            for l, uv in zip(f.loops, uvs): l[uvl].uv = (uv[0], uv[1])
+bm.normal_update()
+for f in bm.faces:
+    c = W(f.calc_center_median()); n = Wn(f.normal)
+    if n.dot(Vector((c.x, c.y + .01, 0))) < 0: f.normal_flip()
+penas = objeto(bm, 'penas_pescoco', ['c2_penas'], uv=False)
+for v in penas.data.vertices:
+    for g in list(v.groups): penas.vertex_groups[g.group].remove([v.index])
+    z = (MW @ v.co).z; t = min(1, max(0, (z - 1.65) / .17))
+    penas.vertex_groups['spine.004'].add([v.index], 1 - t * .7, 'REPLACE'); penas.vertex_groups['spine.005'].add([v.index], t * .7, 'REPLACE')
 for m in MATS.values(): m.use_backface_culling = True
 bpy.data.objects.remove(corpo)                                     # o corpo base fica todo coberto (roupa, luvas, pescoço)

@@ -245,25 +245,52 @@ def caixa_obj(nome, c, tam, mats, pesos, sola=0.0, chanfro=.25):
 mt('z_bigode', 16, 8, lambda x, y, w, h: mix(hx('#141210'), hx('#2c2620'), .6 * ruido(x, y // 2, 301)) if x % 3 else hx('#0c0b0a'))
 FACE = [p for p in me.polygons if CLS[p.index] == 'pele']
 Z_BIGODE = U(2.375)                                                 # medido no modelo: boca em 2,15–2,31 e olhos a partir de 2,64 → bigode logo acima da boca
+def marcos_rosto():
+    """mede o rosto NO MODELO: boca (pixels escuros), olhos (pixels brancos) e a ponta da face (o 'nariz': vértice mais à frente).
+    O rosto do modelo NÃO está no eixo x = 0 e é girado alguns graus — por isso o bigode segue estes marcos, não o eixo do corpo."""
+    boca, olhos = [], []
+    uvd = me.uv_layers.active.data
+    for p in me.polygons:
+        if p.center.z < U(1.6) or p.normal.y > -.2: continue
+        vs = [me.vertices[i].co for i in p.vertices]; us = [uvd[i].uv for i in p.loop_indices]
+        if len(vs) != 3: continue
+        for a in np.linspace(0, 1, 9):
+            for b in np.linspace(0, 1 - a, 9):
+                w = (1 - a - b, a, b); q = vs[0] * w[0] + vs[1] * w[1] + vs[2] * w[2]; u = us[0] * w[0] + us[1] * w[1] + us[2] * w[2]
+                col = PX0[min(IH - 1, int(u.y * IH)), min(IW - 1, int(u.x * IW))]
+                if col.mean() < .15 and U(2.0) < q.z < U(2.45): boca.append(tuple(q))
+                elif col.mean() > .72 and col.min() > .6 and q.z > U(2.45): olhos.append(tuple(q))
+    B = np.array(boca); O = np.array(olhos)
+    cab = [v.co for v in me.vertices if U(1.8) < v.co.z < U(3.2)]; ponta = min(cab, key=lambda c: c.y)
+    oe, od = O[O[:, 0] > 0].mean(0), O[O[:, 0] < 0].mean(0)
+    return {'boca_c': B.mean(0), 'boca_topo': B[:, 2].max(), 'ponta': np.array(tuple(ponta)), 'olho_e': oe, 'olho_d': od}
+MR = marcos_rosto()
 def bigode():
-    """bigode estilo Chaplin: bloco curto e escuro COLADO no rosto — cada vértice vem de um raio na superfície do rosto e
-    cresce pela normal da pele (acompanha a curvatura; sem vão nem inclinação). Peça fechada (frente, verso, bordas)."""
-    bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NC, NR = 4, 3; H_ = U(.1); D_ = U(.045)
-    zc = Z_BIGODE; frente, tras = [], []
+    """bigode estilo Chaplin, CENTRADO no eixo do nariz e da boca e virado pra onde o rosto olha: retangular, curto, escuro,
+    com volume. Borda de cima logo abaixo do nariz (ponta da face), borda de baixo logo acima da boca. As duas pontas são
+    simétricas em relação ao eixo; o verso fica colado na pele e a frente sai na direção do rosto (profundidade igual)."""
+    cx = (MR['boca_c'][0] + MR['ponta'][0]) / 2                    # eixo central: nariz e boca
+    e = Vector((MR['olho_e'][0] - MR['olho_d'][0], MR['olho_e'][1] - MR['olho_d'][1], 0)).normalized()   # linha dos olhos
+    f = Vector((e.y, -e.x, 0)).normalized()                          # frente do rosto (perpendicular, pra -Y)
+    if f.y > 0: f = -f
+    z1 = MR['ponta'][2] - U(.006); z0 = z1 - U(.105)                 # encosta logo abaixo do nariz; mesma altura de antes (0,105)
+    print('BIGODE eixo x', round(cx / ESC, 3), '· z', round(z0 / ESC, 3), '→', round(z1 / ESC, 3), '· giro do rosto', round(math.degrees(math.atan2(e.y, e.x)), 1), 'graus')
+    bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NC, NR = 5, 3; D_ = U(.05)
+    frente, tras = [], []
+    base_y = MR['ponta'][1]
     for r in range(NR):
-        z = zc - H_ / 2 + H_ * r / (NR - 1); W_ = U(.105) - U(.015) * r / (NR - 1)    # estreito como o do Chaplin (largura do nariz)
+        z = z0 + (z1 - z0) * r / (NR - 1); W_ = U(.2) - U(.02) * r / (NR - 1)   # tamanho anterior (sem diminuir); um pouco mais largo embaixo
         lf, lt = [], []
         for c in range(NC):
-            x = -W_ + 2 * W_ * c / (NC - 1)
-            loc, nor, _, _ = BVH.ray_cast(Vector((x, -5, z)), Vector((0, 1, 0)), 20)
-            if loc is None: loc, nor = Vector((x, -U(1.2), z)), Vector((0, -1, 0))
-            n_ = (nor if nor.dot(Vector((0, -1, 0))) > 0 else -nor).normalized()
-            n_ = (n_ + Vector((0, -1, 0))).normalized()                # puxa a direção pra frente (o bloco não "escorre" de lado)
-            lt.append(bm.verts.new(loc + n_ * U(.003))); lf.append(bm.verts.new(loc + n_ * D_))
+            sx = -W_ + 2 * W_ * c / (NC - 1)
+            q = Vector((cx, base_y, z)) + e * sx
+            loc, nor, _, _ = BVH.ray_cast(q + f * 5, -f, 20)
+            if loc is None: loc = q
+            lt.append(bm.verts.new(loc + f * U(.004))); lf.append(bm.verts.new(loc + f * D_))
         frente.append(lf); tras.append(lt)
     def quad(vs, uvs):
-        f = bm.faces.new(vs)
-        for l, u_ in zip(f.loops, uvs): l[uvl].uv = u_
+        fa = bm.faces.new(vs)
+        for l, u_ in zip(fa.loops, uvs): l[uvl].uv = u_
     for r in range(NR - 1):
         for c in range(NC - 1):
             u0, u1, v0, v1 = c / (NC - 1), (c + 1) / (NC - 1), r / (NR - 1), (r + 1) / (NR - 1)
@@ -273,7 +300,7 @@ def bigode():
     for k in range(len(borda)):
         (r0, c0), (r1, c1) = borda[k], borda[(k + 1) % len(borda)]
         quad((tras[r0][c0], tras[r1][c1], frente[r1][c1], frente[r0][c0]), ((0, .5),) * 4)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])          # peça fechada: normais pra fora
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
     return novo_obj('bigode', bm, ['z_bigode'], lambda v: {'spine.005': 1.0})
 bigode_ob = bigode()
 
