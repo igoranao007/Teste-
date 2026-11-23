@@ -1,0 +1,106 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- v4 PLANO 7 · A CABANA (12 s): vista aérea, o carro sai da estrada e para diante da cabana (uma janela verde acesa); desliga o motor;
+     Adryan: "Me entrega a maleta. Espera aqui fora e fica de olho em qualquer movimento." Nicolas entrega; Adryan sai e vai até a porta. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:19.5}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as T from '../../lib/tgp.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 42, perto: 18, longe: 80, luz: { keyDir: [.3, .8, .5], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } }), cena = S.scene;
+  const { ext, cab } = await V.montarCabana(S);
+  const car = await F.carro(); ext.add(car);
+  const inte = new THREE.Group(); cena.add(inte); inte.position.set(0, -60, 0);
+  const D = await V.carroComDupla(inte), fala = await V.vozes();
+  const Ad = await E4.ator('adryan'); ext.add(Ad.obj); const mal = T.maleta(); mal.scale.setScalar(.72); ext.add(mal);
+  const Ni = await E4.ator('nicolas'); ext.add(Ni.obj);                                  // Nicolas fica no carro (dá pra ver com a porta aberta)
+  // carro na MESMA proporção do Adryan (dentro do carro ele tem 0,74 da escala): senão ele fica mais alto que o teto
+  const SC = 1.25; car.scale.setScalar(SC);
+  const v3 = (x, y, z) => new THREE.Vector3(x, y, z), W = (x, y, z) => car.localToWorld(v3(x, y, z));
+  const curva = new THREE.CatmullRomCurve3([[-30, 0, 46], [-10, 0, 40], [0, 0, 30], [0, 0, 14], [0, 0, 8.6]].map(p => new THREE.Vector3(...p)));
+  S.update = t => {
+    const fora = t < 4.6 || t >= 11; ext.visible = fora; inte.visible = !fora; inte.position.y = fora ? -60 : 0;
+    if (fora) {
+      P.nevoa({ perto: 18, longe: 80 }); P.luz(t < 11 ? { keyDir: [.3, .8, .5], keyCor: '#a8cdb2', amb: '#1a2e20', fillCor: '#1c5a30' } : { keyDir: [-.6, .7, -.4], keyCor: '#c4e6cc', amb: '#2c4a36', fillDir: [.3, .2, 1], fillCor: '#2f7a48' });   /* fora do carro: a luz da varanda/janela da cabana ilumina o lado do motorista */
+      const u = P.clamp(t / 4.4), e = 1 - (1 - u) ** 2.2, p = curva.getPointAt(Math.min(1, e)), q = curva.getTangentAt(Math.min(1, e));
+      car.position.set(p.x, .02, p.z); car.rotation.y = Math.atan2(q.x, q.z) + Math.PI;  car.encarar(S.camera); car.luzes(t < 4.5 ? 1 : 0);   // de ré? não: a frente olha pra cabana
+      car.rotation.y = Math.atan2(-q.x, -q.z) + Math.PI;
+      cab.halo.quaternion.copy(S.camera.quaternion);
+      if (t < 4.6) { S.camera.fov = 42; S.camera.position.set(-11, 15, 30); S.camera.lookAt(P.lerp(-8, 0, P.suave(0, 4, t)), 0, P.lerp(36, 6, P.suave(0, 4.4, t))); }
+      else {
+        // SAIR DO CARRO como gente de verdade (cartilhas de "como sair do carro"): puxa a maçaneta e empurra a porta · gira no banco
+        // e chega pra beirada · põe a perna esquerda pra fora, depois a direita (pés no chão, joelhos juntos) · mão no batente ·
+        // levanta abaixando a cabeça pra passar pelo teto · sai do raio da porta · empurra a porta, que bate · vai pra cabana
+        car.updateMatrixWorld(true);
+        const yawC = car.rotation.y, porta = P.suave(11.45, 12.0, t) * (1 - P.suave(14.95, 15.3, t)); car.abrirPorta(porta); car.updateMatrixWorld(true);
+        const gira = P.suave(11.95, 12.45, t) * .55 + P.suave(12.45, 12.95, t) * .45;      // 0 → 1 (90° pra porta), em dois tempos (uma perna de cada vez)
+        const beira = P.suave(11.95, 12.6, t), sobe = P.suave(12.95, 13.85, t), pe1 = P.suave(12.05, 12.5, t), pe2 = P.suave(12.45, 12.95, t);
+        const EM_PE = [1.12, .2], PARA = [1.62, -.05];
+        Ni.obj.visible = true; Ni.obj.userData.noVeiculo = car; V.sentar(Ni, W(-.35, .6, .29), { rot: yawC, dy: 0 }); Ni.obj.updateMatrixWorld(true);
+        V.girar(Ni, 'spine.005', [0, 1, 0], .45 * Math.sin(t * .55) + .15 * Math.sin(t * 1.7)); V.girar(Ni, 'spine.003', [0, 1, 0], .08 * Math.sin(t * .55));   /* "fica de olho": olha em volta */
+        Ad.obj.userData.noVeiculo = t < 14.6 ? car : null;                                      // QA: dentro/saindo do carro de propósito
+        if (t < 13.95) {
+          // quadril: banco → beirada do banco → em pé do lado de fora (pés já no chão)
+          const hip = v3(.35, .6, .2).lerp(v3(.6, .58, .2), beira), G = W(EM_PE[0], 0, EM_PE[1]); G.y = 0;
+          V.sentar(Ad, W(hip.x, hip.y, hip.z), { rot: yawC + gira * Math.PI / 2, dy: 0 });
+          if (sobe > 0) { Ad.pose('sit', 2.2, 'idle', sobe, t); const h = v3(0, 0, 0); Ad.obj.updateMatrixWorld(true); Ad.osso('spine').getWorldPosition(h);
+            Ad.obj.position.add(W(hip.x, hip.y, hip.z).sub(h)).lerp(G, P.suave(0, 1, sobe)); }   /* quadril sai do banco e termina em pé no chão, sem tranco */
+          Ad.obj.updateMatrixWorld(true);
+          // abaixa a cabeça enquanto passa por baixo do teto
+          const abaixa = Math.sin(Math.PI * P.clamp(sobe * 1.15)) * .5 + .12 * pe2 * (1 - sobe);
+          V.girar(Ad, 'spine.002', [1, 0, 0], abaixa * .6); V.girar(Ad, 'spine.003', [1, 0, 0], abaixa * .4); V.girar(Ad, 'spine.005', [1, 0, 0], -abaixa * .3); Ad.obj.updateMatrixWorld(true);
+          // pernas pra fora: pé esquerdo primeiro, depois o direito; pé sobe de leve pra passar pela soleira e pousa no chão
+          const frente = v3(Math.sin(yawC + gira * Math.PI / 2), 0, Math.cos(yawC + gira * Math.PI / 2));
+          for (const [sd, k, z] of [['L', pe1, .32], ['R', pe2, .1]]) { if (k <= 0) continue;
+            const atual = Ad.osso('foot.' + sd).getWorldPosition(v3(0, 0, 0)), chao = W(1.07, .03, z); chao.y = .03;
+            const alvo = atual.clone().lerp(chao, k); alvo.y += Math.sin(Math.PI * k) * .08 * (1 - sobe);
+            const kk = Math.min(1, k * 1.5) * (1 - P.suave(13.6, 13.9, t));
+            V.ik2(Ad, 'thigh.' + sd, 'shin.' + sd, 'foot.' + sd, alvo, frente.clone().add(v3(0, .6, 0)).normalize().toArray(), kk); }
+          Ad.obj.updateMatrixWorld(true);
+        } else {
+          // em pé: um passo pra trás e pra fora (fora do raio da porta) · vira pra porta · empurra · vai pra cabana pela lateral
+          const A0 = W(EM_PE[0], 0, EM_PE[1]), A1 = W(PARA[0], 0, PARA[1]), DESV = [-2.05, 5.3], PORCH = [-1.25, 3.6];
+          let andou = V.caminhar(Ad, [A0.x, A0.z], [A1.x, A1.z], t, 13.95, 14.6, { de: yawC + Math.PI / 2 });
+          if (!andou && t < 15.45) { Ad.obj.position.set(A1.x, 0, A1.z); Ad.obj.rotation.y = V.angLerp(Math.atan2(A1.x - A0.x, A1.z - A0.z), yawC - .18, P.suave(14.6, 14.85, t));   /* de lado: a borda da porta fica à ESQUERDA dele */ Ad.pose('idle', t); }
+          if (t >= 15.45) { andou = V.caminhar(Ad, [A1.x, A1.z], DESV, t, 15.45, 18.3, { de: yawC - .18 });
+            if (t >= 18.3) andou = V.caminhar(Ad, DESV, PORCH, t, 18.3, 19.9, { de: Math.atan2(DESV[0] - A1.x, DESV[1] - A1.z) });
+            if (!andou) Ad.pose('idle', t); }
+          Ad.obj.updateMatrixWorld(true);
+        }
+        // mão esquerda: maçaneta de dentro (abre) → batente do teto (apoio pra levantar) → borda da porta (empurra pra fechar)
+        const mMac = P.suave(11.0, 11.45, t) * (1 - P.suave(11.95, 12.25, t)), mBat = P.suave(12.75, 13.05, t) * (1 - P.suave(13.5, 13.92, t)), mEmp = P.suave(14.72, 14.92, t) * (1 - P.suave(14.98, 15.14, t));
+        // pegadas com o pulso reto: os dedos seguem a direção do braço (ombro → alvo), com um pouco da direção da peça
+        const ombro = () => Ad.osso('upper_arm.L').getWorldPosition(v3(0, 0, 0)), frenteC = W(0, 0, 1).sub(W(0, 0, 0)).normalize(), foraC = W(1, 0, 0).sub(W(0, 0, 0)).normalize();
+        const pegaReta = (alvo, extra, ind, polo, k, fecha) => V.pegar(Ad, 'L', alvo, alvo.clone().sub(ombro()).normalize().multiplyScalar(.75).addScaledVector(extra, .25).normalize(), ind, polo, k, fecha);
+        if (mMac > 0) pegaReta(car.portaMot.localToWorld(v3(-.1, .33, -.7)), frenteC, v3(0, 1, 0), foraC.clone().multiplyScalar(-.3).add(v3(0, -.8, 0)).toArray(), mMac, .7);
+        if (mBat > 0) pegaReta(W(1.0, 1.28, -.03), foraC, frenteC.clone().negate(), foraC.clone().multiplyScalar(-.4).add(v3(0, -.8, 0)).toArray(), mBat, .75);   // coluna de trás (lado esquerdo dele)
+        if (mEmp > 0) { const borda = car.portaMot.localToWorld(v3(.02, .55, -.88)); pegaReta(borda, borda.clone().sub(Ad.obj.position).setY(0).normalize(), v3(0, 1, 0), v3(.6, -.6, -.3).applyAxisAngle(v3(0, 1, 0), Ad.obj.rotation.y).toArray(), mEmp, .2); }
+        // maleta: no colo (mão direita na alça) até levantar; depois pendurada na mão
+        V.segurarMaleta(Ad, mal, t);
+        const colo = P.clamp(1 - sobe * 2.2) * (t < 13.95 ? 1 : 0);
+        if (colo > 0) { const cx = Ad.osso('thigh.L').getWorldPosition(v3(0, 0, 0)).add(Ad.osso('thigh.R').getWorldPosition(v3(0, 0, 0))).multiplyScalar(.5), jo = Ad.osso('shin.L').getWorldPosition(v3(0, 0, 0)).add(Ad.osso('shin.R').getWorldPosition(v3(0, 0, 0))).multiplyScalar(.5);
+          const lap = cx.lerp(jo, .55).add(v3(0, .12, 0)); mal.position.lerp(lap, colo); mal.rotation.set(0, Ad.obj.rotation.y, 0); mal.deitar?.(colo);
+          V.pegar(Ad, 'R', mal.position.clone().add(v3(0, .1, 0)), v3(0, -1, 0), v3(Math.sin(Ad.obj.rotation.y), 0, Math.cos(Ad.obj.rotation.y)), v3(-.5, -.3, -.5).applyAxisAngle(v3(0, 1, 0), Ad.obj.rotation.y).toArray(), colo, .8); }
+        mal.pulsar(t);
+        // câmeras do lado do motorista: a saída inteira, depois acompanha ele indo pra cabana
+        if (t < 15.45) { S.camera.fov = 42; S.camera.position.set(-3.5, 1.4, 10.6); S.camera.lookAt(-1.15, .9, 8.45); }
+        else { const a = Ad.obj.position; S.camera.fov = 42; S.camera.position.set(-4.4, 1.7, 9.6); S.camera.lookAt(a.x * .7 - .3, 1.0, a.z); }
+      }
+      Ad.obj.visible = t >= 11; mal.visible = t >= 11; Ni.obj.visible = t >= 11;
+    } else {
+      P.nevoa({ perto: 3, longe: 20 }); P.luz({ keyDir: [.1, .5, 1], keyCor: '#b4d8be', fillDir: [.6, .2, -.6], fillCor: '#2a8a48', amb: '#3f6048' });
+      const u = t - 4.6, v = fala('47', t, 'adryan');
+      D.atualizar(t, { giro: 0, falaAd: v, olhaAd: -.55 * P.suave(.3, .8, u) * (1 - P.suave(5.8, 6.3, u)), olhaNi: -.4 * P.suave(.5, 1, u) * (1 - P.suave(4.6, 5.2, u)) - .25 * P.suave(4.8, 5.4, u), entrega: P.clamp((u - 1.9) / 3.4) });
+      if (u < 4.3) { S.camera.fov = 46; S.camera.position.set(.02, 1.3, 1.05); S.camera.lookAt(0, .86, .3); }
+      else { S.camera.fov = 40; S.camera.position.set(-.22, 1.36, 1.02); S.camera.lookAt(.1, .86, .26); }
+    }
+    S.camera.updateProjectionMatrix();
+  };
+};
+</script></body></html>
