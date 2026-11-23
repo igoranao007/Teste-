@@ -10,4 +10,5 @@
 ## Elenco
 - **Metalis** = o Sonic da imagem enviada (versão azul-escura de cartola e bengala), no papel de mendigo.
 - **Ittu** = a personagem de mangá da imagem enviada.
+- **Zangão** = o Cartman (South Park) do modelo enviado, em duas versões separadas: A original (aparência dele + bigode estilo Chaplin + emblema de águia inspirado na Lazio) e B militar. Base: "PlayStation 1 - South Park - Eric Cartman" by DamianToons Cartoon Comedy Animation Studios (Sketchfab), CC BY 4.0 — crédito obrigatório; personagem © South Park Studios / Comedy Central (uso fan-made).
 - **Vegetti** e **Gusta** = pessoas reais (foto projetada no rosto), de terno igual ao do Phantom.
