@@ -2,8 +2,9 @@
 (JashiPSX: spine..spine.005, upper_arm.L, thigh.L...). Retarget em espaço de mundo: cada osso de destino recebe a
 rotação que o osso de origem fez em relação à pose de descanso; o quadril recebe também o deslocamento (escalado).
 Uso: blender -b personagem.blend --python animar_jashi.py -- saida.blend"""
-import bpy, sys
+import bpy, sys, os, math
 from mathutils import Matrix, Quaternion, Vector
+ABRE = float(os.environ.get('BRACO_ABRE', '0'))   # graus (Luan gordo: ~22)
 OUT = sys.argv[sys.argv.index('--') + 1]
 sc = bpy.context.scene
 T = bpy.data.objects['simple_character']
@@ -48,6 +49,10 @@ for fa in fontes:
         for tn, (a, b, k) in MAP:
             d = D[a] if not b else D[a].slerp(D[b], k)
             R = d @ trest[tn]
+            if ABRE and tn in ('upper_arm.L', 'upper_arm.R'):            # corpo gordo: braço afastado do tronco (gira no eixo frente-trás do mundo)
+                R = Quaternion((0, 1, 0), math.radians(ABRE) * (-1 if tn.endswith('.L') else 1)) @ R
+            if ABRE and tn in ('forearm.L', 'forearm.R'):                # o antebraço acompanha (não volta pra dentro da barriga)
+                R = Quaternion((0, 1, 0), math.radians(ABRE * 0.55) * (-1 if tn.endswith('.L') else 1)) @ R
             pb = T.pose.bones[tn]
             bpy.context.view_layer.update()
             head = pb.head.copy() if tn != 'spine' else None

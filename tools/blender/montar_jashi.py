@@ -12,7 +12,7 @@ gi = [i for i, m in enumerate(h.data.materials) if m.name == 'glass']
 fora = []
 for f in bm.faces:
     u = sum(l[uvl].uv.x for l in f.loops) / len(f.loops); v = 1 - sum(l[uvl].uv.y for l in f.loops) / len(f.loops)
-    if f.material_index in gi or (0.42 < u < 0.80 and v > 0.90): fora.append(f)
+    if f.material_index in gi or (os.environ.get('OCULOS') != '1' and 0.42 < u < 0.80 and v > 0.90): fora.append(f)   # OCULOS=1: mantém a armação (só tira a lente)
 bmesh.ops.delete(bm, geom=fora, context='FACES')
 # cabelo mais curto: vértices do volume do cabelo puxados pro crânio
 import mathutils
