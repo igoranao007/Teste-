@@ -45,5 +45,18 @@
   ficar mais estreita que a borda de apoio (dobra pra dentro = triângulos virados). `dissolve_limit` (mesmo material/UV) tira as lascas dos cortes:
   V3 com 6.079 triângulos de roupa (V2: 4.848; V1: 3.144).
 
+## V4 (personalidade e assimetria; V1–V3 intactas)
+- `VERSAO=4` → `modelo/dod_farda_v4.glb` · motor `T.dod({ versao: 'v4' })` · `inspecao/folha_dod_v4.jpg`, `inspecao/comparacao_v3_v4.jpg`.
+- Colete: porta-carregadores de 3 tamanhos (duplo largo · simples · pequeno) com lingueta de couro envelhecido em relevo; compartimento lateral só à esquerda.
+- Poncho: 32 colunas e 6 fileiras de queda; caimento em curva, 5 dobras macias que abrem pra baixo, boca de sino, barra ondulada, 3 pontas
+  (frente-esquerda, meio das costas, uma menor atrás à direita) que puxam o pano de cima; comprimento CONTÍNUO em volta (sem "asa" no ombro);
+  ombro esquerdo curto pra bandeira ficar livre.
+- Mangas: cotoveleiras com espessura; bolso de caneta na manga esquerda (abaixo da bandeira); divisa no velcro da aba do bolso da manga direita
+  (acima do patch da Toca). A bandeira ficou fora da fusão de faces (senão achatava e a manga atravessava).
+- Calças: bolsos cargo ASSIMÉTRICOS (esquerdo maior e estufado — fole —, direito menor e mais alto); assento reforçado; bolso traseiro com aba só à
+  esquerda e costura de bolso embutido à direita; costura diagonal na coxa direita.
+- Costas/equipamento: bolsa de rádio na lateral-trás direita (tira de couro, fivela) com antena (tubo fino em 3 faces + ponteira); suspensórios do cinto
+  com fivela; alça diagonal; bolsa utilitária no cinto; identificação "DOD" no peito. 7.230 triângulos de roupa.
+
 ## Cabeça (não mudou)
 - Foto do meme projetada (método do Floppa), cara chapada, cérebro em cúpula, orelhas, boca redesenhada em pixel com repouso/falando (`animar(t, {boca, pisca})`).

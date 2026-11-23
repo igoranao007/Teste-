@@ -256,7 +256,7 @@ def objeto(bm, nome, mats, mat_de=None, dens=4.0, uv=True, uv_extra=None):   # m
     if uv: uv_caixa(bm, dens)
     if uv_extra: uv_extra(bm, bm.loops.layers.uv.verify())
     for f in bm.faces: f.material_index = mat_de(f) if mat_de else 0
-    if V >= 3:                                                     # funde faces coplanares do mesmo material (os cortes deixam lascas); a forma não muda
+    if V >= 3 and nome != 'bandeira':                             # funde faces coplanares do mesmo material (os cortes deixam lascas); a forma não muda (a bandeira fica dobrada na manga)
         antes = len(bm.faces)
         bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(1.5), use_dissolve_boundaries=False, verts=bm.verts[:], edges=bm.edges[:], delimit={'MATERIAL', 'UV'})
         bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
@@ -289,7 +289,7 @@ print('bandeira: faces na manga', len(patch))
 bmb = bm.copy(); bmb.faces.ensure_lookup_table(); idx = {f.index for f in patch}
 idx = {f.index for f in patch}
 bmesh.ops.delete(bmb, geom=[f for f in bmb.faces if f.index not in idx], context='FACES')
-afastar(bmb, .003)
+afastar(bmb, .004 if V >= 4 else .003)
 uvb = bmb.loops.layers.uv.verify()
 for f in bmb.faces:
     for l in f.loops:
@@ -298,6 +298,13 @@ bandeira = objeto(bmb, 'bandeira', ['bandeira'], uv=False)
 if V >= 3: camisa = objeto(bm, 'camisa', camisa_v3(bm), mat_de=lambda f: f.material_index, uv_extra=uv_camisa_v3)
 else: camisa = objeto(bm, 'camisa', ['farda'])
 
+if V >= 4:                                                         # COTOVELEIRAS: casca do lado de fora do cotovelo, com espessura
+    bm = extrair(lambda f: REG[f.index] == 'camisa'); afastar(bm, .014)
+    fs = [f for f in bm.faces if dono(f).startswith(('upper_arm', 'forearm')) and abs(abs(centro(f).x) - COTOVELO.x) < .05 and normal(f).y > .2]
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f not in fs], context='FACES')
+    extrudar(bm, bm.faces[:], .012, normal_unica=False)
+    cotoveleira = objeto(bm, 'cotoveleira', ['joelheira'], dens=8)
+
 # ---------- CALÇA (com barra por cima do cano) + BOLSOS CARGO + JOELHEIRAS
 bm = extrair(lambda f: REG[f.index] == 'calca'); afastar(bm, .013)
 barra = bordas(bm, lambda e: all(abs(W(v.co).z - BOTA) < .01 for v in e.verts))
@@ -305,12 +312,19 @@ if barra:                                                          # a barra des
     vs = extrudar_borda(bm, barra, (0, 0, -.035))
     bm.normal_update()
 BZ0, BZ1, BPROF = (JOELHO + .13, JOELHO + .36, .028) if V >= 3 else (JOELHO + .17, JOELHO + .33, .022)
+BOLSO_Z = {}
 BOLSOS_CALCA = []
 for s in (1, -1):                                                  # bolso cargo na lateral de fora da coxa
+    BZ0, BZ1, BPROF = ((JOELHO + .12, JOELHO + .37, .034) if s > 0 else (JOELHO + .18, JOELHO + .33, .024)) if V >= 4 else (BZ0, BZ1, BPROF)   # V4: assimétricos
+    BOLSO_Z[s] = (BZ0, BZ1)
     lado = lambda f, s=s: dono(f).startswith('thigh') and normal(f).x * s > .55 and centro(f).x * s > 0
     for z in (BZ0, BZ1): cortar(bm, (0, 0, z), (0, 0, 1), [f for f in bm.faces if lado(f)])
     fs = [f for f in bm.faces if lado(f) and BZ0 < centro(f).z < BZ1]
     novos = extrudar(bm, fs, BPROF); BOLSOS_CALCA += novos
+    if V >= 4:                                                     # fole: o bolso estufa no meio (volume de bolso cheio)
+        for v in {v for f in novos if abs(normal(f).x) > .6 for v in f.verts}:
+            z = W(v.co).z
+            if BZ0 + .03 < z < BZ1 - .075: v.co += R3i @ Vector((s * .007, 0, 0))
     tampa = [f for f in novos if centro(f).z > BZ1 - .06 and abs(normal(f).x) > .5]
     for f in tampa:
         for v in f.verts: v.co += f.normal * L(.004)
@@ -368,6 +382,10 @@ bm.normal_update(); caixa(bm, 'colete cortado')
 frente = lambda f: normal(f).y < -.6
 # BOLSOS: peças próprias tiradas da frente da placa (frente achatada e rígida, como um porta-carregador de verdade), com aba
 REGIOES = [((-.115, -.045), (PZ0, PZ1), .034), ((-.035, .035), (PZ0, PZ1), .034), ((.045, .115), (PZ0, PZ1), .034), ((-.06, .06), (PT - .13, PT - .06) if V >= 2 else (PT - .11, PT - .04), .02)]
+if V >= 4:                                                         # V4: duplo largo · simples médio · pequeno (lanterna/pistola) · administrativo
+    REGIOES = [((-.128, -.045), (PZ0, PZ1), .038), ((-.035, .025), (PZ0, PZ1 - .02), .031), ((.037, .1), (PZ0, PZ1 - .05), .026), ((-.06, .06), (PT - .13, PT - .06), .02)]
+    for x in (-.128, .025, .037, .1): cortar(bm, (x * TX / .2, 0, 0), (1, 0, 0), [f for f in bm.faces if normal(f).y < -.6])
+    for z in (PZ1 - .02, PZ1 - .05): cortar(bm, (0, 0, z), (0, 0, 1), [f for f in bm.faces if normal(f).y < -.6])
 bmp = bm.copy(); grupos = []
 for (x0, x1), (z0, z1), prof in REGIOES:
     x0, x1 = x0 * TX / .2, x1 * TX / .2
@@ -384,13 +402,21 @@ for fs, z1, prof, _ in grupos:
     for f in novos:                                                # aba: degrau na parte de cima da frente
         if normal(f).y < -.6 and centro(f).z > z1 - .05:
             for v in f.verts: v.co += f.normal * L(.005)
+if V >= 4:                                                         # fecho de cada bolso: lingueta de couro sobre a aba (peça em relevo)
+    for fs, z1, prof, (x0, x1, z0) in grupos:
+        cx_ = (x0 + x1) / 2
+        frente_b = lambda f: f.is_valid and normal(f).y < -.6 and x0 - .003 < centro(f).x < x1 + .003 and z0 < centro(f).z < z1 + .01
+        for x in (cx_ - .009, cx_ + .009): cortar(bmp, (x, 0, 0), (1, 0, 0), [f for f in bmp.faces if frente_b(f)])
+        for z in (z1 - .068, z1 - .03): cortar(bmp, (0, 0, z), (0, 0, 1), [f for f in bmp.faces if frente_b(f)])
+        lg = [f for f in bmp.faces if frente_b(f) and abs(centro(f).x - cx_) < .009 and z1 - .068 < centro(f).z < z1 - .03]
+        for f in extrudar(bmp, lg, .004): f.material_index = 1
 uv_caixa(bmp, 5); uvp = bmp.loops.layers.uv.verify()
 for fs, z1, prof, (x0, x1, z0) in grupos:                         # frente de cada bolso: a textura inteira (costura na borda, aba em cima)
     for f in bmp.faces:
         c = centro(f)
         if normal(f).y < -.6 and x0 - .005 < c.x < x1 + .005 and z0 - .005 < c.z < z1 + .01:
             for l in f.loops: p_ = W(l.vert.co); l[uvp].uv = ((p_.x - x0) / (x1 - x0), (p_.z - z0) / (z1 - z0))
-bolsos = objeto(bmp, 'bolsos', ['bolso'], uv=False)
+bolsos = objeto(bmp, 'bolsos', ['bolso', 'couro'] if V >= 4 else ['bolso'], mat_de=lambda f: f.material_index, uv=False)
 # espessura do colete (placas de verdade)
 INT, PAR = espessura(bm, bm.faces[:], .016)
 caixa(bm, 'colete solido')

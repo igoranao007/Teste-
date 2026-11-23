@@ -139,3 +139,26 @@ if V >= 3:
         if x in (1, w - 2) or y in (1, h - 2): return hx(P_AMARELO) if (x + y) % 2 == 0 else hx(P_OLIVA_E)
         return bandeira_f(x, y, w, h)
     material('bandeira', textura('bandeira', 48, 32, bandeira3_f), repete=False)
+# ---- V4: couro envelhecido, divisa, bolso de caneta, rádio
+if V >= 4:
+    def couro_f(x, y, w, h):                                       # couro marrom gasto (linguetas, tira do rádio)
+        c = mix(hx('#4a3424'), hx('#7a5a3c'), .55 * ruido(x // 2, y // 2, 71))
+        if ruido(x, y, 72) > .9: c = mix(c, hx('#9a8060'), .5)       # desbotado nas bordas de uso
+        if (x in (0, w - 1)) and y % 2 == 0: c = hx('#2e2016')
+        return c
+    def radio_f(x, y, w, h):                                       # bolsa do rádio: aba, tira de couro com fivela, ilhós da antena, pesponto
+        u, v = x / (w - 1), y / (h - 1)
+        c = lona(P_OLIVA_E, P_ESCURO, P_OLIVA, 73)(x, y, w, h)
+        if v > .72: c = mix(c, hx(P_ESCURO), .25)
+        if abs(v - .72) < .03: c = hx(P_ESCURO)
+        if abs(u - .5) < .1 and .25 < v < .8: c = couro_f(x, y, w, h)
+        if abs(u - .5) < .12 and abs(v - .3) < .04: c = hx('#8c8b84')
+        if abs(u - .82) < .06 and v > .9: c = hx('#8c8b84')
+        if (x in (1, w - 2) or y == 1) and (x + y) % 2 == 0: c = hx(P_AMARELO_E)
+        return c
+    material('couro', textura('couro', 16, 16, couro_f))
+    material('radio', textura('radio', 32, 32, radio_f), repete=False)
+    material('antena', textura('antena', 8, 8, lambda x, y, w, h: hx('#141415') if y % 4 else hx('#2c2c2e')))
+    material('divisa', png('divisa.png'), repete=False)
+    material('bolso_manga', png('bolso_manga_v4.png'), repete=False)   # divisa no velcro da aba + patch da Toca
+    material('caneta', png('caneta.png'), repete=False)

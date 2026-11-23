@@ -28,7 +28,7 @@ def pescoco_em(d):                                                  # raio e alt
 # (raios de fora pra dentro), com pregas e pontas. Assimétrico: na frente, um painel diagonal desce sobre o peito ESQUERDO;
 # do lado direito o colete fica à mostra. Nos lados termina na ponta do ombro (o braço fica livre; a bandeira aparece).
 APOIO = bvh_de([camisa, colete, bolsos])
-NA, NS, NH = 24, 4, 4                                              # ângulos · fileiras de apoio · fileiras caindo
+NA, NS, NH = (32, 4, 6) if V >= 4 else (24, 4, 4)                  # ângulos · fileiras de apoio · fileiras caindo (V4: mais fino, pano mais solto)
 def barra_z(d):                                                    # onde a barra termina em cada direção (frente = -Y, esquerda = +X)
     if d.y < -.25:
         x = d.x * .25
@@ -56,17 +56,32 @@ for k in range(NA):
         z = min((hit.z if hit is not None else z0) + .058, zant) if j else zant
         zant = z; col.append(Vector((p.x, p.y, z)))
     zb = barra_z(d); topo = col[-1]
+    if V >= 4:                                                      # comprimento CONTÍNUO em volta: curto nos ombros, longo na frente/atrás (sem degrau = sem asa)
+        zf = barra_z(Vector((d.x, -1, 0)).normalized()) if d.y <= 0 else barra_z(Vector((d.x, 1, 0)).normalized())
+        if zf > 5: zf = topo.z - .02
+        ini = .42 if d.x > 0 else .12                                # ombro ESQUERDO fica curto por mais tempo: a bandeira do braço esquerdo fica livre
+        w_ = min(1, max(0, (abs(d.y) - ini) / (.92 - ini))); w_ = w_ * w_ * (3 - 2 * w_)
+        zb = (topo.z - .02) * (1 - w_) + zf * w_
     for j in range(1, NH + 1):                                      # fileiras caindo até a barra
-        if zb > topo.z - .03: z = topo.z - .022 * j / NH            # sem queda: só uma borda virada pra baixo
-        else: z = topo.z + (zb - topo.z) * (j / NH)
+        cai = zb < topo.z - .03; tj = j / NH
+        queda = min(1, max(0, (topo.z - zb) / .2)) if V >= 4 else 1           # dobras proporcionais ao tamanho da queda
+        if not cai: z = topo.z - .022 * tj                          # sem queda: só uma borda virada pra baixo
+        elif V >= 4: z = topo.z + (zb - topo.z) * (1 - (1 - tj) ** 1.35) + .009 * tj * math.sin(k * 2 * math.pi * 5 / NA + 1.3)   # caimento: curva + barra ondulada
+        else: z = topo.z + (zb - topo.z) * tj
         eixo = Vector((C0.x, C0.y, z)); hit = APOIO.ray_cast(eixo + d * .9, -d, .9)[0]
         rc = Vector((hit.x - C0.x, hit.y - C0.y, 0)).length + .042 if hit is not None else r1
-        rq = max(rc, r1 + .006 * j) + (.010 if (k % 2) and j >= 2 else 0) * (1 if zb < topo.z - .03 else 0)   # pregas (a queda sempre abre pra fora: sem dobrar pra dentro)
+        if V >= 4:                                                  # dobras macias que abrem pra baixo (5 dobras principais + 1 secundária) e boca de sino
+            dobra = (.016 * math.sin(k * 2 * math.pi * 5 / NA + .7) + .006 * math.sin(k * 2 * math.pi * 11 / NA + 2.1)) * tj ** 1.2
+            rq = max(rc, r1 + .006 * j) + (dobra + .012 * tj ** 1.5) * queda   # nos lados (queda curta) o pano só assenta: nada de asa sobre o ombro
+        else: rq = max(rc, r1 + .006 * j) + (.010 if (k % 2) and j >= 2 else 0) * (1 if cai else 0)   # pregas (a queda sempre abre pra fora)
         col.append(Vector((C0.x, C0.y, z)) + d * rq)
     # PONTAS: frente-esquerda e meio das costas descem mais
     if zb < 9:
-        ponta = .05 * max(0, 1 - abs(math.atan2(d.y, d.x) - math.atan2(-.75, .66)) / .35) + .04 * max(0, 1 - abs(math.atan2(d.y, d.x) - math.pi / 2) / .3)
+        ang_ = math.atan2(d.y, d.x)
+        ponta = .05 * max(0, 1 - abs(ang_ - math.atan2(-.75, .66)) / .35) + .04 * max(0, 1 - abs(ang_ - math.pi / 2) / .3)
+        if V >= 4: ponta = ponta * 1.3 + .028 * max(0, 1 - abs(ang_ - math.atan2(.72, -.7)) / .3)   # terceira ponta, menor, atrás à direita
         col[-1] = col[-1] - Vector((0, 0, ponta))
+        if V >= 4 and len(col) > 2: col[-2] = col[-2] - Vector((0, 0, ponta * .45))   # a ponta puxa o pano de cima (não é só a borda)
     grade.append(col)
 for _ in range(2):                                                  # suaviza alturas e raios entre ângulos vizinhos (sem picos)
     nova = []
@@ -89,7 +104,7 @@ for k in range(NA):
 bmp_.normal_update()
 if sum(Wn(f.normal).dot(Vector((W(f.calc_center_median()).x - C0.x, W(f.calc_center_median()).y - C0.y, .3)).normalized()) for f in bmp_.faces) < 0:
     bmesh.ops.reverse_faces(bmp_, faces=bmp_.faces[:])
-INT_P, PAR_P = espessura(bmp_, [f for f in bmp_.faces], .006)
+INT_P, PAR_P = espessura(bmp_, [f for f in bmp_.faces], .004 if V >= 4 else .006)
 for f in PAR_P: f.material_index = 1
 pesar(bmp_)
 poncho = objeto(bmp_, 'poncho', ['poncho', 'poncho_barra'], mat_de=lambda f: f.material_index, dens=4)
@@ -220,3 +235,49 @@ if V >= 3:                                                         # porta-equip
     bmb = bolsa_em((hit or Vector((.12, .15, CINTURA - .065))), dtras, C, .075, .09, .045)
     pesar(bmb); bolsa_tras = objeto(bmb, 'bolsa_tras', ['bolsa'], uv=False); restringir(bolsa_tras, ['spine', 'spine.001'])
 print('bolsas ok')
+
+# ================================================================== V4: rádio nas costas (com antena), compartimento lateral do colete, suspensórios
+if V >= 4:
+    SUP = bvh_de([o for o in (poncho, colete, bolsos, camisa, cinto, calca, alca) if o])
+    # RÁDIO: bolsa na lateral-trás DIREITA do colete (abaixo do poncho), com antena flexível subindo por fora das costas
+    drad = Vector((-.62, .78, 0)).normalized()
+    hit = raio(SUP, Vector((-.15, .1, 1.27)), drad)
+    c_r = (hit or Vector((-.17, .16, 1.27)))
+    bmb = bolsa_em(c_r, drad, C, .066, .105, .042, nx=2, nz=3)
+    topo_r = c_r + drad * .03 + Vector((0, 0, .055))
+    base = topo_r + Vector((.012, .0, 0))
+    pts = [base, base + Vector((-.006, .03, .14)), base + Vector((-.014, .07, .30)), base + Vector((-.022, .1, .44))]   # antena: leve curva pra trás
+    fa_ = []; aneis_ = []                                            # tubo fino de seção triangular (fechado: aparece de todo lado)
+    for i, p in enumerate(pts):
+        lg = .005 * (1 - .5 * i / (len(pts) - 1))
+        aneis_.append([bmb.verts.new(MWi @ (p + Vector((math.cos(a) * lg, math.sin(a) * lg, 0)))) for a in (0, 2.094, 4.189)])
+    for i in range(len(aneis_) - 1):
+        for k in range(3):
+            f = bmb.faces.new((aneis_[i][k], aneis_[i][(k + 1) % 3], aneis_[i + 1][(k + 1) % 3], aneis_[i + 1][k])); f.material_index = 1; fa_.append(f)
+    bmb.normal_update()
+    cx_a = sum((W(v.co) for r in aneis_ for v in r), Vector()) / (3 * len(aneis_))
+    for f in fa_:
+        c_ = W(f.calc_center_median()); out = Vector((c_.x - cx_a.x, c_.y - cx_a.y, 0))
+        if Wn(f.normal).dot(out) < 0: f.normal_flip()
+    ponta_ = pts[-1]
+    tp_ = [bmb.verts.new(MWi @ (ponta_ + Vector((math.cos(a) * .006, math.sin(a) * .006, .0)))) for a in (0, 2.094, 4.189)] + [bmb.verts.new(MWi @ (ponta_ + Vector((0, 0, .02))))]
+    for k in range(3): f = bmb.faces.new((tp_[k], tp_[(k + 1) % 3], tp_[3])); f.material_index = 2     # ponteira
+    uvl = bmb.loops.layers.uv.verify()
+    for f in fa_:
+        for l in f.loops: l[uvl].uv = (0, W(l.vert.co).z * 8)
+    pesar(bmb); radio = objeto(bmb, 'radio', ['radio', 'antena', 'metal'], mat_de=lambda f: f.material_index, uv=False)
+    restringir(radio, ['spine.001', 'spine.002', 'spine.003'])
+    # COMPARTIMENTO LATERAL: bolsa alta e estreita só no lado ESQUERDO do colete (assimetria)
+    hit = raio(SUP, Vector((.18, 0, 1.285)), E_)
+    bmb = bolsa_em((hit or Vector((.21, 0, 1.285))), E_, C, .055, .1, .03)
+    pesar(bmb); lateral_e = objeto(bmb, 'bolso_lateral', ['bolso'], uv=False); restringir(lateral_e, ['spine.001', 'spine.002'])
+    # SUSPENSÓRIOS nas costas: do cinto até a barra do poncho (prendem o cinto de guarnição), com fivela de ajuste
+    for sx in (.075, -.085):
+        g_ = [(Vector((sx, .1, CINTURA - .02)), T), (Vector((sx * 1.05, .1, 1.24)), T), (Vector((sx * 1.15, .1, 1.40)), T)]
+        bms, fs_, _ = faixa(g_, .03, .006, passos=4)
+        espessura(bms, fs_, .003)
+        i = len(fs_) // 2
+        for f in extrudar(bms, [fs_[i]], .005): f.material_index = 1
+        pesar(bms); sus = objeto(bms, 'suspensorio', ['alca', 'metal'], mat_de=lambda f: f.material_index, dens=10)
+        restringir(sus, ['spine', 'spine.001', 'spine.002'])
+    print('v4 equipamento ok')

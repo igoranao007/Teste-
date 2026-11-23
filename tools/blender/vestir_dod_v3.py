@@ -44,9 +44,21 @@ def camisa_v3(bm):
         f.material_index = 4
         if normal(f).z > .6 and -centro(f).x < BM_X0 + .02:
             for v in f.verts: v.co += f.normal * L(.003)                    # aba do bolso
-    return ['farda', 'farda2', 'costura', 'reforco', 'bolso_manga']
+    if V < 4: return ['farda', 'farda2', 'costura', 'reforco', 'bolso_manga']
+    # V4 · manga ESQUERDA: bolso de caneta abaixo da bandeira · manga DIREITA: divisa (identificação) acima do bolso
+    for (x0, x1, yy, mat, prof, sx) in ((CN_X0, CN_X1, CN_Y, 5, .009, 1),):   # (a divisa foi pro velcro da aba do bolso da manga direita: textura bolso_manga_v4)
+        na = lambda f, sx=sx: eh_braco(f) and centro(f).x * sx > OMBRO.x and normal(f).z > .3
+        for x in (x0, x1): cortar(bm, (sx * x, 0, 0), (1, 0, 0), [f for f in bm.faces if na(f)])
+        for y in (-yy, yy): cortar(bm, (0, y, 0), (0, 1, 0), [f for f in bm.faces if na(f)])
+        fs = [f for f in bm.faces if na(f) and x0 < centro(f).x * sx < x1 and abs(centro(f).y) < yy and f.material_index != 4]
+        for f in extrudar(bm, fs, prof): f.material_index = mat
+    return ['farda', 'farda2', 'costura', 'reforco', 'bolso_manga', 'caneta']
+CN_X0, CN_X1, CN_Y = OMBRO.x + .135, OMBRO.x + .18, .022          # bolso de caneta (manga esquerda)
+DV_X0, DV_X1, DV_Y = OMBRO.x + .062, OMBRO.x + .108, .026         # divisa (manga direita)
 def uv_camisa_v3(bm, uvl):
     plana(bm, uvl, [f for f in bm.faces if f.material_index == 4], lambda q: (BM_Y - q.y) / (2 * BM_Y), lambda q: 1 - (-q.x - BM_X0) / (BM_X1 - BM_X0))
+    plana(bm, uvl, [f for f in bm.faces if f.material_index == 5], lambda q: (q.y + CN_Y) / (2 * CN_Y), lambda q: 1 - (q.x - CN_X0) / (CN_X1 - CN_X0))
+    plana(bm, uvl, [f for f in bm.faces if f.material_index == 6], lambda q: (DV_Y - q.y) / (2 * DV_Y), lambda q: 1 - (-q.x - DV_X0) / (DV_X1 - DV_X0))
     uv_denso(bm, uvl, (2,))
 
 # ------------------------------------------------------------------ CALÇA: bolsos cargo grandes com aba, costuras laterais e do joelho,
@@ -76,13 +88,33 @@ def calca_v3(bm, novos):
     for s in (1, -1):
         fv = [f for f in faixa if f.is_valid and normal(f).x * s > .6 and centro(f).x * s > 0]
         for f in extrudar(bm, fv[:1], .004): f.material_index = 5
+    if V >= 4:
+        tras = lambda f: f.material_index in (0, 2) and normal(f).y > .45 and centro(f).y > 0
+        for f in bm.faces:
+            if tras(f) and QUADRIL - .13 < centro(f).z < CINTURA - .05: f.material_index = 3          # assento reforçado
+        faixa_costura(bm, lambda f: tras(f) and centro(f).x > 0, (0, 0, QUADRIL - .13), (0, 0, 1), 2)
+        # bolso traseiro só do lado ESQUERDO, com aba (o direito fica só com a costura de um bolso embutido)
+        bt = lambda f: f.is_valid and tras(f) and centro(f).x > 0
+        for x in (.045, .125): cortar(bm, (x, 0, 0), (1, 0, 0), [f for f in bm.faces if bt(f)])
+        for z in (QUADRIL - .01, QUADRIL + .075): cortar(bm, (0, 0, z), (0, 0, 1), [f for f in bm.faces if bt(f)])
+        fs = [f for f in bm.faces if bt(f) and .045 < centro(f).x < .125 and QUADRIL - .01 < centro(f).z < QUADRIL + .075]
+        for f in extrudar(bm, fs, .008):
+            f.material_index = 1; BOLSO_TRAS.append(f)
+        faixa_costura(bm, lambda f: f.is_valid and f.material_index in (0, 3) and normal(f).y > .45 and centro(f).y > 0 and -.125 < centro(f).x < -.045, (0, 0, QUADRIL + .05), (0, 0, 1), 2)
+        # costura diagonal na frente da coxa DIREITA (assimetria)
+        n_ = Vector((.45, 0, .89)).normalized()
+        faixa_costura(bm, lambda f: f.is_valid and f.material_index == 0 and dono(f).startswith('thigh') and centro(f).x < 0 and normal(f).y < -.4, (-.12, 0, JOELHO + .27), n_, 2)
     return ['calca', 'bolso_calca', 'costura', 'reforco', 'fita', 'metal']
+BOLSO_TRAS = []
 def uv_calca_v3(bm, uvl):
     for s in (1, -1):
         if s not in BOLSO_CALCA_Y: continue
         y0, y1 = BOLSO_CALCA_Y[s]
         fs = [f for f in bm.faces if f.material_index == 1 and centro(f).x * s > 0]
-        plana(bm, uvl, fs, (lambda q: (q.y - y0) / (y1 - y0)) if s > 0 else (lambda q: (y1 - q.y) / (y1 - y0)), lambda q: (q.z - BZ0) / (BZ1 - BZ0))
+        z0b, z1b = BOLSO_Z.get(s, (BZ0, BZ1))
+        fs = [f for f in fs if f not in BOLSO_TRAS]
+        plana(bm, uvl, fs, (lambda q: (q.y - y0) / (y1 - y0)) if s > 0 else (lambda q: (y1 - q.y) / (y1 - y0)), lambda q, z0b=z0b, z1b=z1b: (q.z - z0b) / (z1b - z0b))
+    plana(bm, uvl, [f for f in BOLSO_TRAS if f.is_valid], lambda q: (.125 - q.x) / .08, lambda q: (q.z - QUADRIL + .01) / .085)
     uv_denso(bm, uvl, (2,)); uv_denso(bm, uvl, (4,), 12)
 
 # ------------------------------------------------------------------ COTURNO: sola em duas camadas (com borda saliente), biqueira, cadarço
