@@ -80,6 +80,12 @@ if PERSONAGEM == 'entrada':
     exec(open(os.path.join(AQUI, 'cabeca_entrada.py' if CABECA == 'v2' else 'cabeca_entrada_v1.py')).read())
     if UNIFORME == 'v2' and CABECA == 'v2': bpy.data.objects.remove(corpo)   # nada do corpo base aparece (manga longa, luvas, pescoço da cabeça)
 
+if PERSONAGEM == 'oliveira':
+    exec(open(os.path.join(AQUI, 'vestir_oliveira.py')).read())
+
+if PERSONAGEM == 'luan':
+    exec(open(os.path.join(AQUI, 'vestir_luan.py')).read())
+
 if PERSONAGEM == 'corsa':
     CORSA = os.environ.get('CORSA', 'v2')                            # v1 = cabeça recortada da digitalização (antiga) · v2 = cabeça limpa + uniforme refeito
     exec(open(os.path.join(AQUI, 'vestir_corsa.py' if CORSA == 'v1' else 'vestir_corsa_v2.py')).read())
