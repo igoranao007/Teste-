@@ -42,34 +42,36 @@ def anel_torso(z0, z1, afasta, esp, pred=lambda f: True):          # faixa em vo
     bmesh.ops.delete(bm, geom=[f for f in bm.faces if not (z0 < centro(f).z < z1 and pred(f))], context='FACES')
     afastar(bm, afasta); espessura(bm, bm.faces[:], esp); return bm
 
+def afinar_corpo(kt=(.86, .92), ka=.84, kc=.91, kn=.95):            # PROPORÇÕES PRÓPRIAS: afina tronco (x, y), braços, coxas e canelas do corpo base
+    nomes = {g.index: g.name for g in corpo.vertex_groups}
+    YT = osso('spine.002').y; MAO = osso('hand.L'); PE = osso('foot.L'); COXA = osso('thigh.L')
+    def afina(nome, p):
+        if nome.startswith(('spine.004', 'spine.005')): return p
+        if nome.startswith(('upper_arm', 'forearm', 'hand')):            # braço em T: encolhe em volta do eixo do braço
+            t = min(1, max(0, (abs(p.x) - OMBRO.x) / (MAO.x - OMBRO.x)))
+            ey = OMBRO.y + (MAO.y - OMBRO.y) * t; ez = OMBRO.z + (MAO.z - OMBRO.z) * t; k = .95 if nome.startswith('hand') else ka
+            return Vector((p.x, ey + (p.y - ey) * k, ez + (p.z - ez) * k))
+        if nome.startswith(('thigh', 'shin')):                           # perna: encolhe em volta do eixo da perna
+            s = 1 if p.x > 0 else -1; t = min(1, max(0, (COXA.z - p.z) / (COXA.z - PE.z)))
+            ex = s * (COXA.x + (PE.x - COXA.x) * t); ey = COXA.y + (PE.y - COXA.y) * t; k = kc if nome.startswith('thigh') else kn
+            return Vector((ex + (p.x - ex) * k, ey + (p.y - ey) * k, p.z))
+        if nome.startswith(('foot', 'toe')): return p
+        return Vector((p.x * kt[0], YT + (p.y - YT) * kt[1], p.z))     # tronco
+    for v in bm0.verts:
+        ws = [(nomes[g], w) for g, w in v[DL].items() if g in nomes and w > 0]
+        tot = sum(w for _, w in ws)
+        if tot <= 0: continue
+        p = W(v.co); q = Vector()
+        for n_, w in ws: q += afina(n_, p) * (w / tot)
+        v.co = MWi @ q
+    bm0.normal_update()
+    return max(abs(W(v.co).x) for f in bm0.faces if tronco(f) and 1.3 < centro(f).z < 1.5 for v in f.verts)   # nova meia-largura do tronco (TX)
+
 if PERSONAGEM == 'entrada':
     R_ = json.load(open(os.path.join(RAIZ, 'material/producao/personagens/entrada/texturas/rosto.json')))
     PELE = R_['pele']
     UNIFORME = os.environ.get('UNIFORME', 'v2')                      # v1 = chest rig + manga arregaçada (antigo) · v2 = uniforme refeito
-    if UNIFORME == 'v2':                                             # PROPORÇÕES PRÓPRIAS: rapaz magro — tronco, braços e coxas mais finos que o corpo base
-        nomes = {g.index: g.name for g in corpo.vertex_groups}
-        YT = osso('spine.002').y; MAO = osso('hand.L'); PE = osso('foot.L'); COXA = osso('thigh.L')
-        def afina(nome, p):
-            if nome.startswith(('spine.004', 'spine.005')): return p
-            if nome.startswith(('upper_arm', 'forearm', 'hand')):        # braço em T: encolhe em volta do eixo do braço
-                s = 1 if p.x > 0 else -1; t = min(1, max(0, (abs(p.x) - OMBRO.x) / (MAO.x - OMBRO.x)))
-                ey = OMBRO.y + (MAO.y - OMBRO.y) * t; ez = OMBRO.z + (MAO.z - OMBRO.z) * t; k = .95 if nome.startswith('hand') else .84
-                return Vector((p.x, ey + (p.y - ey) * k, ez + (p.z - ez) * k))
-            if nome.startswith(('thigh', 'shin')):                       # perna: encolhe em volta do eixo da perna
-                s = 1 if p.x > 0 else -1; t = min(1, max(0, (COXA.z - p.z) / (COXA.z - PE.z)))
-                ex = s * (COXA.x + (PE.x - COXA.x) * t); ey = COXA.y + (PE.y - COXA.y) * t; k = .91 if nome.startswith('thigh') else .95
-                return Vector((ex + (p.x - ex) * k, ey + (p.y - ey) * k, p.z))
-            if nome.startswith(('foot', 'toe')): return p
-            return Vector((p.x * .86, YT + (p.y - YT) * .92, p.z))      # tronco
-        for v in bm0.verts:
-            ws = [(nomes[g], w) for g, w in v[DL].items() if g in nomes and w > 0]
-            tot = sum(w for _, w in ws)
-            if tot <= 0: continue
-            p = W(v.co); q = Vector()
-            for n_, w in ws: q += afina(n_, p) * (w / tot)
-            v.co = MWi @ q
-        bm0.normal_update()
-        TX = max(abs(W(v.co).x) for f in bm0.faces if tronco(f) and 1.3 < centro(f).z < 1.5 for v in f.verts)
+    if UNIFORME == 'v2': TX = afinar_corpo()                         # rapaz magro: tronco ×0,86, braços ×0,84, coxas ×0,91
     exec(open(os.path.join(AQUI, 'uniforme_entrada_%s.py' % UNIFORME)).read())
     CABECA = os.environ.get('CABECA', 'v2')                          # v1 = foto projetada (antiga) · v2 = cabeça modelada + textura pintada
     if UNIFORME == 'v1' or CABECA == 'v1':                           # o corpo fica só com o que aparece (pescoço da v1, antebraços da manga arregaçada)
@@ -79,7 +81,8 @@ if PERSONAGEM == 'entrada':
     if UNIFORME == 'v2' and CABECA == 'v2': bpy.data.objects.remove(corpo)   # nada do corpo base aparece (manga longa, luvas, pescoço da cabeça)
 
 if PERSONAGEM == 'corsa':
-    exec(open(os.path.join(AQUI, 'vestir_corsa.py')).read())
+    CORSA = os.environ.get('CORSA', 'v2')                            # v1 = cabeça recortada da digitalização (antiga) · v2 = cabeça limpa + uniforme refeito
+    exec(open(os.path.join(AQUI, 'vestir_corsa.py' if CORSA == 'v1' else 'vestir_corsa_v2.py')).read())
 
 for o in list(bpy.data.objects):
     if o.name == 'head': bpy.data.objects.remove(o)

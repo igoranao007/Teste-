@@ -27,3 +27,6 @@ audio/00-filme4.wav
 audio/*.raw.wav
 material/producao/personagens/corsa/*.blend
 material/producao/personagens/corsa/exports/
+material/producao/personagens/corsa/texturas/cabeca_corsa.json
+material/producao/personagens/corsa/texturas/pardal_cabeca.png
+material/producao/personagens/corsa/backup/
