@@ -153,8 +153,9 @@ if PERSONAGEM == 'entrada':
     b_ = bolsa_em(hit or Vector((.1, .15, CINTURA - .07)), Vector((.5, .86, 0)).normalized(), C_, .1, .09, .04); pesar(b_)
     so_tronco(objeto(b_, 'bolsa_descarga', ['e_bolso'], uv=False), ['spine', 'spine.001'])
     # o corpo fica com pescoço e ANTEBRAÇOS (manga arregaçada), na cor da pele da foto
-    corpo_visivel(lambda f: REG[f.index] == 'pescoco' or (dono(f).startswith('forearm') and abs(centro(f).x) > MANGA + .02 and REG[f.index] != 'luva'), 'e_pele')
-    exec(open(os.path.join(AQUI, 'cabeca_entrada.py')).read())
+    CABECA = os.environ.get('CABECA', 'v2')                          # v1 = foto projetada (antiga) · v2 = cabeça modelada + textura pintada
+    corpo_visivel(lambda f: (CABECA == 'v1' and REG[f.index] == 'pescoco') or (dono(f).startswith('forearm') and abs(centro(f).x) > MANGA + .02 and REG[f.index] != 'luva'), 'e_pele')
+    exec(open(os.path.join(AQUI, 'cabeca_entrada.py' if CABECA == 'v2' else 'cabeca_entrada_v1.py')).read())
 
 if PERSONAGEM == 'corsa':
     exec(open(os.path.join(AQUI, 'vestir_corsa.py')).read())
