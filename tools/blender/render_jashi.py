@@ -15,13 +15,29 @@ for o in bpy.data.objects:
             if m and m.use_nodes:
                 for n in m.node_tree.nodes:
                     if n.type == 'TEX_IMAGE': n.interpolation = 'Closest'
+import os
+if os.environ.get('BELO') == '1':                                      # render "bonito": Cycles, luz de recorte, brilho nas linhas acesas
+    sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = int(os.environ.get('AMOSTRAS', '24')); sc.cycles.use_denoising = True
+    w = sc.world or bpy.data.worlds.new('w'); sc.world = w; w.use_nodes = True
+    w.node_tree.nodes['Background'].inputs['Color'].default_value = (.012, .012, .014, 1); w.node_tree.nodes['Background'].inputs['Strength'].default_value = 1.0
+    for nome, en, rot, cor in (('key', 3.2, (0.95, 0.15, -0.6), (1, .96, .9)), ('rim', 4.0, (1.2, 0, 2.7), (.75, .8, 1)), ('fill', 1.0, (1.1, 0, 0.9), (.8, .8, .85))):
+        l = bpy.data.objects.new(nome, bpy.data.lights.new(nome, 'SUN')); l.data.energy = en; l.data.color = cor; l.rotation_euler = rot; sc.collection.objects.link(l)
+    sc.view_settings.view_transform = 'Standard'; sc.view_settings.look = 'None'
+    # (brilho/bloom das linhas: feito depois no PIL — tools/brilho_png.py)
+    for m in bpy.data.materials:
+        if 'brilho' in m.name and m.use_nodes:
+            b = m.node_tree.nodes.get('Principled BSDF')
+            if b: b.inputs['Emission Strength'].default_value = 6.0
 cam = bpy.data.objects.new('camR', bpy.data.cameras.new('camR')); sc.collection.objects.link(cam); sc.camera = cam
 def mirar(p, alvo, lente=50): cam.location = Vector(p); cam.rotation_euler = (Vector(alvo) - Vector(p)).to_track_quat('-Z', 'Y').to_euler(); cam.data.lens = lente
-def foto(n, w=900, h=1300): sc.render.resolution_x, sc.render.resolution_y = w, h; sc.render.filepath = f'{OUT}/{n}.png'; bpy.ops.render.render(write_still=True)
+VISTAS = os.environ.get('VISTAS', '').split(',') if os.environ.get('VISTAS') else None
+def foto(n, w=900, h=1300):
+    if VISTAS and n not in VISTAS: return
+    sc.render.resolution_x, sc.render.resolution_y = w, h; sc.render.filepath = f'{OUT}/{n}.png'; bpy.ops.render.render(write_still=True)
 H = 1.0
 for n, ang in (('frente', 0), ('tres', 35), ('lado', 90), ('costas', 180)):
     r = 4.2; t = math.radians(ang); mirar((r * math.sin(t), -r * math.cos(t), H), (0, 0, H - .02), 50); foto(n)
-C = Vector((0, 0, 1.88))
+C = Vector([float(v) for v in __import__('os').environ.get('CAB_C', '0,0,1.88').split(',')])
 mirar(C + Vector((0, -1.0, .02)), C, 85); foto('rosto', 1000, 1000)
 mirar(C + Vector((.62, -.8, .05)), C, 85); foto('rosto_34', 1000, 1000)
 mirar(Vector((0, -1.5, 1.42)), Vector((0, 0, 1.40)), 60); foto('peito', 1000, 1000)

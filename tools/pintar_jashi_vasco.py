@@ -169,6 +169,12 @@ def cor_terno(k, p, n, o):
     return [q * dobra(o, k, 0.8) for q in (24, 24, 27)]
 for x, y, p, t in lista:
     o = O[x, y]; k = regiao(t, p, o); X, Y, Z = p; ax = abs(X); n = t['n']; rn_ = math.hypot(X, Y + 0.02)
+    if ROUPA == 'oliveira':                                           # OLIVEIRA: traje de baixo preto-grafite (quase todo coberto pela armadura)
+        base_o = (30, 30, 34) if k != 'chuteira' else (18, 18, 20)
+        if t['obj'] == 'arms' and ax >= PULSO - 0.005: base_o = (24, 24, 27)
+        q_ = 0.9 + 0.1 * (((x // 6) + (y // 6)) % 2)                   # acolchoado discreto
+        c = [v * q_ * dobra(OB[x, y], 'camisa' if k not in ('pele_cab', 'cabelo') else k, 0.5) for v in base_o]
+        T[x, y] = tuple(max(0, min(255, int(v))) for v in c); feito.add((x, y)); continue
     if ROUPA == 'luan' and t['obj'] == 'head' and .42 < x / N < .80 and y / N > .90:   # armação dos óculos (preta)
         T[x, y] = (14, 14, 16); feito.add((x, y)); continue
     if ROUPA == 'luan' and k == 'pele_cab':                           # mantém o rosto pintado do modelo; só troca o tom da pele

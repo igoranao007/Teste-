@@ -1,5 +1,5 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- Folha de personagem: LUAN GORDO (aliado do Dom), base Simple PSX Character (JashiPSX) — ver material/producao/personagens/luan/LEIA.md
+<!-- Folha de personagem (?p=luan|oliveira): LUAN GORDO (aliado do Dom), base Simple PSX Character (JashiPSX) — ver material/producao/personagens/luan/LEIA.md
      ?v=frente|tres|lado|costas|rosto|rosto34|peito · &clip=idle|walk|run|talk|wave|sit|cower|attack|hit|death · &t=segundos · &tex=256 -->
 <script>VIDEO={w:1920,h:1080,fps:30,dur:4}</script>
 <script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
@@ -12,7 +12,7 @@ window.SETUP = async () => {
   const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#1a1a1c',
     luz: { keyDir: [-.4, .7, .8], keyCor: '#f2efe6', fillDir: [.8, .2, .3], fillCor: '#6a7078', amb: '#626a66' } });
   S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#2a2a2c' }), { pos: [0, -.01, 0] }));
-  const A = await E4.ator('luan', { texMax: +(q.get('tex') || 256) }); S.scene.add(A.obj);
+  const A = await E4.ator(q.get('p') || 'luan', { texMax: +(q.get('tex') || 256) }); S.scene.add(A.obj);
   const clip = q.get('clip') || 'idle'; A.pose(clip, +(q.get('t') || 1));
   const b = new THREE.Box3().setFromObject(A.obj), h = b.max.y, cab = A.osso('spine.005').getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, .1, 0));
   const V = { frente: [0, h * .55, 4.4, 0, h * .5, 0, 30], tres: [2.5, h * .62, 3.6, 0, h * .5, 0, 30], lado: [4.4, h * .55, 0, 0, h * .5, 0, 30],
