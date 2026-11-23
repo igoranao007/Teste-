@@ -14,7 +14,7 @@ window.SETUP = async () => {
   const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#29292b',
     luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillDir: [.8, .1, .3], fillCor: '#8a8a90', amb: '#5a5a5e' } });
   S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#333336' }), { pos: [0, -.01, 0] }));
-  const c = T.poses(await M.carregar(ARQ[nome], { fora: ['Icosphere'], esc: .85, texMax: 128 }));
+  const c = T.poses(await M.carregar(ARQ[nome], { fora: ['Icosphere'], esc: .85, texMax: 256 }));
   S.scene.add(c.obj);
   c.braco('R', [-.15, -1, .05], [-.05, -1, .1]); c.braco('L', [.15, -1, .05], [.05, -1, .1]); c.guardar();
   if (q.get('esconder')) for (const n of q.get('esconder').split(',')) c.malhas.forEach(m => { if (m.name.startsWith(n)) m.visible = false; });

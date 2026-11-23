@@ -1,7 +1,7 @@
 # CABEÇA DA ENTRADA v2 — geometria facial própria + textura única REPINTADA (estilo NPC de terror PS1).
 # Roda no python do sistema (numpy + PIL). Gera:
 #   material/producao/personagens/entrada/texturas/cabeca.json      malha (cabeça+pescoço, cabelo, orelhas) em coordenadas do mundo
-#   material/producao/personagens/entrada/texturas/rosto_v2.png     textura única da cabeça (128 px), UV contínuo
+#   material/producao/personagens/entrada/texturas/rosto_v2.png     textura única da cabeça (256 px = página de textura do PS1), UV contínuo
 #   material/producao/personagens/entrada/texturas/cabelo_v2.png    textura do cabelo (64 px)
 # A cabeça é um "loft" de anéis horizontais com colunas mais densas na frente (nariz, olhos, boca, maçãs, mandíbula modelados).
 # A foto NÃO é colada: dela saem só o tom da pele e o DETALHE (olhos, sobrancelhas, boca, sombras) por cima de uma pele pintada
@@ -24,11 +24,11 @@ ANEIS = [                                                          # alturas tir
     ('N0', -18.5, 4.3, 4.6, None, 4.0, {}),                                          # pescoço (entra na gola)
     ('N1', -14.0, 4.4, 4.9, None, 4.3, {}),
     ('J1', -12.0, 4.3, 5.0, None, 4.9, {}),                                          # garganta, logo abaixo do queixo
-    ('J0', -10.9, 4.5, 5.4, [-7.6, -7.3, -6.3, -5.0, -3.7, -2.2], 0, {}),            # base do queixo / embaixo da mandíbula
-    ('C1', -9.4, 5.0, 6.2, [-9.3, -9.0, -8.0, -6.6, -4.8, -2.4], 0, {22: 2.1, 34: 3.2, 50: 4.2}),   # queixo
-    ('M1', -7.4, 5.6, 7.0, [-9.6, -9.4, -8.5, -7.1, -5.3, -2.2], 0, {22: 2.4, 34: 3.6, 50: 4.7}),   # lábio de baixo / ângulo da mandíbula
-    ('M0', -6.45, 6.0, 7.7, [-9.15, -9.05, -8.65, -7.35, -5.6, -2.8], 0, {22: 2.6, 50: 4.8}),  # linha da boca (cantos em ±2,6)
-    ('M2', -5.3, 6.4, 8.6, [-9.85, -9.65, -8.75, -7.55, -5.9, -3.1], 0, {22: 2.6}),   # lábio de cima
+    ('J0', -10.4, 4.4, 5.4, [-8.2, -7.8, -6.6, -5.1, -3.7, -2.2], 0, {}),            # base do queixo / embaixo da mandíbula
+    ('C1', -9.0, 4.4, 6.0, [-9.75, -9.4, -8.1, -6.4, -4.4, -2.2], 0, {22: 1.9, 34: 2.9, 50: 3.8}),   # queixo
+    ('M1', -7.4, 5.2, 6.9, [-9.6, -9.4, -8.45, -7.0, -5.1, -2.1], 0, {22: 2.35, 34: 3.5, 50: 4.4}),   # lábio de baixo / ângulo da mandíbula
+    ('M0', -6.45, 5.7, 7.6, [-9.15, -9.05, -8.65, -7.3, -5.5, -2.7], 0, {22: 2.6, 50: 4.6}),  # linha da boca (cantos em ±2,6)
+    ('M2', -5.3, 6.2, 8.5, [-9.85, -9.65, -8.75, -7.5, -5.8, -3.0], 0, {22: 2.6}),   # lábio de cima
     ('S', -4.1, 6.75, 9.3, [-9.6, -9.9, -8.8, -7.8, -6.2, -3.4], 0, {10: 1.75}),     # base do nariz (asas)
     ('T', -3.1, 6.9, 9.7, [-11.4, -9.9, -8.7, -8.0, -6.4, -3.5], 0, {10: 1.5}),      # ponta do nariz
     ('E', -1.5, 7.05, 10.0, [-10.2, -9.0, -8.3, -8.1, -6.8, -3.7], 0, {10: 1.1, 22: 3.0}),   # meio do nariz, maçã do rosto
@@ -50,10 +50,10 @@ def ponto(anel, th):
     else: x, y = a * math.sin(r), -bb * math.cos(r)
     return np.array([s * x, y, z])
 
-def u_de(th):                                                   # UV: o rosto (±75°) ocupa 64 % da largura da textura
+def u_de(th):                                                   # UV: o rosto (±55°) ocupa 72 % da largura da textura
     s = 1 if th >= 0 else -1; t = abs(th)
-    return .5 + s * (.32 * t / 75 if t <= 75 else .32 + .18 * (t - 75) / 105)
-def v_de(z): return .02 + .86 * (z + 18.5) / 30.1                 # faixa de cima (v > .9) fica pras orelhas
+    return .5 + s * (.36 * t / 55 if t <= 55 else .36 + .14 * (t - 55) / 125)
+def v_de(z): return float(np.interp(z, [-18.5, -11, 6, 11.6], [.02, .12, .74, .88]))   # rosto (queixo→testa) = 62 % da altura; orelhas em v > .9
 
 # ------------------------------------------------------------------ malha da cabeça
 V, F, UV, MAT = [], [], [], []                                    # vértices (cm), faces (índices), uv por canto, material (0 cabeça, 1 orelha)
@@ -80,7 +80,7 @@ NCAB = len(F)
 OREL = [(0, -2.4), (.9, -3.0), (1.8, -2.5), (2.4, -1.0), (2.6, .7), (2.2, 1.9), (1.2, 2.5), (.2, 1.9)]
 def orelha(s):
     base = len(V); ab = math.radians(35)
-    def P(u, w, fora=0.0): return np.array([s * (7.25 + u * math.sin(ab) + fora), .2 + u * math.cos(ab), -1.0 + 1.05 * w])
+    def P(u, w, fora=0.0): return np.array([s * (7.15 + 1.15 * u * math.sin(ab) + fora), .2 + 1.15 * u * math.cos(ab), -.75 + 1.2 * w])
     pts = [P(u, w) for u, w in OREL]; ctr = P(1.1, -.1, -.35)               # centro afundado (concha)
     for p in pts: V.append(p)
     V.append(ctr); ic = len(V) - 1
@@ -106,7 +106,7 @@ def sup(th, z):                                                    # ponto da su
         t = (z - zs[-1]) / (TOPO[2] - zs[-1]); return ponto(ANEIS[-1], th) * (1 - t) + TOPO * t
     i = max(k for k in range(len(zs)) if zs[k] <= z); t = (z - zs[i]) / (zs[i + 1] - zs[i])
     return ponto(ANEIS[i], th) * (1 - t) + ponto(ANEIS[i + 1], th) * t
-LINHA = {0: 5.6, 10: 5.8, 22: 5.4, 34: 4.7, 50: 3.8, 70: 4.0, 95: 4.4, 130: 3.6, 180: 2.2}   # lados e nuca: degradê PINTADO abaixo da casca
+LINHA = {0: 5.4, 10: 5.6, 22: 5.0, 34: 3.8, 50: 2.6, 70: 2.8, 95: 3.6, 130: 3.2, 180: 2.0}   # lados e nuca: degradê PINTADO abaixo da casca
 FRANJA = {0: -1.1, 10: -.1, 22: -1.0, 34: -.3, 50: -.6, 70: -.2}           # pontas da franja (mechas desiguais)
 SS = [0, .16, .36, .6, .8, .94]
 PICO = {0: .9, 22: 1.1, 34: .4, 50: .8, 95: .5, 130: .7}           # pontas soltas no alto (silhueta bagunçada como nas fotos)
@@ -123,7 +123,8 @@ for s_ in SS + ['dentro']:
         if s_ == 0: z += FRANJA.get(t, 0)
         p = sup(th, min(z, 11.3)); n = p - np.array([0, CEN[1], min(p[2], 2)]); n /= np.linalg.norm(n)
         frente = max(0, 1 - t / 45)
-        esp = .3 + 1.0 * frente * (1 - s_) + 2.3 * s_ ** .9 * (.75 + .25 * frente) + 1.1 * frente * math.sin(math.pi * min(1, s_ / .8)) + (PICO.get(t, 0) * (1 if th >= 0 else .8) if s_ in (.36, .6) and (j + int(s_ * 10)) % 2 == 0 else 0)   # topete na frente
+        lado = math.exp(-((t - 75) / 35) ** 2) * math.sin(math.pi * min(1, s_ / .7))          # volume nas laterais do alto (cabelo cheio, como nas fotos)
+        esp = .3 + 1.2 * lado + 1.0 * frente * (1 - s_) + 2.3 * s_ ** .9 * (.75 + .25 * frente) + 1.1 * frente * math.sin(math.pi * min(1, s_ / .8)) + (PICO.get(t, 0) * (1 if th >= 0 else .8) if s_ in (.36, .6) and (j + int(s_ * 10)) % 2 == 0 else 0)   # topete na frente
         q = p + n * esp
         if s_ in (0, .16) and t <= 50: q += np.array([-.5, -.6 if s_ == 0 else -.35, 0]) * (1 - t / 70)   # franja caindo pra frente, penteada pro lado direito da pessoa
         V.append(q); linha.append(len(V) - 1)
@@ -195,13 +196,13 @@ for i, f in enumerate(F):
         for v in f: VN[v] += nface(f)
 VN /= np.linalg.norm(VN, axis=1, keepdims=True) + 1e-12
 
-# ------------------------------------------------------------------ TEXTURA DO ROSTO (pintada em 512 e reduzida pra 128)
+# ------------------------------------------------------------------ TEXTURA DO ROSTO (pintada em 1024 e reduzida pra 256)
 FOTO = Image.open(os.path.join(ED, 'referencia/foto_original.jpg')).convert('RGB')
 FS = 4; foto = np.asarray(FOTO.resize((FOTO.width // FS, FOTO.height // FS), Image.LANCZOS)).astype(float)
 _pele = np.array(R['pele'], float)
 _m = (np.abs(foto - _pele).sum(-1) < 75).astype(float)                       # máscara de PELE na foto (sem parede, cabelo, olho)
-def _gb(a): return np.asarray(Image.fromarray(np.clip(a, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14))).astype(float)
-_mb = np.asarray(Image.fromarray((_m * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14))).astype(float)[..., None] / 255
+def _gb(a): return np.asarray(Image.fromarray(np.clip(a, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(18))).astype(float)
+_mb = np.asarray(Image.fromarray((_m * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(18))).astype(float)[..., None] / 255
 borra = np.stack([_gb(foto[..., k] * _m) for k in range(3)], -1) / np.maximum(_mb, .05)   # média só da pele em volta
 borra = np.where(_mb > .05, borra, _pele)
 def amostra(img, px, py):                                          # bilinear (px, py em pixels da foto original)
@@ -213,9 +214,9 @@ def amostra(img, px, py):                                          # bilinear (p
 APOIO = [((-3.15, 0), (900, 1038)), ((3.15, 0), (1385, 1070)),                       # olhos
          ((0, -3.1), (1150, 1285)), ((0, -4.1), (1150, 1345)), ((-1.85, -3.7), (1020, 1320)), ((1.85, -3.7), (1290, 1330)),   # nariz
          ((0, -6.45), (1135, 1515)), ((-2.6, -6.45), (945, 1515)), ((2.6, -6.45), (1310, 1525)),                  # boca
-         ((0, -9.4), (1125, 1735)), ((-3.1, 2.4), (890, 870)), ((3.1, 2.4), (1385, 905)), ((0, 5.6), (1150, 660)),  # queixo, sobrancelhas, cabelo
+         ((0, -9.2), (1125, 1745)), ((-3.1, 2.4), (890, 870)), ((3.1, 2.4), (1385, 905)), ((0, 5.6), (1150, 660)),  # queixo, sobrancelhas, cabelo
          ((-6.3, -1), (640, 1100)), ((6.3, -1), (1540, 1110)), ((-5.8, -6.45), (680, 1515)), ((5.8, -6.45), (1470, 1525)),
-         ((-3.9, -9.4), (820, 1720)), ((3.9, -9.4), (1350, 1730)), ((-5.0, 4.0), (700, 760)), ((5.0, 4.0), (1500, 800))]
+         ((-3.7, -9.0), (820, 1720)), ((3.7, -9.0), (1350, 1730)), ((-5.0, 4.0), (700, 760)), ((5.0, 4.0), (1500, 800))]
 A = np.array([a for a, b in APOIO]); B_ = np.array([b for a, b in APOIO], float)
 def U(r): return np.where(r > 0, r * r * np.log(r + 1e-12), 0)
 n_ = len(A); Kd = U(np.linalg.norm(A[:, None] - A[None], axis=2)); Pm = np.hstack([np.ones((n_, 1)), A])
@@ -224,7 +225,7 @@ W_ = np.linalg.solve(L, np.vstack([B_, np.zeros((3, 2))]))
 def tps(xz):
     d = U(np.linalg.norm(xz[:, None] - A[None], axis=2)); return d @ W_[:n_] + np.hstack([np.ones((len(xz), 1)), xz]) @ W_[n_:]
 
-TR = 512
+TR = 1024
 pos = np.zeros((TR, TR, 3)); nor = np.zeros((TR, TR, 3)); tem = np.zeros((TR, TR), bool); ore = np.zeros((TR, TR), bool)
 def raster(i):
     f = F[i]; uvs = UV[i]
@@ -251,12 +252,12 @@ def bolha(x, z, cx, cz, rx, rz): return np.exp(-(((x - cx) / rx) ** 2 + ((z - cz
 x, y, z = pos[..., 0], pos[..., 1], pos[..., 2]; nx, ny, nz = nor[..., 0], nor[..., 1], nor[..., 2]
 th = np.degrees(np.arctan2(x, -y))
 fr = ss(-1.0, -4.0, y)
-zt = np.interp(np.abs(th), [0, 22, 34, 50, 70], [5.3, 5.1, 4.3, 2.9, 2.0])     # onde o cabelo começa (o rosto da foto para antes)                                                   # só a metade da FRENTE recebe os realces do rosto
-PELE = np.array(R['pele'], float); TESTA = np.array(R['testa'], float)
+zt = np.interp(np.abs(th), [0, 22, 34, 50, 70], [5.1, 4.7, 3.5, 2.4, 2.0])     # onde o cabelo começa (o rosto da foto para antes)                                                   # só a metade da FRENTE recebe os realces do rosto
+PELE = np.array(R['pele'], float) * 1.07; TESTA = np.array(R['testa'], float) * 1.05   # um pouco mais claro: a luz do jogo escurece
 # pele base pintada (contínua em volta da cabeça): testa mais clara, bochechas/nariz/orelhas mais rosados, pescoço mais escuro
 base = PELE[None, None] * np.ones((TR, TR, 1))
 base = base * (1 - ss(1, 5, z)[..., None] * .6) + TESTA * (ss(1, 5, z)[..., None] * .6)
-rosa = np.array([1.06, .97, .95])
+rosa = np.array([1.03, .985, .975])
 br = (fr * (bolha(np.abs(x), z, 4.6, -3.6, 2.0, 1.8) + .8 * bolha(x, z, 0, -3.0, 1.4, 1.2)))[..., None]
 base = base * (1 + (rosa - 1) * np.clip(br, 0, 1))
 base = base * (1 - .14 * ss(-10.5, -14.5, z))[..., None] * np.array([1, .98, .97]) ** ss(-10.5, -14.5, z)[..., None]
@@ -269,48 +270,51 @@ sh *= 1 - .22 * ss(-.35, -.8, nz) * ss(-9.6, -11.5, z)                 # embaixo
 sh *= 1 - .16 * fr * bolha(np.abs(x), z, .85, -4.05, .6, .35)                 # narinas
 sh *= 1 - .12 * fr * bolha(np.abs(x), z, 1.6, -2.4, .7, 1.4)                # lados do nariz
 sh *= 1 - .07 * fr * bolha(np.abs(x), z, 3.1, 1.2, 1.9, .9)                  # sob a arcada da sobrancelha
-sh *= 1 - .10 * fr * bolha(x, z, 0, -8.2, 2.2, .7)                          # sob o lábio de baixo
+sh *= 1 + .06 * fr * bolha(x, z, 0, -8.4, 2.4, .9)                          # sob o lábio de baixo
 sh *= 1 - .10 * ss(70, 115, np.abs(th)) * ss(-5, -13, z)
 sh *= 1 + .40 * fr * bolha(x, z, 0, -3.7, 1.8, .6)                    # base do nariz (virada pra baixo) um pouco mais clara
 sh[ore] = .9
 labio = (fr * bolha(x, z, 0, -6.6, 2.4, .9))[..., None]
-base = base * (1 - .22 * labio) + np.array([170, 112, 100]) * (.22 * labio)   # boca levemente rosada
-sh *= 1 - .10 * fr * bolha(x, z, 0, -6.9, 2.3, .45)                    # lábio de baixo sem faixa clara
+base = base * (1 - .12 * labio) + np.array([170, 112, 100]) * (.12 * labio)   # boca levemente rosada
+sh *= 1 - .04 * fr * bolha(x, z, 0, -6.9, 2.3, .45)                    # lábio de baixo sem faixa clara
 cor = base * sh[..., None]
 # DETALHE da foto (razão foto / foto borrada): olhos, sobrancelhas, boca, marcas — por cima da pintura
 xz = np.stack([x, z], -1).reshape(-1, 2); pxy = tps(xz)
 ph = amostra(foto, pxy[:, 0], pxy[:, 1]).reshape(TR, TR, 3); pb = amostra(borra, pxy[:, 0], pxy[:, 1]).reshape(TR, TR, 3)
 razao = np.clip(ph / (pb + 1), .25, 1.6)
-frente = ss(66, 48, np.abs(th)) * ss(-11.2, -10.0, z) * ss(zt + .4, zt - .6, z) * ss(-.1, -.45, ny) * (~ore)
-feat = np.clip(.40 + 1.0 * (bolha(np.abs(x), z, 3.15, .1, 2.0, .95) + bolha(np.abs(x), z, 3.1, 2.4, 2.4, .7)      # olhos, sobrancelhas
+frente = ss(60, 40, np.abs(th)) * ss(-11.2, -10.0, z) * ss(zt + .4, zt - .6, z) * ss(-.1, -.45, ny) * (~ore)
+feat = np.clip(.68 + 1.0 * (bolha(np.abs(x), z, 3.15, .1, 2.0, .95) + bolha(np.abs(x), z, 3.1, 2.4, 2.4, .7)      # olhos, sobrancelhas
                              + bolha(x, z, 0, -6.45, 2.9, 1.1)), 0, 1) * (1 - .8 * bolha(x, z, 0, -4.0, 2.0, .7))   # base do nariz: pouca foto (a sombra virava bigode)   # boca, base do nariz
 w = (frente * feat)[..., None]
 lum = razao.mean(-1, keepdims=True)
-det = (razao * .55 + lum * .45)
+det = (razao * .75 + lum * .25)
+sobr = (frente * bolha(np.abs(x), z, 3.1, 2.5, 2.3, .6))[..., None]
+det = det ** (1 + .35 * sobr)                                            # sobrancelhas grossas e escuras como na foto
 olho = (frente * bolha(np.abs(x), z, 3.15, .1, 1.7, .7))[..., None]
 det = det ** (1 + .15 * olho)                                             # olhos um pouco mais marcados (leitura a distância)                                         # cor do detalhe um pouco dessaturada (pintura, não foto)
 cor = cor * (1 + w * (det - 1))
 # DEGRADÊ dos lados/nuca pintado na pele (cabelo curtinho), abaixo da casca do cabelo
 HC_ = np.array(HCOR) if 'HCOR' in dir() else None
-zf = np.interp(np.abs(th), [0, 45, 62, 75, 88, 97, 108, 140, 180], [9, 9, 2.6, -.4, 1.2, 1.0, -.6, -2.4, -3.2])   # costeleta, contorno atrás da orelha, nuca   # costeleta na frente da orelha, nuca baixa
+zf = np.interp(np.abs(th), [0, 45, 62, 75, 88, 97, 108, 140, 180], [9, 9, 1.6, -.6, 1.2, 1.0, -.6, -2.4, -3.2])   # costeleta, contorno atrás da orelha, nuca   # costeleta na frente da orelha, nuca baixa
 cab = ss(zf - .4, zf + 3.6, z) ** .8 * (~ore) * .85                   # degradê: escuro em cima, clareando até a pele
 cor = cor * (1 - .86 * cab[..., None]) + np.array([46, 38, 33]) * (.86 * cab[..., None]) * (.85 + .3 * np.random.default_rng(3).random((TR, TR, 1)))
 cor = np.clip(cor, 0, 255) * tem[..., None]
-# reduz pra 128 (média) e preenche fora das ilhas
+# reduz pra 256 (média) e preenche fora das ilhas
 img = Image.fromarray(cor.astype(np.uint8)); msk = Image.fromarray((tem * 255).astype(np.uint8))
-pre = np.asarray(img.resize((128, 128), Image.BOX)).astype(float); m128 = np.asarray(msk.resize((128, 128), Image.BOX)).astype(float) / 255
+OUT = 256
+pre = np.asarray(img.resize((OUT, OUT), Image.BOX)).astype(float); m128 = np.asarray(msk.resize((OUT, OUT), Image.BOX)).astype(float) / 255
 pre = np.where(m128[..., None] > .05, pre / np.maximum(m128[..., None], .05) * (m128[..., None] > .05), 0)
 ok = m128 > .05
-for _ in range(12):                                                      # dilatação: a borda das ilhas não puxa preto
+for _ in range(24):                                                      # dilatação: a borda das ilhas não puxa preto
     viz = np.zeros_like(pre); cnt = np.zeros(ok.shape)
     for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
         sh_ = np.roll(np.roll(pre * ok[..., None], dy, 0), dx, 1); so = np.roll(np.roll(ok, dy, 0), dx, 1)
         viz += sh_; cnt += so
     novo = (~ok) & (cnt > 0); pre[novo] = viz[novo] / cnt[novo][:, None]; ok = ok | novo
 BAY = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) / 16 - .47
-q = np.clip(np.floor(pre / 8 + .5 + np.tile(BAY, (32, 32))[..., None]) * 8, 0, 255).astype(np.uint8)   # 15 bits com pontilhado (PS1)
+q = np.clip(np.floor(pre / 8 + .5 + np.tile(BAY, (OUT // 4, OUT // 4))[..., None]) * 8, 0, 255).astype(np.uint8)   # 15 bits com pontilhado (PS1)
 Image.fromarray(q).save(os.path.join(TX, 'rosto_v2.png'))
-Image.fromarray(cor.astype(np.uint8)).save(os.path.join(ED, 'inspecao/rosto_v2_512.png')) if os.path.isdir(os.path.join(ED, 'inspecao')) else None
+Image.fromarray(cor.astype(np.uint8)).save(os.path.join(ED, 'inspecao/rosto_v2_1024.png')) if os.path.isdir(os.path.join(ED, 'inspecao')) else None
 
 # ------------------------------------------------------------------ textura do cabelo (fios na direção do penteado, castanho-escuro da foto)
 hc = np.asarray(FOTO.crop((700, 300, 1600, 600))).reshape(-1, 3).astype(float)
