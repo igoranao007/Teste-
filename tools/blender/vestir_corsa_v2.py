@@ -254,20 +254,31 @@ def pesc_f(x, y, w, h):                                            # plumagem cu
     k = ruido(x // 3, y // 2, 231) * .6 + ruido(x // 6, y // 4, 232) * .4
     return mix(PESC_E, PESC_C, .25 + .75 * k)
 mt('c2_pescoco', 32, 32, pesc_f)
-bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NP = 12; an = []
-for j, (z, r) in enumerate(((1.645, .062), (1.70, .057), (1.75, .057), (1.80, .062))):
-    an.append([bm.verts.new(MWi @ Vector((r * math.sin(2 * math.pi * k / NP), -.01 - r * .95 * math.cos(2 * math.pi * k / NP), z))) for k in range(NP)])
+# PESCOÇO humanoide de verdade: oval (mais largo de lado que de frente), afina do ombro (base larga, some sob a gola) até
+# debaixo da cabeça, garganta um pouco à frente e nuca atrás; o topo entra na cabeça. Plumagem marrom (só a cabeça é de pardal).
+bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NP = 14; an = []
+ANEIS_P = [(1.615, .092, .074, .006), (1.655, .068, .062, .002), (1.70, .058, .055, -.003), (1.745, .055, .054, -.007), (1.79, .057, .058, -.011), (1.83, .05, .05, -.013)]
+for j, (z, a_, b_, yc) in enumerate(ANEIS_P):
+    anel_ = []
+    for k in range(NP):
+        t = 2 * math.pi * k / NP; x = a_ * math.sin(t); y = yc - b_ * math.cos(t)
+        if j in (2, 3) and abs(math.sin(t)) < .3 and math.cos(t) > 0: y -= .006 * (1 if j == 2 else .6)   # garganta (pomo)
+        if j in (0, 1) and math.cos(t) < -.3: z_ = z + .012 * (-math.cos(t)) * (1 - j * .5)                 # nuca: base mais alta atrás (trapézio)
+        else: z_ = z
+        anel_.append(bm.verts.new(MWi @ Vector((x, y, z_))))
+    an.append(anel_)
 for j in range(len(an) - 1):
     for k in range(NP):
         k2 = (k + 1) % NP; f = bm.faces.new((an[j][k], an[j][k2], an[j + 1][k2], an[j + 1][k]))
-        u0 = (.5 + k / NP) % 1; u1 = u0 + 1 / NP                       # sempre dentro de 0..1 (o motor não repete esta textura)
-        for l, uv in zip(f.loops, ((u0, j / 3), (u1, j / 3), (u1, (j + 1) / 3), (u0, (j + 1) / 3))): l[uvl].uv = uv
+        u0 = (.5 + k / NP) % 1; u1 = u0 + 1 / NP
+        for l, uv in zip(f.loops, ((u0, j / 5), (u1, j / 5), (u1, (j + 1) / 5), (u0, (j + 1) / 5))): l[uvl].uv = uv
 bm.normal_update()
 if sum(Wn(f.normal).dot((W(f.calc_center_median()) - Vector((0, -.01, W(f.calc_center_median()).z))).normalized()) for f in bm.faces) < 0: bmesh.ops.reverse_faces(bm, faces=bm.faces[:])
 pesc = objeto(bm, 'pescoco', ['c2_pescoco'], uv=False)
 for v in pesc.data.vertices:                                       # base no pescoço, topo junto com a cabeça
     for g in list(v.groups): pesc.vertex_groups[g.group].remove([v.index])
-    z = (MW @ v.co).z; t = min(1, max(0, (z - 1.66) / .13))
-    pesc.vertex_groups['spine.004'].add([v.index], 1 - t * .6, 'REPLACE'); pesc.vertex_groups['spine.005'].add([v.index], t * .6, 'REPLACE')
+    z = (MW @ v.co).z; t = min(1, max(0, (z - 1.65) / .17))       # base presa no tronco, topo acompanha a cabeça
+    if z < 1.64: pesc.vertex_groups['spine.003'].add([v.index], 1.0, 'REPLACE'); continue
+    pesc.vertex_groups['spine.004'].add([v.index], 1 - t * .7, 'REPLACE'); pesc.vertex_groups['spine.005'].add([v.index], t * .7, 'REPLACE')
 for m in MATS.values(): m.use_backface_culling = True
 bpy.data.objects.remove(corpo)                                     # o corpo base fica todo coberto (roupa, luvas, pescoço)
