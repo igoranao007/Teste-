@@ -25,5 +25,25 @@
 - Texturas PSX geradas no script: 16–64 px, cor de 15 bits com pontilhado Bayer, filtro Closest (farda, calça, colete com fitas MOLLE, bolso, cinto, metal, bota, sola, luva, joelheira, bandeira).
 - **3.144 triângulos** na roupa.
 
+## V2 e V3 (pedido do diretor: identidade militar própria, sem destruir a V1)
+- Gerar: `VERSAO=2` / `VERSAO=3 blender -b -P tools/blender/vestir_dod.py -- $PWD/material/producao/personagens/dod/modelo/dod_farda_v3.glb`
+  (módulos: `vestir_dod_mat.py` = paleta/texturas, `vestir_dod_v2.py` = peças novas, `vestir_dod_v3.py` = detalhes). V1 sai igual (`VERSAO=1`, padrão).
+- No motor: `T.dod({ versao: 'v1'|'v2'|'v3' })` (padrão v3) · folha `videos/95-dod?versao=v2` · comparação: `inspecao/comparacao_v1_v2_v3.jpg`,
+  folhas `inspecao/folha_dod_v2.jpg` e `inspecao/folha_dod_v3.jpg` (vistas, closes e testes andar/correr/braços/sentar/girar: `&pose=`).
+- Referências: imagem B do guia (poncho com gola alta) + guia em PDF. Os assets indicados não servem (Fort Vale e Gunner pagos; Rebel Soldier fora do ar;
+  Sketchfab/Poly Pizza exigem login/bloqueiam) → tudo modelado sobre o corpo do Dod.
+- **V2:** gola alta (tubo de tecido com dobra e cordões, mais baixa na frente: boca e queixo livres) · poncho curto assimétrico CAÍDO sobre os ombros
+  (raios de cima acham o apoio, a queda acompanha o colete a ~4 cm; painel diagonal no peito esquerdo, pregas e ponta nas costas; termina na ponta do
+  ombro, então o braço fica livre e a bandeira aparece) · alça diagonal (bandoleira) apoiada na superfície com 2 fivelas em relevo · bolsa na alça e bolsa no cinto.
+- **V3:** paleta oliva / musgo / verde-escuro / amarelo-oliva envelhecido (costuras) / caqui (fitas) / cinza-metal / preto / marrom gasto (desgaste).
+  Colete em componentes (placas com debrum, pesponto e cantos reforçados; laterais em musgo; alças; 4 fileiras MOLLE em relevo na frente e atrás;
+  fita "DOD"; fivelas nas alças e laterais) · camisa com pala e painéis em musgo, costuras do ombro e do punho, reforço no cotovelo, bolso na manga direita
+  com zíper e patch da Toca do Anão · calça com bolsos cargo grandes, costuras laterais e do joelho, reforço no joelho, faixas caqui no tornozelo com fivela ·
+  coturno com cadarço, biqueira e sola em 2 camadas · luva com reforço na palma · bolsa extra atrás do cinto · patch da bandeira com pesponto.
+- Lições: `bmesh.ops.solidify` explode em quinas (usar `espessura()` própria); material exportado como dupla face faz a casca interna aparecer
+  (V2/V3 = face única); o tecido apoiado precisa descer sempre a partir do pescoço e ser suavizado entre ângulos (sem picos); a queda nunca pode
+  ficar mais estreita que a borda de apoio (dobra pra dentro = triângulos virados). `dissolve_limit` (mesmo material/UV) tira as lascas dos cortes:
+  V3 com 6.079 triângulos de roupa (V2: 4.848; V1: 3.144).
+
 ## Cabeça (não mudou)
 - Foto do meme projetada (método do Floppa), cara chapada, cérebro em cúpula, orelhas, boca redesenhada em pixel com repouso/falando (`animar(t, {boca, pisca})`).

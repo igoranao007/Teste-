@@ -1,6 +1,6 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <!-- Folha de personagem: DOD (gato preto do meme com o cérebro exposto; feito do mesmo jeito do Igor/Floppa; não entra no filme).
-     ?v=frente|tres|lado|costas|rosto|topo|bandeira|colete|botas|ombro|quadril · &pose=andar|bracos|sentar|girar · &corpo=gato (o 1º corpo) · &boca=0..1 · &fundo=#hex · &t=segundos -->
+     ?v=frente|tres|lado|costas|rosto|topo|bandeira|colete|botas|ombro|quadril|gola|poncho|mangas|calcas|costas2 · &pose=andar|correr|bracos|sentar|girar · &versao=v1|v2|v3 · &corpo=gato (o 1º corpo) · &boca=0..1 · &fundo=#hex · &t=segundos -->
 <script>VIDEO={w:1920,h:1080,fps:30,dur:4}</script>
 <script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
 <script type="module">
@@ -12,7 +12,7 @@ window.SETUP = async () => {
   const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#29292b',
     luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillDir: [.8, .1, .3], fillCor: '#8a8a90', amb: '#55555a' } });
   S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#333336' }), { pos: [0, -.01, 0] }));
-  const D = await T.dod({ corpo: q.get('corpo') || 'farda' }); S.scene.add(D.obj); const c = D.corpo;
+  const D = await T.dod({ corpo: q.get('corpo') || 'farda', versao: q.get('versao') || 'v3' }); S.scene.add(D.obj); const c = D.corpo;
   c.braco('R', [-.15, -1, .05], [-.05, -1, .1]); c.braco('L', [.15, -1, .05], [.05, -1, .1]); c.guardar(); D.assentar(); S.scene.updateMatrixWorld(true);
   // TESTE DE MOVIMENTO (&pose=andar|bracos|sentar|girar): poses do motor por cima da pose base, pra ver se a farda acompanha sem atravessar
   const pose = q.get('pose'), posar = t => {
@@ -23,6 +23,12 @@ window.SETUP = async () => {
       c.virar('thigh.L', [1, 0, 0], -.45 * a); c.virar('thigh.R', [1, 0, 0], .45 * a);
       c.virar('shin.L', [1, 0, 0], .5 * Math.max(0, -Math.sin(t * w - .6))); c.virar('shin.R', [1, 0, 0], .5 * Math.max(0, Math.sin(t * w - .6)));
       c.braco('L', [.12, -1, -.35 * a], [.05, -1, -.35 * a + .2]); c.braco('R', [-.12, -1, .35 * a], [-.05, -1, .35 * a + .2]);
+    } else if (pose === 'correr') {                                             // corrida: passada maior, joelho alto, tronco inclinado, braços dobrados
+      const a = Math.sin(t * w * 1.6);
+      c.virar('spine.001', [1, 0, 0], .18);
+      c.virar('thigh.L', [1, 0, 0], -.8 * a); c.virar('thigh.R', [1, 0, 0], .8 * a);
+      c.virar('shin.L', [1, 0, 0], 1.1 * Math.max(0, -Math.sin(t * w * 1.6 - .8))); c.virar('shin.R', [1, 0, 0], 1.1 * Math.max(0, Math.sin(t * w * 1.6 - .8)));
+      c.braco('L', [.12, -.8, -.6 * a], [.05, .3, 1]); c.braco('R', [-.12, -.8, .6 * a], [-.05, .3, 1]);
     } else if (pose === 'bracos') {                                             // braço esquerdo pra frente, direito pra cima (alonga o ombro e o colete)
       c.braco('L', [.15, -.1, 1], [.1, 0, 1]); c.braco('R', [-.35, 1, .15], [-.2, 1, .2]);
     } else if (pose === 'sentar') { c.sentar(); c.braco('L', [.1, -.7, .7], [0, -.3, 1]); c.braco('R', [-.1, -.7, .7], [0, -.3, 1]); }
@@ -30,9 +36,10 @@ window.SETUP = async () => {
   };
   const b = new THREE.Box3().setFromObject(D.obj), h = b.max.y, cab = D.cabeca.getWorldPosition(new THREE.Vector3());
   const V = { frente: [0, h * .55, 4.6, 0, h * .5, 0, 30], tres: [2.6, h * .62, 3.7, 0, h * .5, 0, 30], lado: [4.6, h * .55, 0, 0, h * .5, 0, 30],
-    costas: [-1.2, h * .6, -4.4, 0, h * .5, 0, 30], topo: [cab.x + .3, cab.y + .7, cab.z + .8, cab.x, cab.y + .05, cab.z, 30], bandeira: [1.25, h * .8, .3, .2, h * .74, 0, 20], colete: [.35, h * .72, 1.5, 0, h * .66, 0, 26], botas: [.5, .45, 1.6, 0, .14, 0, 22], ombro: [.9, h * .86, .9, .1, h * .76, 0, 26], quadril: [.7, h * .5, 1.3, 0, h * .46, 0, 26], rosto: [cab.x + .15, cab.y + .08, cab.z + 1.15, cab.x, cab.y + .02, cab.z, 26] }[q.get('v') || 'frente'];
+    costas: [-1.2, h * .6, -4.4, 0, h * .5, 0, 30], topo: [cab.x + .3, cab.y + .7, cab.z + .8, cab.x, cab.y + .05, cab.z, 30], bandeira: [1.25, h * .8, .3, .2, h * .74, 0, 20], colete: [.35, h * .72, 1.5, 0, h * .66, 0, 26], botas: [.5, .45, 1.6, 0, .14, 0, 22], ombro: [.9, h * .86, .9, .1, h * .76, 0, 26], gola: [.25, h * .9, 1.1, 0, h * .84, 0, 24], poncho: [.9, h * .85, 1.4, 0, h * .76, 0, 26], mangas: [1.1, h * .7, .5, .25, h * .66, 0, 24], manga_d: [-1.1, h * .7, .5, -.25, h * .66, 0, 24], calcas: [.6, h * .3, 1.6, 0, h * .3, 0, 26], costas2: [-.6, h * .8, -1.5, 0, h * .72, 0, 26], quadril: [.7, h * .5, 1.3, 0, h * .46, 0, 26], rosto: [cab.x + .15, cab.y + .08, cab.z + 1.15, cab.x, cab.y + .02, cab.z, 26] }[q.get('v') || 'frente'];
   S.update = t => { c.repor(); posar(t); D.assentar(); D.animar(t, { pisca: (t % 3.2) > 3.05 ? 1 : 0, boca: +(q.get('boca') || 0) });
     S.camera.fov = V[6]; S.camera.position.set(V[0], V[1], V[2]); S.camera.lookAt(V[3], V[4], V[5]); S.camera.updateProjectionMatrix(); };
+  if (q.get('esconder')) for (const n of q.get('esconder').split(',')) c.malhas.forEach(m => { if (m.name.startsWith(n)) m.visible = false; });   // inspeção: esconde peças
   window.D = D;
 };
 </script></body></html>

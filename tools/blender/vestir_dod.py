@@ -5,6 +5,10 @@
 # Uso: blender -b -P tools/blender/vestir_dod.py -- <saida.glb> [pasta_renders]   (COR=MATERIAL|TEXTURE pros renders)
 import bpy, bmesh, sys, os, math, collections, random
 from mathutils import Vector, Matrix
+from mathutils.kdtree import KDTree
+from mathutils.bvhtree import BVHTree
+V = int(os.environ.get('VERSAO', '1'))           # 1: farda base · 2: + gola alta, poncho, alça diagonal, bolsas · 3: + paleta, costuras e detalhes
+AQUI = os.path.dirname(os.path.abspath(__file__))
 
 ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 SAIDA = ARGS[0] if ARGS else '/tmp/dod_farda.glb'
@@ -116,8 +120,9 @@ def espessura(bm, faces, m):                                   # dá volume: cas
     for f in faces:
         for v in f.verts:
             if v not in novo: novo[v] = bm.verts.new(v.co - v.normal * L(m), v)
+    internas, paredes = [], []
     for f in faces:
-        try: bm.faces.new([novo[v] for v in reversed(f.verts)], f)
+        try: internas.append(bm.faces.new([novo[v] for v in reversed(f.verts)], f))
         except ValueError: pass
     for e in {e for f in faces for e in f.edges}:
         lig = [f for f in e.link_faces if f in fs]
@@ -126,14 +131,16 @@ def espessura(bm, faces, m):                                   # dá volume: cas
         for l in f.loops:                                          # mantém a ordem da face pra parede ficar virada pra fora
             if l.vert is a and l.link_loop_next.vert is b: break
             if l.vert is b and l.link_loop_next.vert is a: a, b = b, a; break
-        try: bm.faces.new([b, a, novo[a], novo[b]], f)
+        try: paredes.append(bm.faces.new([b, a, novo[a], novo[b]], f))
         except ValueError: pass
+    return internas, paredes
 def bordas(bm, pred=lambda e: True): return [e for e in bm.edges if e.is_boundary and pred(e)]
 def extrudar_borda(bm, edges, desloc):                         # extruda uma borda aberta (gola, punho, barra) e move (vetor em metros)
     ret = bmesh.ops.extrude_edge_only(bm, edges=edges)
     vs = [e for e in ret['geom'] if isinstance(e, bmesh.types.BMVert)]
     d = R3i @ Vector(desloc)                                   # metros do mundo → local
     for v in vs: v.co += d
+    extrudar_borda.faces = [e for e in ret['geom'] if isinstance(e, bmesh.types.BMFace)]
     return vs
 
 # ------------------------------------------------------------------ texturas PSX (64 px, paleta de 15 bits, pontilhado Bayer, filtro Closest)
@@ -211,6 +218,7 @@ def material(nome, img, repete=True):
     nt.links.new(t.outputs['Color'], p.inputs['Base Color'])
     px = img.pixels[:]; n = len(px) // 4                                # cor média (pros renders sem textura)
     m.diffuse_color = (sum(px[0::4]) / n, sum(px[1::4]) / n, sum(px[2::4]) / n, 1)
+    m.use_backface_culling = V >= 2                                   # V2/V3: face única (a casca interna não briga com a externa)
     MATS[nome] = m; return m
 material('farda', textura('farda', 64, 64, tecido('#414e2e', '#2c361f', '#5a6840', 1)))
 material('calca', textura('calca', 64, 64, tecido('#3d4a2b', '#29331d', '#56633d', 2)))
@@ -223,6 +231,18 @@ material('sola', textura('sola', 16, 16, sola_f))
 material('luva', textura('luva', 32, 32, preto_f('#1a1b18', '#3d3f38', 11)))
 material('joelheira', textura('joelheira', 16, 16, preto_f('#222820', '#3e4637', 12)))
 material('bandeira', textura('bandeira', 48, 32, bandeira_f), repete=False)
+if V >= 2: exec(open(os.path.join(AQUI, 'vestir_dod_mat.py')).read())     # paleta e texturas da V2/V3
+if V >= 3: exec(open(os.path.join(AQUI, 'vestir_dod_v3.py')).read())      # funções de detalhe da V3
+
+# pesos pra geometria nova (alças, bolsas): os do vértice do corpo mais próximo
+bm0.verts.ensure_lookup_table(); KD = KDTree(len(bm0.verts))
+for i, v in enumerate(bm0.verts): KD.insert(W(v.co), i)
+KD.balance()
+def pesar(bm):
+    dl = bm.verts.layers.deform.verify()
+    for v in bm.verts:
+        _, i, _ = KD.find(W(v.co)); dv = v[dl]; dv.clear()
+        for gi, w in bm0.verts[i][DL].items(): dv[gi] = w
 
 def uv_caixa(bm, dens=4.0):                                      # projeção de caixa no mundo: 1 repetição a cada 1/dens metros
     uv = bm.loops.layers.uv.verify()
@@ -232,9 +252,15 @@ def uv_caixa(bm, dens=4.0):                                      # projeção de
             p = W(l.vert.co)
             l[uv].uv = (p.y * dens, p.z * dens) if a == 0 else (p.x * dens, p.z * dens) if a == 1 else (p.x * dens, p.y * dens)
 
-def objeto(bm, nome, mats, mat_de=None, dens=4.0, uv=True):     # malha final presa ao esqueleto do Dod (mesmos grupos de vértice)
+def objeto(bm, nome, mats, mat_de=None, dens=4.0, uv=True, uv_extra=None):   # malha final presa ao esqueleto do Dod (mesmos grupos de vértice)
     if uv: uv_caixa(bm, dens)
+    if uv_extra: uv_extra(bm, bm.loops.layers.uv.verify())
     for f in bm.faces: f.material_index = mat_de(f) if mat_de else 0
+    if V >= 3:                                                     # funde faces coplanares do mesmo material (os cortes deixam lascas); a forma não muda
+        antes = len(bm.faces)
+        bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(1.5), use_dissolve_boundaries=False, verts=bm.verts[:], edges=bm.edges[:], delimit={'MATERIAL', 'UV'})
+        bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
+        print('  %s: %d -> %d faces' % (nome, antes, len(bm.faces)))
     me = bpy.data.meshes.new(nome); bm.to_mesh(me); bm.free()
     for p in me.polygons: p.use_smooth = False
     for m in mats: me.materials.append(MATS[m])
@@ -269,7 +295,8 @@ for f in bmb.faces:
     for l in f.loops:
         p = W(l.vert.co); l[uvb].uv = ((p.y - BY0) / (BY1 - BY0), 1 - (p.x - BX0) / (BX1 - BX0))   # arco do braço → bandeira acompanha a curva da manga
 bandeira = objeto(bmb, 'bandeira', ['bandeira'], uv=False)
-camisa = objeto(bm, 'camisa', ['farda'])
+if V >= 3: camisa = objeto(bm, 'camisa', camisa_v3(bm), mat_de=lambda f: f.material_index, uv_extra=uv_camisa_v3)
+else: camisa = objeto(bm, 'camisa', ['farda'])
 
 # ---------- CALÇA (com barra por cima do cano) + BOLSOS CARGO + JOELHEIRAS
 bm = extrair(lambda f: REG[f.index] == 'calca'); afastar(bm, .013)
@@ -277,15 +304,18 @@ barra = bordas(bm, lambda e: all(abs(W(v.co).z - BOTA) < .01 for v in e.verts))
 if barra:                                                          # a barra desce por cima do coturno (sem vão)
     vs = extrudar_borda(bm, barra, (0, 0, -.035))
     bm.normal_update()
+BZ0, BZ1, BPROF = (JOELHO + .13, JOELHO + .36, .028) if V >= 3 else (JOELHO + .17, JOELHO + .33, .022)
+BOLSOS_CALCA = []
 for s in (1, -1):                                                  # bolso cargo na lateral de fora da coxa
     lado = lambda f, s=s: dono(f).startswith('thigh') and normal(f).x * s > .55 and centro(f).x * s > 0
-    for z in (JOELHO + .17, JOELHO + .33): cortar(bm, (0, 0, z), (0, 0, 1), [f for f in bm.faces if lado(f)])
-    fs = [f for f in bm.faces if lado(f) and JOELHO + .17 < centro(f).z < JOELHO + .33]
-    novos = extrudar(bm, fs, .022)
-    tampa = [f for f in novos if centro(f).z > JOELHO + .27 and abs(normal(f).x) > .5]
+    for z in (BZ0, BZ1): cortar(bm, (0, 0, z), (0, 0, 1), [f for f in bm.faces if lado(f)])
+    fs = [f for f in bm.faces if lado(f) and BZ0 < centro(f).z < BZ1]
+    novos = extrudar(bm, fs, BPROF); BOLSOS_CALCA += novos
+    tampa = [f for f in novos if centro(f).z > BZ1 - .06 and abs(normal(f).x) > .5]
     for f in tampa:
         for v in f.verts: v.co += f.normal * L(.004)
-calca = objeto(bm, 'calca', ['calca'])
+if V >= 3: calca = objeto(bm, 'calca', calca_v3(bm, BOLSOS_CALCA), mat_de=lambda f: f.material_index, uv_extra=uv_calca_v3)
+else: calca = objeto(bm, 'calca', ['calca'])
 bm = extrair(lambda f: REG[f.index] == 'calca'); afastar(bm, .013)     # joelheiras: casca da frente do joelho, com espessura
 fs = [f for f in bm.faces if abs(centro(f).z - JOELHO) < .065 and normal(f).y < -.35]
 bmesh.ops.delete(bm, geom=[f for f in bm.faces if f not in fs], context='FACES')
@@ -302,7 +332,8 @@ cortar(bm, (0, 0, SOLA_Z), (0, 0, 1))
 def mat_bota(f): return 1 if centro(f).z < SOLA_Z else 0
 cano = bordas(bm, lambda e: all(abs(W(v.co).z - BOTA) < .01 for v in e.verts))
 if cano: extrudar_borda(bm, cano, (0, 0, .012))
-bota = objeto(bm, 'bota', ['bota', 'sola'], mat_de=mat_bota)
+if V >= 3: bota = objeto(bm, 'bota', bota_v3(bm), mat_de=lambda f: f.material_index, uv_extra=uv_bota_v3)
+else: bota = objeto(bm, 'bota', ['bota', 'sola'], mat_de=mat_bota)
 
 # ---------- LUVAS com punho
 bm = extrair(lambda f: REG[f.index] == 'luva'); afastar(bm, .006)
@@ -312,7 +343,8 @@ for s in (1, -1):
         vs = extrudar_borda(bm, pu, (-s * .035, 0, 0))           # o punho sobe pelo antebraço por cima da manga
         c0 = sum((W(v.co) for v in vs), Vector()) / len(vs)
         for v in vs: p = W(v.co); d = Vector((0, p.y - c0.y, p.z - c0.z)); v.co = MWi @ (p + d.normalized() * .009)
-luva = objeto(bm, 'luva', ['luva'], dens=8)
+if V >= 3: luva = objeto(bm, 'luva', luva_v3(bm), mat_de=lambda f: f.material_index, dens=8)
+else: luva = objeto(bm, 'luva', ['luva'], dens=8)
 
 # ---------- COLETE porta-placas (placa da frente e de trás, faixa lateral, alças nos ombros), com espessura
 VB, VT, PT = CINTURA + .07, 1.40, 1.585                            # base do colete, topo da faixa lateral, topo das placas
@@ -329,13 +361,13 @@ def no_colete(f):
 bmesh.ops.delete(bm, geom=[f for f in bm.faces if not no_colete(f)], context='FACES'); caixa(bm, 'colete recortado')
 afastar(bm, .022); caixa(bm, 'colete afastado')
 # porta-carregadores (3 na frente) e bolso administrativo no peito: extrudados da própria placa
-PZ0, PZ1 = VB + .03, VB + .17
+PZ0, PZ1 = VB + .03, (VB + .15 if V >= 3 else VB + .17)
 for x in (-.115, -.045, -.035, .035, .045, .115, -.06, .06): cortar(bm, (x * TX / .2, 0, 0), (1, 0, 0), [f for f in bm.faces if normal(f).y < -.6])
-for z in (PZ0, PZ1, PT - .11, PT - .04): cortar(bm, (0, 0, z), (0, 0, 1), [f for f in bm.faces if normal(f).y < -.6])
+for z in (PZ0, PZ1, PT - .11, PT - .04, PT - .13, PT - .06): cortar(bm, (0, 0, z), (0, 0, 1), [f for f in bm.faces if normal(f).y < -.6])
 bm.normal_update(); caixa(bm, 'colete cortado')
 frente = lambda f: normal(f).y < -.6
 # BOLSOS: peças próprias tiradas da frente da placa (frente achatada e rígida, como um porta-carregador de verdade), com aba
-REGIOES = [((-.115, -.045), (PZ0, PZ1), .034), ((-.035, .035), (PZ0, PZ1), .034), ((.045, .115), (PZ0, PZ1), .034), ((-.06, .06), (PT - .11, PT - .04), .02)]
+REGIOES = [((-.115, -.045), (PZ0, PZ1), .034), ((-.035, .035), (PZ0, PZ1), .034), ((.045, .115), (PZ0, PZ1), .034), ((-.06, .06), (PT - .13, PT - .06) if V >= 2 else (PT - .11, PT - .04), .02)]
 bmp = bm.copy(); grupos = []
 for (x0, x1), (z0, z1), prof in REGIOES:
     x0, x1 = x0 * TX / .2, x1 * TX / .2
@@ -360,8 +392,10 @@ for fs, z1, prof, (x0, x1, z0) in grupos:                         # frente de ca
             for l in f.loops: p_ = W(l.vert.co); l[uvp].uv = ((p_.x - x0) / (x1 - x0), (p_.z - z0) / (z1 - z0))
 bolsos = objeto(bmp, 'bolsos', ['bolso'], uv=False)
 # espessura do colete (placas de verdade)
-espessura(bm, bm.faces[:], .016)
-caixa(bm, 'colete solido'); colete = objeto(bm, 'colete', ['colete'], dens=5)
+INT, PAR = espessura(bm, bm.faces[:], .016)
+caixa(bm, 'colete solido')
+if V >= 3: colete = objeto(bm, 'colete', colete_v3(bm, INT, PAR), mat_de=lambda f: f.material_index, dens=5, uv_extra=uv_colete_v3)
+else: colete = objeto(bm, 'colete', ['colete'], dens=5)
 
 # ---------- CINTO de guarnição com fivela
 bm = extrair(lambda f: REG[f.index] == 'calca'); afastar(bm, .013)
@@ -371,7 +405,7 @@ afastar(bm, .008); espessura(bm, bm.faces[:], .008)
 cortar(bm, (-.03, 0, 0), (1, 0, 0)); cortar(bm, (.03, 0, 0), (1, 0, 0))
 fiv = [f for f in bm.faces if normal(f).y < -.7 and abs(centro(f).x) < .03 and centro(f).y < 0]
 for f in extrudar(bm, fiv, .008): f.material_index = 1
-cinto = objeto(bm, 'cinto', ['cinto', 'metal'], mat_de=lambda f: f.material_index, dens=6)
+cinto = objeto(bm, 'cinto', cinto_v3(bm) if V >= 3 else ['cinto', 'metal'], mat_de=lambda f: f.material_index, dens=6)
 
 # ---------- o corpo do Dod fica só com o que a roupa não cobre (pescoço); a cabeça de gato entra no motor
 bmc = extrair(lambda f: REG[f.index] == 'pescoco'); bmc.to_mesh(corpo.data); bmc.free()
@@ -390,6 +424,7 @@ def so_tronco(ob, ossos):
         else: ob.vertex_groups['spine.002'].add([v.index], 1, 'REPLACE')
 so_tronco(colete, ['spine', 'spine.001', 'spine.002', 'spine.003']); so_tronco(bolsos, ['spine', 'spine.001', 'spine.002', 'spine.003'])
 so_tronco(cinto, ['spine', 'spine.001'])
+if V >= 2: exec(open(os.path.join(AQUI, 'vestir_dod_v2.py')).read())   # gola alta, poncho, alça diagonal, bolsas
 
 tris = {o.name: sum(len(p.vertices) - 2 for p in o.data.polygons) for o in bpy.data.objects if o.type == 'MESH' and o.name != 'head'}
 print('TRIANGULOS', tris, 'total', sum(tris.values()))
