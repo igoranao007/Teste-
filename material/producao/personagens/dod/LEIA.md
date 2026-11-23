@@ -1,4 +1,4 @@
-# DOD — o gato preto do meme (cérebro exposto), de farda militar MODELADA
+# DOD — o gato preto do meme (cérebro exposto), de farda militar MODELADA · VERSÃO DEFINITIVA: V4 (`modelo/dod_farda_v4.glb`)
 
 ## Arquivos
 - `T.dod()` em `lib/tgp.js` (cabeça: `T.cabecaDod()`) · folha: `videos/95-dod`

@@ -12,7 +12,7 @@ window.SETUP = async () => {
   const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#29292b',
     luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillDir: [.8, .1, .3], fillCor: '#8a8a90', amb: '#55555a' } });
   S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#333336' }), { pos: [0, -.01, 0] }));
-  const D = await T.dod({ corpo: q.get('corpo') || 'farda', versao: q.get('versao') || 'v3' }); S.scene.add(D.obj); const c = D.corpo;
+  const D = await T.dod({ corpo: q.get('corpo') || 'farda', versao: q.get('versao') || 'v4' }); S.scene.add(D.obj); const c = D.corpo;
   c.braco('R', [-.15, -1, .05], [-.05, -1, .1]); c.braco('L', [.15, -1, .05], [.05, -1, .1]); c.guardar(); D.assentar(); S.scene.updateMatrixWorld(true);
   // TESTE DE MOVIMENTO (&pose=andar|bracos|sentar|girar): poses do motor por cima da pose base, pra ver se a farda acompanha sem atravessar
   const pose = q.get('pose'), posar = t => {
