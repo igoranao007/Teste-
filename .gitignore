@@ -25,3 +25,5 @@ material/producao/personagens/vegetti_jashi/texturas/
 material/modelos/pacotes/
 audio/00-filme4.wav
 audio/*.raw.wav
+material/producao/personagens/corsa/*.blend
+material/producao/personagens/corsa/exports/

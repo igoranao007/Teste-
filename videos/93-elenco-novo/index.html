@@ -1,0 +1,46 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Folha dos personagens novos do jogo: ?p=entrada|corsa · &v=frente|tres|lado|costas|cabeca|cabeca34|uniforme|botas|costas2
+     · &pose=andar|correr|bracos|sentar|girar|cabeca · &esconder=peca1,peca2 · &t=segundos -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:4}</script>
+<script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as M from '../../lib/modelo.js';
+import * as T from '../../lib/tgp.js';
+const { THREE } = P;
+const ARQ = { entrada: 'material/producao/personagens/entrada/exports/entrada_militar.glb', corsa: 'material/producao/personagens/corsa/exports/corsa_militar.glb' };
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), nome = q.get('p') || 'entrada';
+  const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#29292b',
+    luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillDir: [.8, .1, .3], fillCor: '#8a8a90', amb: '#5a5a5e' } });
+  S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#333336' }), { pos: [0, -.01, 0] }));
+  const c = T.poses(await M.carregar(ARQ[nome], { fora: ['Icosphere'], esc: .85, texMax: 128 }));
+  S.scene.add(c.obj);
+  c.braco('R', [-.15, -1, .05], [-.05, -1, .1]); c.braco('L', [.15, -1, .05], [.05, -1, .1]); c.guardar();
+  if (q.get('esconder')) for (const n of q.get('esconder').split(',')) c.malhas.forEach(m => { if (m.name.startsWith(n)) m.visible = false; });
+  const pose = q.get('pose'), w = Math.PI * 2 / 1.1;
+  const posar = t => {
+    if (!pose) return;
+    if (pose === 'andar') { const a = Math.sin(t * w);
+      c.virar('thigh.L', [1, 0, 0], -.45 * a); c.virar('thigh.R', [1, 0, 0], .45 * a);
+      c.virar('shin.L', [1, 0, 0], .5 * Math.max(0, -Math.sin(t * w - .6))); c.virar('shin.R', [1, 0, 0], .5 * Math.max(0, Math.sin(t * w - .6)));
+      c.braco('L', [.12, -1, -.35 * a], [.05, -1, -.35 * a + .2]); c.braco('R', [-.12, -1, .35 * a], [-.05, -1, .35 * a + .2]); }
+    else if (pose === 'correr') { const a = Math.sin(t * w * 1.6);
+      c.virar('spine.001', [1, 0, 0], .18); c.virar('thigh.L', [1, 0, 0], -.8 * a); c.virar('thigh.R', [1, 0, 0], .8 * a);
+      c.virar('shin.L', [1, 0, 0], 1.1 * Math.max(0, -Math.sin(t * w * 1.6 - .8))); c.virar('shin.R', [1, 0, 0], 1.1 * Math.max(0, Math.sin(t * w * 1.6 - .8)));
+      c.braco('L', [.12, -.8, -.6 * a], [.05, .3, 1]); c.braco('R', [-.12, -.8, .6 * a], [-.05, .3, 1]); }
+    else if (pose === 'bracos') { c.braco('L', [.15, -.1, 1], [.1, 0, 1]); c.braco('R', [-.35, 1, .15], [-.2, 1, .2]); }
+    else if (pose === 'sentar') { c.sentar(); c.braco('L', [.1, -.7, .7], [0, -.3, 1]); c.braco('R', [-.1, -.7, .7], [0, -.3, 1]); }
+    else if (pose === 'girar') { c.girar('spine.002', .35); c.girar('spine.003', .25); c.braco('L', [.5, -.5, .7], [.3, -.2, 1]); c.braco('R', [-.6, -.8, -.1], [-.3, -1, .3]); }
+    else if (pose === 'cabeca') { c.virar('spine.005', [0, 1, 0], .6 * Math.sin(t * 2)); c.virar('spine.005', [1, 0, 0], .25 * Math.sin(t * 3.1)); }
+  };
+  const h = 1.75, cab = c.osso('spine.005').getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, .07, 0));
+  const V = { frente: [0, h * .55, 4.6, 0, h * .5, 0, 30], tres: [2.6, h * .62, 3.7, 0, h * .5, 0, 30], lado: [4.6, h * .55, 0, 0, h * .5, 0, 30],
+    costas: [-1.2, h * .6, -4.4, 0, h * .5, 0, 30], cabeca: [cab.x, cab.y + .03, cab.z + .9, cab.x, cab.y, cab.z, 24], cabeca34: [cab.x + .6, cab.y + .05, cab.z + .7, cab.x, cab.y, cab.z, 24],
+    cabeca_lado: [cab.x + .9, cab.y + .03, cab.z, cab.x, cab.y, cab.z, 24], uniforme: [.4, h * .62, 1.7, 0, h * .58, 0, 30], botas: [.5, .45, 1.6, 0, .14, 0, 22],
+    costas2: [-.6, h * .7, -1.7, 0, h * .62, 0, 30], calcas: [.6, h * .3, 1.6, 0, h * .3, 0, 26] }[q.get('v') || 'frente'];
+  S.update = t => { c.repor(); posar(t); c.obj.updateMatrixWorld(true);
+    S.camera.fov = V[6]; S.camera.position.set(V[0], V[1], V[2]); S.camera.lookAt(V[3], V[4], V[5]); S.camera.updateProjectionMatrix(); };
+  window.C = c;
+};
+</script></body></html>
