@@ -1,6 +1,6 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <!-- Folha de personagem: DOD (gato preto do meme com o cérebro exposto; feito do mesmo jeito do Igor/Floppa; não entra no filme).
-     ?v=frente|tres|lado|costas|rosto · &fundo=#hex · &t=segundos -->
+     ?v=frente|tres|lado|costas|rosto|topo|bandeira · &corpo=gato (o 1º corpo) · &boca=0..1 · &fundo=#hex · &t=segundos -->
 <script>VIDEO={w:1920,h:1080,fps:30,dur:4}</script>
 <script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
 <script type="module">
@@ -12,12 +12,12 @@ window.SETUP = async () => {
   const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: q.get('fundo') || '#29292b',
     luz: { keyDir: [-.35, .8, .55], keyCor: '#f2f2ee', fillDir: [.8, .1, .3], fillCor: '#8a8a90', amb: '#55555a' } });
   S.scene.add(P.caixa(6, .02, 6, P.mat({ cor: '#333336' }), { pos: [0, -.01, 0] }));
-  const D = await T.dod(); S.scene.add(D.obj); const c = D.corpo;
-  c.braco('R', [-.15, -1, .05], [-.05, -1, .1]); c.braco('L', [.15, -1, .05], [.05, -1, .1]); c.guardar(); D.assentar();
+  const D = await T.dod({ corpo: q.get('corpo') || 'soldado' }); S.scene.add(D.obj); const c = D.corpo;
+  c.braco('R', [-.15, -1, .05], [-.05, -1, .1]); c.braco('L', [.15, -1, .05], [.05, -1, .1]); c.guardar(); D.assentar(); S.scene.updateMatrixWorld(true);
   const b = new THREE.Box3().setFromObject(D.obj), h = b.max.y, cab = D.cabeca.getWorldPosition(new THREE.Vector3());
   const V = { frente: [0, h * .55, 4.6, 0, h * .5, 0, 30], tres: [2.6, h * .62, 3.7, 0, h * .5, 0, 30], lado: [4.6, h * .55, 0, 0, h * .5, 0, 30],
-    costas: [-1.2, h * .6, -4.4, 0, h * .5, 0, 30], topo: [cab.x + .3, cab.y + .7, cab.z + .8, cab.x, cab.y + .05, cab.z, 30], rosto: [cab.x + .15, cab.y + .08, cab.z + 1.15, cab.x, cab.y + .02, cab.z, 26] }[q.get('v') || 'frente'];
-  S.update = t => { c.repor(); D.assentar(); D.animar(t, { pisca: (t % 3.2) > 3.05 ? 1 : 0 });
+    costas: [-1.2, h * .6, -4.4, 0, h * .5, 0, 30], topo: [cab.x + .3, cab.y + .7, cab.z + .8, cab.x, cab.y + .05, cab.z, 30], bandeira: [1.4, h * .8, -.1, .2, h * .74, 0, 22], rosto: [cab.x + .15, cab.y + .08, cab.z + 1.15, cab.x, cab.y + .02, cab.z, 26] }[q.get('v') || 'frente'];
+  S.update = t => { c.repor(); D.assentar(); D.animar(t, { pisca: (t % 3.2) > 3.05 ? 1 : 0, boca: +(q.get('boca') || 0) });
     S.camera.fov = V[6]; S.camera.position.set(V[0], V[1], V[2]); S.camera.lookAt(V[3], V[4], V[5]); S.camera.updateProjectionMatrix(); };
   window.D = D;
 };
