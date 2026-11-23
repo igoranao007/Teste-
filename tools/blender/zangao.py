@@ -244,14 +244,14 @@ def caixa_obj(nome, c, tam, mats, pesos, sola=0.0, chanfro=.25):
 # fica no meio do rosto, logo acima da boca: um bloco curto e retangular (largura do "nariz"), bem escuro, com volume
 mt('z_bigode', 16, 8, lambda x, y, w, h: mix(hx('#141210'), hx('#2c2620'), .6 * ruido(x, y // 2, 301)) if x % 3 else hx('#0c0b0a'))
 FACE = [p for p in me.polygons if CLS[p.index] == 'pele']
-Z_BIGODE = U(2.40)                                                 # medido no modelo: boca em 2,15–2,31 e olhos a partir de 2,64 → bigode logo acima da boca
+Z_BIGODE = U(2.375)                                                 # medido no modelo: boca em 2,15–2,31 e olhos a partir de 2,64 → bigode logo acima da boca
 def bigode():
     """bigode estilo Chaplin: bloco curto e escuro COLADO no rosto — cada vértice vem de um raio na superfície do rosto e
     cresce pela normal da pele (acompanha a curvatura; sem vão nem inclinação). Peça fechada (frente, verso, bordas)."""
-    bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NC, NR = 5, 3; H_ = U(.105); D_ = U(.05)
+    bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NC, NR = 4, 3; H_ = U(.1); D_ = U(.045)
     zc = Z_BIGODE; frente, tras = [], []
     for r in range(NR):
-        z = zc - H_ / 2 + H_ * r / (NR - 1); W_ = U(.2) - U(.025) * r / (NR - 1)      # um pouco mais largo embaixo
+        z = zc - H_ / 2 + H_ * r / (NR - 1); W_ = U(.105) - U(.015) * r / (NR - 1)    # estreito como o do Chaplin (largura do nariz)
         lf, lt = [], []
         for c in range(NC):
             x = -W_ + 2 * W_ * c / (NC - 1)

@@ -249,20 +249,23 @@ bm.normal_update()
 cab = objeto(bm, 'cabeca_pardal', ['c2_pardal', 'c2_olho'], mat_de=lambda f: f.material_index, uv=False)
 tudo_no_osso(cab, 'spine.005')
 g_, n_ = CJ['garganta'], CJ['nuca']
-PESC_C, PESC_E = (100, 80, 58), (64, 52, 40)                       # marrom das penas do pescoço do pardal (claro / escuro)
-def pesc_f(x, y, w, h):                                            # plumagem curta: manchas suaves de marrom (sem padrão geométrico)
+PESC_F, PESC_T = tuple(int(c * .95) for c in g_), (104, 84, 60)     # frente: babador escuro do pardal · trás: nuca marrom
+def pesc_f(x, y, w, h):                                            # u = .5 é a frente; v (y) sobe do ombro pra cabeça
+    a = (x / w) * 2 * math.pi; fr = max(0, math.cos(a - math.pi)) ** 1.3
+    c = mix(PESC_T, PESC_F, fr)
     k = ruido(x // 3, y // 2, 231) * .6 + ruido(x // 6, y // 4, 232) * .4
-    return mix(PESC_E, PESC_C, .25 + .75 * k)
+    c = mix(c, (0, 0, 0), .1 + .12 * k)
+    sombra = max(0, (y / h - .7) / .3)                              # sombra embaixo da cabeça
+    return mix(c, (20, 16, 12), .35 * sombra)
 mt('c2_pescoco', 32, 32, pesc_f)
 # PESCOÇO humanoide de verdade: oval (mais largo de lado que de frente), afina do ombro (base larga, some sob a gola) até
 # debaixo da cabeça, garganta um pouco à frente e nuca atrás; o topo entra na cabeça. Plumagem marrom (só a cabeça é de pardal).
 bm = bmesh.new(); uvl = bm.loops.layers.uv.verify(); NP = 14; an = []
-ANEIS_P = [(1.615, .092, .074, .006), (1.655, .068, .062, .002), (1.70, .058, .055, -.003), (1.745, .055, .054, -.007), (1.79, .057, .058, -.011), (1.83, .05, .05, -.013)]
+ANEIS_P = [(1.615, .088, .072, .005), (1.665, .06, .056, .004), (1.71, .051, .049, .002), (1.75, .054, .053, .004), (1.785, .066, .06, .008), (1.815, .07, .062, .008)]   # afina no meio, abre embaixo da cabeça (encaixa no contorno dela)
 for j, (z, a_, b_, yc) in enumerate(ANEIS_P):
     anel_ = []
     for k in range(NP):
         t = 2 * math.pi * k / NP; x = a_ * math.sin(t); y = yc - b_ * math.cos(t)
-        if j in (2, 3) and abs(math.sin(t)) < .3 and math.cos(t) > 0: y -= .006 * (1 if j == 2 else .6)   # garganta (pomo)
         if j in (0, 1) and math.cos(t) < -.3: z_ = z + .012 * (-math.cos(t)) * (1 - j * .5)                 # nuca: base mais alta atrás (trapézio)
         else: z_ = z
         anel_.append(bm.verts.new(MWi @ Vector((x, y, z_))))
@@ -275,6 +278,7 @@ for j in range(len(an) - 1):
 bm.normal_update()
 if sum(Wn(f.normal).dot((W(f.calc_center_median()) - Vector((0, -.01, W(f.calc_center_median()).z))).normalized()) for f in bm.faces) < 0: bmesh.ops.reverse_faces(bm, faces=bm.faces[:])
 pesc = objeto(bm, 'pescoco', ['c2_pescoco'], uv=False)
+for p_ in pesc.data.polygons: p_.use_smooth = True                 # pescoço liso (sem cara de caixa)
 for v in pesc.data.vertices:                                       # base no pescoço, topo junto com a cabeça
     for g in list(v.groups): pesc.vertex_groups[g.group].remove([v.index])
     z = (MW @ v.co).z; t = min(1, max(0, (z - 1.65) / .17))       # base presa no tronco, topo acompanha a cabeça
