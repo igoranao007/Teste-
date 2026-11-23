@@ -27,7 +27,7 @@ if os.environ.get('BELO') == '1':                                      # render 
     for m in bpy.data.materials:
         if 'brilho' in m.name and m.use_nodes:
             b = m.node_tree.nodes.get('Principled BSDF')
-            if b: b.inputs['Emission Strength'].default_value = 6.0
+            if b: b.inputs['Emission Strength'].default_value = 1.6
 cam = bpy.data.objects.new('camR', bpy.data.cameras.new('camR')); sc.collection.objects.link(cam); sc.camera = cam
 def mirar(p, alvo, lente=50): cam.location = Vector(p); cam.rotation_euler = (Vector(alvo) - Vector(p)).to_track_quat('-Z', 'Y').to_euler(); cam.data.lens = lente
 VISTAS = os.environ.get('VISTAS', '').split(',') if os.environ.get('VISTAS') else None
