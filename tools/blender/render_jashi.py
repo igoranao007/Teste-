@@ -25,6 +25,16 @@ if os.environ.get('BELO') == '1':                                      # render 
     sc.view_settings.view_transform = 'Standard'; sc.view_settings.look = 'None'
     # (brilho/bloom das linhas: feito depois no PIL — tools/brilho_png.py)
     for m in bpy.data.materials:
+        if 'aura' in m.name:                                             # aura: emissão translúcida (no motor é mistura aditiva)
+            m.use_nodes = True; nt_ = m.node_tree
+            for n_ in list(nt_.nodes): nt_.nodes.remove(n_)
+            em = nt_.nodes.new('ShaderNodeEmission'); em.inputs['Color'].default_value = (1.0, 0.62, 0.02, 1); em.inputs['Strength'].default_value = 1.4
+            tr = nt_.nodes.new('ShaderNodeBsdfTransparent'); mx = nt_.nodes.new('ShaderNodeMixShader'); mx.inputs['Fac'].default_value = 0.28
+            out = nt_.nodes.new('ShaderNodeOutputMaterial')
+            nt_.links.new(tr.outputs[0], mx.inputs[1]); nt_.links.new(em.outputs[0], mx.inputs[2]); nt_.links.new(mx.outputs[0], out.inputs['Surface'])
+            try: m.surface_render_method = 'BLENDED'
+            except Exception: pass
+    for m in bpy.data.materials:
         if 'brilho' in m.name and m.use_nodes:
             b = m.node_tree.nodes.get('Principled BSDF')
             if b: b.inputs['Emission Strength'].default_value = 1.6

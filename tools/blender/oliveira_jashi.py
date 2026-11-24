@@ -52,6 +52,9 @@ def forte_bracos(o):
         f = interp([(0.2, 1.12), (0.3, 1.22), (0.45, 1.18), (0.62, 1.2), (0.78, 1.12), (0.9, 1.08)], abs(w.x))
         v.co = inv @ Vector((w.x, e.y + (w.y - e.y) * f, e.z + (w.z - e.z) * f))
 forte_corpo(B); forte_bracos(AR)
+_bm = bmesh.new(); _bm.from_mesh(AR.data)                                 # antebraço e mão humanos saem: entra o braço do Godzilla
+bmesh.ops.delete(_bm, geom=[f for f in _bm.faces if abs((AR.matrix_world @ f.calc_center_median()).x) > 0.47], context='FACES')
+bmesh.ops.delete(_bm, geom=[v for v in _bm.verts if not v.link_faces], context='VERTS'); _bm.to_mesh(AR.data); _bm.free()
 
 # ================================================================ materiais
 def lin(c): return tuple((v / 255) ** 2.2 for v in c) + (1,)
@@ -68,12 +71,13 @@ def mat_cor(nome, rgb, brilho=False):
     return m
 TX = os.path.join(OD, 'texturas/')
 M_PL = mat_tex('o_placa', TX + 'placa.png')          # 0 placa
-M_BR = mat_cor('o_linha_brilho', (255, 206, 30), True)  # 1 energia
+M_BR = mat_cor('o_linha_brilho', (255, 224, 20), True)  # 1 energia (amarelo forte)
 M_MT = mat_tex('o_metal', TX + 'metal.png')          # 2 metal (rebites, engrenagens, canos)
 M_PL2 = mat_tex('o_placa2', TX + 'placa2.png')       # 3 placa com painéis (peças grandes)
 M_TC = mat_tex('o_tecido', TX + 'tecido.png')        # 4 tecido do tabardo
-M_NU = mat_cor('o_nucleo_brilho', (255, 238, 150), True)  # 5 núcleo do reator / olhos
-MATS = [M_PL, M_BR, M_MT, M_PL2, M_TC, M_NU]
+M_NU = mat_cor('o_nucleo_brilho', (255, 248, 170), True)  # 5 núcleo do reator / olhos
+M_AU = mat_cor('o_aura', (255, 190, 0), True)        # 6 aura aditiva em volta das linhas (motor: mistura aditiva)
+MATS = [M_PL, M_BR, M_MT, M_PL2, M_TC, M_NU, M_AU]
 
 # ================================================================ BVH da pele (corpo + braços já engordados, pose de descanso)
 def bvh_de(objs):
@@ -269,14 +273,6 @@ for s, sfx in ((1, 'L'), (-1, 'R')):
     placa(f'upper_arm.{sfx}', E0, E1, UP, -180, 180, 0.62, 0.95, folga=0.018, esp=0.012, bojo=0.004, nth=16, nt=3, mat=0, rebites=False, lado=s)
     F0, F1 = osso(f'forearm.{sfx}'), osso(f'hand.{sfx}')
     placa(f'forearm.{sfx}', F0, F1, -FR, -80, 80, -0.10, 0.14, folga=0.03, esp=0.014, bojo=0.025, nth=10, nt=4, mat=3, lado=s)        # cotoveleira (atrás)
-    # manopla: 2 lâminas + placa de cima com sulco aceso
-    placa(f'forearm.{sfx}', F0, F1, UP, -180, 180, 0.18, 0.60, folga=0.022, esp=0.014, bojo=0.008, nth=16, nt=5, brilho=('baixo', ('th', 0.5)), mat=3, lado=s)
-    placa(f'forearm.{sfx}', F0, F1, UP, -180, 180, 0.56, 0.98, folga=0.03, esp=0.014, bojo=0.006, nth=16, nt=4, brilho=('cima',), mat=0, lado=s)
-    H0 = osso(f'hand.{sfx}'); H1 = osso(f'f_middle.01.{sfx}')
-    placa(f'hand.{sfx}', H0, H1, UP, -70, 70, 0.05, 1.05, folga=0.012, esp=0.008, bojo=0.006, nth=8, nt=3, mat=0, rebites=False, lado=s)
-    for dedo in ('f_index.01', 'f_middle.01', 'f_ring.01', 'f_pinky.01'):                            # nós dos dedos
-        D0, D1 = osso(f'{dedo}.{sfx}'), osso(f'{dedo.replace(".01", ".02")}.{sfx}')
-        placa(f'{dedo}.{sfx}', D0, D1, UP, -60, 60, 0.0, 0.9, folga=0.006, esp=0.006, bojo=0.003, nth=4, nt=2, mat=2, rebites=False, chanfro=0, lado=s, rmin=0.002)
     # --- pernas
     T0, T1 = osso(f'thigh.{sfx}'), osso(f'shin.{sfx}'); K1 = osso(f'foot.{sfx}')
     placa(f'thigh.{sfx}', T0, T1, FR, -85, 95, 0.10, 0.50, folga=0.03, esp=0.016, bojo=0.015, nth=12, nt=5, brilho=(('L', [(0.2, 0.15), (0.2, 0.75), (0.35, 0.9)]),), mat=3, lado=s)
@@ -345,14 +341,111 @@ def engrenagem(c, raio, dentes, esp, mat):
         for q in ((cf, vs_f[k2], vs_f[k]), (ct, vs_t[k], vs_t[k2]), (vs_f[k], vs_f[k2], vs_t[k2], vs_t[k])):
             f = bmr.faces.new(q); f.material_index = mat
             for l in f.loops: l[uvr].uv = (0.5 + l.vert.co.x * 3, 0.5 + l.vert.co.z * 3)
-engrenagem(Vector((-0.11, YR + 0.035, 1.56)), 0.07, 10, 0.016, 2)
-engrenagem(Vector((0.115, YR + 0.035, 1.27)), 0.06, 9, 0.016, 2)
+GA, GB, HC = Vector((-0.11, YR + 0.035, 1.56)), Vector((0.115, YR + 0.035, 1.27)), Vector((0, YR + 0.17, 1.47))
+def novo_osso(nome, cabeca, pai='spine.003'):                            # osso extra (gira nas animações: tools/blender/girar_ossos.py)
+    bpy.context.view_layer.objects.active = A; bpy.ops.object.mode_set(mode='EDIT')
+    eb = A.data.edit_bones; b = eb.new(nome); inv = A.matrix_world.inverted()
+    b.head = inv @ cabeca; b.tail = inv @ (cabeca + Vector((0, 0.12, 0))); b.parent = eb[pai]; b.use_deform = True
+    bpy.ops.object.mode_set(mode='OBJECT')
+for nome_, c_, r_, d_ in (('engr_a', GA, 0.07, 10), ('engr_b', GB, 0.06, 9)):
+    novo_osso(nome_, c_)
+    bmr_salvo, uvr_salvo = bmr, uvr
+    bmr = bmesh.new(); uvr = bmr.loops.layers.uv.new('UVMap')
+    engrenagem(c_, r_, d_, 0.016, 2); cil(bmr, uvr, c_ + Vector((0, 0.016, 0)), Vector((0, 1, 0)), 0.018, 0.008, 8, 1)
+    juntar(acum(nome_), bmr); bmr, uvr = bmr_salvo, uvr_salvo
+# MOLDURA OCTOGONAL GRANDE (como no conceito: das costas até acima dos ombros), com filetes acesos em cada lado
+octogono(0.44, 0.035, YR + 0.06, 1.52, 2, 0.055)
+for k in range(8):
+    a0 = math.pi / 8 + k * math.pi / 4; a1 = a0 + math.pi / 4; r_ = 0.44 - 0.0275
+    p0 = Vector((r_ * math.cos(a0), 0, r_ * math.sin(a0))); p1 = Vector((r_ * math.cos(a1), 0, r_ * math.sin(a1)))
+    m0, m1 = p0.lerp(p1, 0.18), p0.lerp(p1, 0.82); c_ = (m0 + m1) / 2; L_ = (m1 - m0).length; ang = math.atan2(m1.z - m0.z, m1.x - m0.x)
+    t_ = bmesh.ops.create_cube(bmr, size=1.0)['verts']
+    M_ = Matrix.Translation(Vector((c_.x, YR + 0.098, 1.52 + c_.z))) @ Matrix.Rotation(-ang, 4, 'Y') @ Matrix.Diagonal((L_, 0.006, 0.016, 1))
+    for v in t_: v.co = M_ @ v.co
+    for f in {f for v in t_ for f in v.link_faces}:
+        f.material_index = 1
+        for l in f.loops: l[uvr].uv = (0.5, 0.5)
+# GRANDE CÍRCULO DE ENERGIA atrás (gira no osso 'halo'): arcos acesos com vãos, anel de metal por dentro com marcas, 4 nós
+novo_osso('halo', HC)
+bmh = bmesh.new(); uvh = bmh.loops.layers.uv.new('UVMap')
+def arco(bm, uvl, c, r0, r1, a0, a1, y0, y1, mat, n=8):
+    vs = []
+    for k in range(n + 1):
+        a = a0 + (a1 - a0) * k / n; ca, sa = math.cos(a), math.sin(a)
+        vs.append([bm.verts.new(c + Vector((r * ca, y, r * sa))) for r, y in ((r0, y0), (r1, y0), (r1, y1), (r0, y1))])
+    for A_, B_ in zip(vs, vs[1:]):
+        for k in range(4):
+            f = bm.faces.new((A_[k], B_[k], B_[(k + 1) % 4], A_[(k + 1) % 4])); f.material_index = mat
+            for l in f.loops: l[uvl].uv = (0.5, 0.5)
+    for q in (vs[0], vs[-1][::-1]):
+        f = bm.faces.new(q); f.material_index = mat
+for k in range(10):                                                     # arcos acesos (36° com vão de 6°)
+    a0 = math.radians(k * 36 + 3); arco(bmh, uvh, HC, 0.70, 0.75, a0, a0 + math.radians(30), -0.012, 0.012, 1)
+arco(bmh, uvh, HC, 0.645, 0.675, 0, 2 * math.pi, -0.008, 0.008, 2, n=48)  # anel de metal por dentro
+for k in range(36):                                                     # marcas acesas no anel de dentro
+    a = math.radians(k * 10); arco(bmh, uvh, HC, 0.648, 0.672, a - 0.012, a + 0.012, -0.012, -0.009, 1, n=1)
+for k in range(4):                                                      # nós (caixas de metal com luz)
+    a = math.radians(45 + 90 * k); p_ = HC + Vector((0.725 * math.cos(a), 0, 0.725 * math.sin(a)))
+    caixa(bmh, uvh, p_, 0.07, 0.04, 0.07, 3, rot=0.0); caixa(bmh, uvh, p_ + Vector((0, -0.021, 0)), 0.035, 0.004, 0.035, 5, chanf=0)
+juntar(acum('halo'), bmh)
 for s in (-1, 1):                                                        # canos do reator até os ombros e pra baixo
     pts = [Vector((s * 0.10, YR + 0.0, 1.52)), Vector((s * 0.16, YR - 0.01, 1.62)), Vector((s * 0.20, YR - 0.05, 1.66))]
     for a_, b_ in zip(pts, pts[1:]): cil(bmr, uvr, a_, b_ - a_, 0.016, (b_ - a_).length, 8, 2, tampa=False)
     cil(bmr, uvr, Vector((s * 0.12, YR, 1.24)), Vector((s * 0.3, -0.2, -1)), 0.016, 0.12, 8, 2)
     for z in (1.30, 1.50): caixa(bmr, uvr, Vector((s * 0.16, YR - 0.01, z)), 0.03, 0.03, 0.08, 1, chanf=0)   # luzes laterais
 juntar(acum('spine.003'), bmr)
+
+# ================================================================ 3b) GARRAS na armadura e ANÉIS de energia
+def garra(osso_, base, dirc, curva, comp, raio, lados=5, nseg=5, ponta_acesa=False):
+    bm = bmesh.new(); uvl = bm.loops.layers.uv.new('UVMap'); dirc = dirc.normalized(); curva = curva.normalized()
+    P0, P1, P2 = base, base + dirc * comp * 0.55, base + dirc * comp * 0.8 + curva * comp * 0.45
+    aneis = []
+    for k in range(nseg + 1):
+        t = k / nseg; p = P0 * (1 - t) ** 2 + P1 * 2 * t * (1 - t) + P2 * t * t
+        tg = (2 * (1 - t) * (P1 - P0) + 2 * t * (P2 - P1)).normalized(); R = tg.to_track_quat('Z', 'Y').to_matrix(); r = raio * (1 - t) ** 1.1
+        aneis.append([bm.verts.new(p + R @ Vector((r * math.cos(2 * math.pi * j / lados), r * math.sin(2 * math.pi * j / lados) * 0.7, 0))) for j in range(lados)] if k < nseg else [bm.verts.new(p)])
+    for k in range(nseg - 1):
+        for j in range(lados):
+            f = bm.faces.new((aneis[k][j], aneis[k][(j + 1) % lados], aneis[k + 1][(j + 1) % lados], aneis[k + 1][j])); f.material_index = 1 if (k == 0 and ponta_acesa is False and False) else 2
+            for l in f.loops: l[uvl].uv = (j / lados, k / nseg)
+    for j in range(lados):
+        f = bm.faces.new((aneis[nseg - 1][j], aneis[nseg - 1][(j + 1) % lados], aneis[nseg][0])); f.material_index = 1 if ponta_acesa else 2
+        for l in f.loops: l[uvl].uv = (0.5, 1.0)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    cil(bm, uvl, base - dirc * 0.004, dirc, raio * 1.25, 0.008, lados + 1, 1)          # anel aceso na base da garra
+    juntar(acum(osso_), bm)
+for s, sfx in ((1, 'L'), (-1, 'R')):
+    for k, x in enumerate((0.17, 0.25, 0.33)):                              # 3 garras em cada ombreira (pra cima e pra trás)
+        h = PELE.ray_cast(Vector((s * x, 0.03, 2.3)), Vector((0, 0, -1)), 1.5)
+        if h[0] is None: continue
+        b_ = h[0] + Vector((0, 0.01, 0.075 - 0.012 * k))
+        garra(f'shoulder.{sfx}' if k == 0 else f'upper_arm.{sfx}', b_, Vector((s * (0.25 + 0.2 * k), 0.35, 1.0)), Vector((s * 0.2, 1.0, 0)), 0.15 - 0.025 * k, 0.026 - 0.003 * k)
+    E_ = osso(f'forearm.{sfx}')                                             # garra do cotovelo (pra trás)
+    garra(f'forearm.{sfx}', E_ + Vector((0, 0.11, 0.0)), Vector((s * 0.25, 1, 0.15)), Vector((s * 0.4, 0.2, -1)), 0.10, 0.022)
+    K_ = osso(f'shin.{sfx}')                                                # garrinha do joelho (pra frente/cima)
+    h = PELE.ray_cast(K_ + Vector((0, 0, 0.02)), FR, 0.5)
+    if h[0] is not None: garra(f'shin.{sfx}', h[0] + FR * 0.07 + Vector((0, 0, 0.02)), Vector((0, -0.6, 1)), Vector((0, -1, 0.2)), 0.08, 0.02)
+    for k, x in enumerate((-0.03, 0.03)):                                   # garras na bota (bico)
+        Q_ = osso(f'toe.{sfx}'); garra(f'foot.{sfx}', Vector((Q_.x + x, Q_.y - 0.14, 0.03)), Vector((0, -1, 0.15)), Vector((0, -0.2, -1)), 0.06, 0.015, lados=4, nseg=3)
+def anel_energia(osso_, c, eixo, raio, larg=0.016, esp=0.006, n=28):
+    bm = bmesh.new(); uvl = bm.loops.layers.uv.new('UVMap'); eixo = eixo.normalized()
+    u_ = eixo.orthogonal().normalized(); w_ = eixo.cross(u_)
+    aneis = []
+    for k in range(n):
+        a = 2 * math.pi * k / n; d_ = u_ * math.cos(a) + w_ * math.sin(a)
+        aneis.append([bm.verts.new(c + d_ * r + eixo * z) for r, z in ((raio, -larg / 2), (raio + esp, -larg / 2), (raio + esp, larg / 2), (raio, larg / 2))])
+    for k in range(n):
+        A_, B_ = aneis[k], aneis[(k + 1) % n]
+        for j in range(4):
+            f = bm.faces.new((A_[j], B_[j], B_[(j + 1) % 4], A_[(j + 1) % 4])); f.material_index = 1
+            for l in f.loops: l[uvl].uv = (0.5, 0.5)
+    juntar(acum(osso_), bm)
+for s, sfx in ((1, 'L'), (-1, 'R')):                                        # 2 anéis em cada tornozelo (soltos em volta do cano da bota)
+    P_ = osso(f'foot.{sfx}')
+    for z, kr in ((0.13, 1.0), (0.21, 1.12)):
+        rs = [PELE.ray_cast(Vector((P_.x, P_.y, z)), Vector((math.cos(a), math.sin(a), 0)), 0.4)[3] for a in np.linspace(0, 2 * math.pi, 12, endpoint=False)]
+        rs = [r for r in rs if r]; r = (max(rs) if rs else 0.08) + 0.06
+        anel_energia(f'shin.{sfx}', Vector((P_.x, P_.y, z)), Vector((0, 0, 1)), r * kr)
 
 # ================================================================ 4) tabardo de tecido rasgado (frente e trás)
 def tabardo(y_sinal, z0, z1, larg, nome):
@@ -467,6 +560,112 @@ for t in partes:
         for l, li in zip(f.loops, p.loop_indices): l[uvG].uv = uv_[li].uv if (uv_ and p.material_index == 0) else (0.5, 0.5)
 bmesh.ops.delete(bmG, geom=[v for v in bmG.verts if not v.link_faces], context='VERTS')
 meG = bpy.data.meshes.new('cabeca_godzilla'); bmG.to_mesh(meG); bmG.free(); bmA.free()
+# ---------------- BRAÇOS DO GODZILLA (antebraço escamoso + mão com garras, como no filme) no lugar do antebraço humano
+def ilha_braco(sx):
+    """antebraço + mão do original: faces num cilindro em volta do eixo cotovelo->garras e só a maior peça conectada"""
+    me_ = corpo_g.data.copy(); me_.transform(corpo_g.matrix_world); bm = bmesh.new(); bm.from_mesh(me_)
+    E0, E1 = Vector((sx * 9.3, 1.5, 28.4)), Vector((sx * 8.9, -12.8, 29.0)); dE = (E1 - E0); LE = dE.length; dE.normalize()
+    def dentro(c):
+        t = (c - E0).dot(dE) / LE; r = (c - E0 - dE * (c - E0).dot(dE)).length
+        return 0.0 <= t <= 1.02 and r < (2.35 if t < 0.6 else 2.9)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if not dentro(f.calc_center_median())], context='FACES')
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
+    restantes, ilhas = set(bm.faces), []
+    while restantes:
+        f0 = restantes.pop(); ilha, fila = {f0}, [f0]
+        while fila:
+            f = fila.pop()
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g in restantes: restantes.discard(g); ilha.add(g); fila.append(g)
+        ilhas.append(ilha)
+    manter = set().union(*[il for il in ilhas if len(il) > 40])            # antebraço, mão e garras são peças soltas no original
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f not in manter], context='FACES')
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
+    bm.to_mesh(me_); bm.free(); o = bpy.data.objects.new(f'braco_gz_{sx}', me_); bpy.context.scene.collection.objects.link(o)
+    print('BRACO GZ', sx, 'tri', sum(len(p.vertices) - 2 for p in me_.polygons), 'ilhas', len(ilhas)); return o
+def decimar(o, alvo):
+    c = o.copy(); c.data = o.data.copy(); bpy.context.scene.collection.objects.link(c)
+    tri = sum(len(p.vertices) - 2 for p in c.data.polygons)
+    if tri > alvo:
+        md = c.modifiers.new('d', 'DECIMATE'); md.ratio = alvo / tri; md.use_collapse_triangulate = True
+        bpy.context.view_layer.objects.active = c; bpy.ops.object.modifier_apply(modifier='d')
+    return c
+def juntar_objs(objs, nome):
+    for o_ in bpy.context.selected_objects: o_.select_set(False)
+    for o_ in objs: o_.select_set(True)
+    bpy.context.view_layer.objects.active = objs[0]; bpy.ops.object.join(); objs[0].name = nome; return objs[0]
+hiL, hiR = ilha_braco(1), ilha_braco(-1)
+# eixo de cada braço no original (centro do corte -> ponta da garra mais à frente)
+FRAMES = {}
+for sx, hi_ in ((1, hiL), (-1, hiR)):
+    P = [v.co for v in hi_.data.vertices]; ymax = max(p.y for p in P); corte = [p for p in P if p.y > ymax - 1.2]
+    c0 = sum(corte, Vector()) / len(corte); ponta = min(P, key=lambda p: p.y).copy()   # .copy(): o join depois muda a malha
+    FRAMES[sx] = (c0, ponta); print('FRAME', sx, tuple(round(v, 2) for v in c0), tuple(round(v, 2) for v in ponta), len(P), round(ymax, 2))
+loL, loR = decimar(hiL, 1500), decimar(hiR, 1500)
+for o_, sx in ((loL, 1), (loR, -1)):
+    for v in o_.data.vertices: pass
+    o_['lado'] = sx
+lo = juntar_objs([loL, loR], 'bracos_gz_low'); hi2 = juntar_objs([hiL, hiR], 'bracos_gz_alto')
+for o_ in bpy.context.selected_objects: o_.select_set(False)
+bpy.context.view_layer.objects.active = lo; lo.select_set(True)
+bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.uv.smart_project(angle_limit=math.radians(80), island_margin=0.004, area_weight=1.0); bpy.ops.object.mode_set(mode='OBJECT')
+mt_b = hi2.data.materials[0]; alvo = {}
+for nome_ in ('cor', 'ao'): alvo[nome_] = bpy.data.images.new('bakeb_' + nome_, TR, TR, alpha=False)
+nd = mt_b.node_tree.nodes.new('ShaderNodeTexImage'); mt_b.node_tree.nodes.active = nd
+hi2.select_set(True); lo.select_set(True); bpy.context.view_layer.objects.active = lo
+for nome_, tipo in (('cor', 'DIFFUSE'), ('ao', 'AO')):
+    nd.image = alvo[nome_]; kw = dict(type=tipo, use_selected_to_active=True, cage_extrusion=0.3, max_ray_distance=0.8, margin=6)
+    if tipo == 'DIFFUSE': kw['pass_filter'] = {'COLOR'}
+    bpy.ops.object.bake(**kw)
+mt_b.node_tree.nodes.remove(nd)
+Cb = np.array(alvo['cor'].pixels[:], np.float32).reshape(TR, TR, 4)[::-1, :, :3]; AOb = np.array(alvo['ao'].pixels[:], np.float32).reshape(TR, TR, 4)[::-1, :, 0]
+temb = Cb.sum(-1) > 1e-4
+corb = Cb * 0.45 + Cb.mean(-1, keepdims=True) * 0.55; corb = corb * (0.22 / max(1e-4, float(corb[temb].mean())))
+corb = corb * (0.30 + 0.95 * (np.clip((AOb - 0.35) / 0.6, 0, 1) ** 1.2)[..., None]); corb = np.clip(corb ** 0.92 + 0.02, 0, 1) * np.array([1.0, 0.985, 0.96])
+imgb = bpy.data.images.new('godzilla_bracos', TR, TR, alpha=False); pxb = np.ones((TR, TR, 4), np.float32); pxb[..., :3] = np.round(corb[::-1] * 31) / 31
+imgb.pixels.foreach_set(pxb.ravel()); imgb.filepath_raw = os.path.join(OD, 'texturas/godzilla_bracos.png'); imgb.file_format = 'PNG'; imgb.save(); imgb.pack()
+M_GB = bpy.data.materials.new('o_godzilla_bracos'); M_GB.use_nodes = True; ntb = M_GB.node_tree; tib = ntb.nodes.new('ShaderNodeTexImage'); tib.image = imgb; tib.interpolation = 'Closest'
+ntb.links.new(tib.outputs['Color'], ntb.nodes['Principled BSDF'].inputs['Base Color']); ntb.nodes.active = tib; ntb.nodes['Principled BSDF'].inputs['Roughness'].default_value = 0.85
+bpy.data.objects.remove(hi2)
+# encaixe: corte do braço no cotovelo do esqueleto, garras na direção da mão; palma pra baixo (pose T)
+uvb = lo.data.uv_layers.active.data
+bmB = bmesh.new(); uvB = bmB.loops.layers.uv.new('UVMap'); dvB = bmB.verts.layers.deform.verify()
+NOMES_G = ['forearm.L', 'hand.L', 'upper_arm.L', 'forearm.R', 'hand.R', 'upper_arm.R']
+mapa = {}; PULSOS = {}
+for v in lo.data.vertices:
+    sx = 1 if v.co.x > 0 else -1; c0, ponta = FRAMES[sx]
+    d0 = (ponta - c0).normalized(); L0 = (ponta - c0).length
+    p0 = Vector((-sx, 0, -0.5)); p0 = (p0 - d0 * p0.dot(d0)).normalized()
+    sfx = 'L' if sx > 0 else 'R'; E_ = osso(f'forearm.{sfx}'); Hh = osso(f'hand.{sfx}')
+    d1 = (Hh - E_).normalized(); p1 = Vector((0, 0, -1)); p1 = (p1 - d1 * p1.dot(d1)).normalized()
+    M0 = Matrix((d0, p0, d0.cross(p0))).transposed(); M1 = Matrix((d1, p1, d1.cross(p1))).transposed()
+    ESCb = 0.54 / L0
+    q = v.co - c0; t = q.dot(d0) / L0
+    qq = (M1 @ M0.transposed() @ q) * ESCb; al = qq.dot(d1)
+    nv = bmB.verts.new(E_ - d1 * 0.02 + d1 * al + (qq - d1 * al) * float(os.environ.get('BRACO_GROSSO', '1.35'))); mapa[v.index] = nv   # antebraço mais grosso (como no filme)
+    wh = ss(0.50, 0.66, t); wu = (1 - ss(0.0, 0.12, t)) * 0.35
+    base = 3 if sx < 0 else 0
+    nv[dvB][base + 0] = (1 - wh) * (1 - wu); nv[dvB][base + 1] = wh; nv[dvB][base + 2] = wu * (1 - wh)
+    if abs(t - 0.56) < 0.03: PULSOS.setdefault(sx, []).append((nv.co.copy(), E_ + d1 * (0.54 * 0.56 - 0.02), d1))
+for p in lo.data.polygons:
+    try: f = bmB.faces.new([mapa[i] for i in p.vertices])
+    except ValueError: continue
+    for l, li in zip(f.loops, p.loop_indices): l[uvB].uv = uvb[li].uv
+bmesh.ops.recalc_face_normals(bmB, faces=bmB.faces)
+meB = bpy.data.meshes.new('bracos_godzilla'); bmB.to_mesh(meB); bmB.free(); bpy.data.objects.remove(lo)
+ob_b = bpy.data.objects.new('bracos_godzilla', meB); bpy.context.scene.collection.objects.link(ob_b); meB.materials.append(M_GB)
+for p in meB.polygons: p.use_smooth = True
+for n_ in NOMES_G: ob_b.vertex_groups.new(name=n_)
+mdb = ob_b.modifiers.new('Armature', 'ARMATURE'); mdb.object = A; ob_b.parent = A; ob_b.matrix_parent_inverse = A.matrix_world.inverted()
+# anéis de energia nos pulsos (2 por mão, soltos em volta do braço de Godzilla)
+for sx, lst in PULSOS.items():
+    sfx = 'L' if sx > 0 else 'R'; _, c_, d1 = lst[0]
+    r = max((p - c_ - d1 * (p - c_).dot(d1)).length for p, _, _ in lst)
+    for dt, kr in ((-0.035, 1.0), (0.03, 1.15)):
+        anel_energia(f'forearm.{sfx}', c_ + d1 * dt, d1, r * 1.05 + 0.035 * kr)
+    print('PULSO', sfx, 'raio', round(r, 3))
 for o in novos + partes: bpy.data.objects.remove(o)
 og = bpy.data.objects.new('cabeca_godzilla', meG); bpy.context.scene.collection.objects.link(og)
 meG.materials.append(M_GZ); meG.materials.append(M_OL)
@@ -479,7 +678,18 @@ zs = [v.co.z for v in meG.vertices]; ys = [v.co.y for v in meG.vertices]
 print('GODZILLA z', round(min(zs), 3), round(max(zs), 3), 'y', round(min(ys), 3), round(max(ys), 3))
 
 # ================================================================ objetos finais da armadura (1 por osso, peso 100%)
+AURA = float(os.environ.get('AURA', '0.007'))
 for nome_osso, bm in GRUPOS.items():
+    if AURA > 0:                                                          # aura: cópia inflada das partes acesas (motor: mistura aditiva = brilho em volta)
+        acesas = [f for f in bm.faces if f.material_index in (1, 5)]
+        if acesas:
+            dup = bmesh.ops.duplicate(bm, geom=acesas)
+            fs = [g for g in dup['geom'] if isinstance(g, bmesh.types.BMFace)]; vs = [g for g in dup['geom'] if isinstance(g, bmesh.types.BMVert)]
+            for f in fs: f.material_index = 6
+            bm.normal_update()
+            for v in vs:
+                nn = sum((f.normal for f in v.link_faces if f in set(fs)), Vector())
+                if nn.length > 0: v.co += nn.normalized() * AURA
     me = bpy.data.meshes.new('arm_' + nome_osso); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new('armadura_' + nome_osso, me); bpy.context.scene.collection.objects.link(o)
     for m in MATS: me.materials.append(m)

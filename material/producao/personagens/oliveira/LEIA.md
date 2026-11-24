@@ -39,3 +39,18 @@ Refazer (na raiz do projeto):
   pescoço afinado embaixo, base no centro do gorjal (encaixa no corpo), focinho levantado 10°, olhos acesos.
 - Motor: `E4.ator('oliveira')` · `videos/91-luan/?p=oliveira` · Folha: `folha_oliveira_v2.jpg` (render Cycles `BELO=1` do `tools/blender/render_jashi.py` + `tools/brilho_png.py`).
 - Pacotes do itch.io avaliados como base (não usados no modelo final): Corebreaker (CC0), Viking armor chad (OnlyHooks), Sci Fi Samurai (domínio público).
+
+## v3 — braços de Godzilla, anéis e halo de energia, garras, amarelo forte
+- **Braços do Godzilla** (como no filme): antebraço escamoso + mão com garras recortados do original (cilindro em volta do eixo
+  cotovelo→garras; são 3 peças soltas no original: antebraço, mão, garras), ~1.500 tri por braço, textura 512 por BAKE (cor + oclusão)
+  → `texturas/godzilla_bracos.png`; encaixados no cotovelo do esqueleto com a palma pra baixo, 35% mais grossos (`BRACO_GROSSO`),
+  pesos antebraço→mão (e um pouco do braço no cotovelo). O antebraço/mão humanos e as manoplas saíram.
+- **Anéis de energia**: 2 em cada pulso (em volta do braço do Godzilla) e 2 em cada tornozelo (em volta do cano da bota).
+- **Grande círculo de energia atrás** (osso `halo`): 10 arcos acesos com vãos, anel de metal por dentro com marcas e 4 nós; GIRA e
+  pulsa em todas as animações (`tools/blender/girar_ossos.py`: `GIROS="halo:0.25,engr_a:-0.6,engr_b:0.8" PULSO="halo:0.025"`,
+  voltas inteiras por clipe = loop sem emenda). As 2 engrenagens do reator também giram (ossos `engr_a`, `engr_b`).
+- **Moldura octogonal grande** nas costas (como no conceito) com filetes acesos em cada lado.
+- **Garras na armadura**: 3 em cada ombreira, uma em cada cotovelo, uma em cada joelho e 2 no bico de cada bota (curvas, com anel aceso na base).
+- **Amarelo forte**: linhas (255, 224, 20) e AURA — cópia inflada das partes acesas com material `*aura*`, que o motor desenha com
+  mistura aditiva (`lib/modelo.js`), dando o brilho em volta. No render da folha a aura é emissão translúcida + bloom (`tools/brilho_png.py`).
+- Pipeline: mesmo da v2 + depois do `animar_jashi.py`: `girar_ossos.py` e então `exportar_glb.py`. Folha: `folha_oliveira_v3.jpg`.
