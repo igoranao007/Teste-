@@ -60,7 +60,7 @@
 9. **Eles fecham a porta juntos e trancam.**
 10. Ao mesmo tempo o **Igor aperta o BOTÃO VERMELHO**, acionando o **ALERTA**; e no mesmo instante **uma SALA SECRETA se abre**,
     tomada pela **luz verde da tela**.
-11. **Sincronia** (corte casado) para outro lugar — letreiro: **KERSSIBURG — CASMIRON**.
+11. **Sincronia** (corte casado) para outro lugar — letreiro: **KESSINBURGH — CASMIRON**.
 12. **Sala grande**: mistura de **bunker subterrâneo** com **base militar**.
 13. Abre com um **dezoom (afastamento) a partir da roupa do DOD, que é verde**.
 14. Na sala, **4 personagens: DOD, ENTRADA, ZANGÃO e CORSA**. A cena mostra um pouco o que cada um está fazendo:
@@ -79,7 +79,7 @@
 > **"CALMA, ANTES DE FAZER ANIMAÇÃO TEM MAIS COISAS"** — continuação abaixo (24/11, 2ª parte).
 
 ### 4b. Depois do alerta na base dos RENEGADOS ANTI-CAOS (Dod, Corsa, Zangão e Entrada)
-> Nome do grupo de Kerssiburg: **renegados anti-caos**.
+> Nome do grupo de Kessinburgh: **renegados anti-caos**.
 18. A cena fica **preta**. Depois aparece outra sala. Letreiro:
     **BASE — LOCAL: ????**
 19. O **DOM sentado**: **não dá pra ver o visual dele**; a única coisa que aparece são os **braços apoiados** (mãos entrelaçadas
@@ -126,7 +126,7 @@
 - **Pacote de ESCRITÓRIO enviado** (`OFFICE_1.zip` → `material/modelos/office/`, fora do git): mesas, cadeiras de escritório,
   computador (monitor, torre, teclado, **mouse**), TV, estantes e livros, arquivos, sofás, poltronas, puffs, divisórias, carpete,
   luminárias, telefone, relógio de parede, quadro branco, bebedouro, cafeteira, canecas, papéis, canetas.
-  → **trocar o computador do Igor** (hoje nem tem mouse) e usar na sala do Igor, na base do Dom, na base de Kerssiburg e na casa do Phantom.
+  → **trocar o computador do Igor** (hoje nem tem mouse) e usar na sala do Igor, na base do Dom, na base de Kessinburgh e na casa do Phantom.
 - **ZANGÃO**: a águia do distintivo vira o **escudo do Universitário** (águia sobre o círculo com "U") — referência ao clube dele, que
   está em último (`referencia/terceiros/escudo_universitario_zangao.png`).
 
@@ -136,19 +136,19 @@
   Aulton, Canider; outras: Ghalatha City, Cruz Formosa, New Aberdeen, South Flopptown, Ivee, Ossumane, Ânchora, Sierra Blanca,
   Ville Sainte, Forte Helgares, Monte Calvário, Nouveau Magellan, Nea Korinthios, Santa Maria do Vale, Nova Coimbra, Santa Clarissa,
   Porto São Grande.
-- **Grupos**: o grupo do **Igor** (Toca do Anão), os **renegados anti-caos** (Dod, Corsa, Zangão, Entrada — base em Kerssiburg),
+- **Grupos**: o grupo do **Igor** (Toca do Anão), os **renegados anti-caos** (Dod, Corsa, Zangão, Entrada — base em Kessinburgh),
   o **DOM** (Dom, Oliveira, Luan; chama o Phantom), a **máfia casmirenha** (deixa o Igor ficar em Casmiron City).
 
 ## 5. O que isso pede de produção (levantamento, não começar)
 - Cenários: interior do **alojamento** do posto (porta, itens, janela); **porta-bunker** da sala do Igor; **sala secreta** com
-  luz verde; **base de Kerssiburg** (bunker + base militar: mesas, cadeiras, computador do Corsa, estação meteorológica do Dod,
+  luz verde; **base de Kessinburgh** (bunker + base militar: mesas, cadeiras, computador do Corsa, estação meteorológica do Dod,
   telão do alerta, latas de comida).
 - Objetos: pedrinha do Metalis; arma (sugerida) do Nicolas; botão vermelho do Igor; cadeira do Igor que cai; sirene/luz de alerta.
 - Animações: frentista andando e entrando; Metalis arremessando e acenando; Adryan saindo, verificando, entrando no carro e
   dando a partida; Nicolas virando com a mão nas costas; Igor caindo com a cadeira e levantando; Gusta segurando o Adryan pelos
   ombros; os dois fechando e trancando a porta; Igor apertando o botão; Corsa clicando no mouse; Zangão e Entrada comendo
   sentados; Dod digitando/escrevendo; todos virando pro telão.
-- Câmera: POV do Adryan (entrega da maleta, Igor se arrumando, porta); dezoom da roupa do Dod; corte sincronizado para Kerssiburg.
+- Câmera: POV do Adryan (entrega da maleta, Igor se arrumando, porta); dezoom da roupa do Dod; corte sincronizado para Kessinburgh.
 - Falas novas e trocadas → vozes (Igor: voz clonada; Adryan; Gusta ainda sem voz gravada).
 
 ## 6. Dúvidas pra confirmar com o diretor
@@ -156,5 +156,19 @@
 2. ~~Nicolas na sala do Igor~~ → RESOLVIDO: nunca esteve; são Gusta e Adryan.
 3. Quais outras falas antigas mudam por causa do grupo Dom (o diretor vai mandar)?
 4. Título novo da minissérie (a enviar).
-5. Grafia: no letreiro está **"Kerssiburg — Casmiron"**, no mapa está **"Kessinburgh"**. Qual vale?
-6. No alerta de Kerssiburg a missão é "**RESGATE** — Casmiron (capital)": é resgate do Igor/Nicolas? (anotado como está)
+5. ~~Grafia~~ → **KESSINBURGH** (como no mapa).
+6. ~~Missão de resgate~~ → é o resgate **do IGOR**.
+
+## 7. Confirmações e regras novas (24/11, 3ª parte)
+- O **quarteto de Kessinburgh (Dod, Corsa, Zangão, Entrada) NÃO TEM FALAS** — só ação, sons e o alerta.
+- **CRÍTICA DO PÚBLICO — ATUAÇÃO**: "as falas parecem que estão lendo o roteiro". Agora as vozes precisam de **interpretação de
+  verdade**: emoção, ritmo, pausas, **gritos** onde cabe (Igor caindo/"Malditos, eles me acharam!", "Fecha essa porta
+  imediatamente!", Adryan "Mas é o Nicolas, ele tá só!", Gusta segurando o Adryan), respiração, susto.
+- **OLIVEIRA e LUAN não mandaram áudio** → vozes livres da internet (licença livre / TTS livre):
+  **Oliveira mais "grosso"** (grave, pesado); **Luan com voz de adolescente**.
+- **Boca**: quando o **Oliveira** fala ele **mexe a boca** (mandíbula), e quando para fica de **boca fechada**. (Vale pra todos que falam.)
+- **Pesquisar e baixar pacotes**: itens, modelos, sons, músicas, efeitos (itch.io ou qualquer site), conferindo a licença. **MUITO IMPORTANTE.**
+- **Phantom**: o diretor quer o Phantom = Deadpool. **PENDENTE**: na produção da série não dá pra renderizar personagem famoso de terceiros
+  (Deadpool, e o mesmo vale pro Cartman do Zangão, o Sonic do Metalis e a cabeça do Godzilla do Oliveira) — proposta: visual próprio
+  mantendo papel, cores, armas e jeito de cada um. Aguardando decisão.
+- **AUTORIZADO COMEÇAR A PRODUÇÃO.**
