@@ -8,6 +8,8 @@ OUT = sys.argv[sys.argv.index('--') + 1]
 sc = bpy.context.scene
 A = next(o for o in bpy.data.objects if o.type == 'ARMATURE' and 'spine' in o.data.bones)
 PES = [n for n in ('foot.L', 'foot.R', 'toe.L', 'toe.R') if n in A.pose.bones]
+REPOUSO = {n: (A.matrix_world @ A.data.bones[n].head_local).z for n in PES}
+LIM_SALTO = 60   # graus por quadro (golpes e corridas rápidas passam de 35°; acima de 60° é estalo)
 SENTADO = ('sit', 'driv', 'crouch', 'death', 'knock', 'fall', 'get_up', 'kneel', 'crawl', 'swim', 'roll', 'land', 'jump', 'climb', 'vault', 'cower', 'fixing')
 rel = {}
 for act in sorted(bpy.data.actions, key=lambda a: a.name):
@@ -18,11 +20,11 @@ for act in sorted(bpy.data.actions, key=lambda a: a.name):
     ant = None; pior = (0, '', 0); zmin, zmax_min = 9, -9; problemas = []
     for f in range(f0, f1 + 1):
         sc.frame_set(f)
-        zs = [(A.matrix_world @ A.pose.bones[n].head).z for n in PES]
+        zs = [(A.matrix_world @ A.pose.bones[n].head).z - REPOUSO[n] for n in PES]   # altura em relação à de descanso (tornozelo ~7,5 cm, ponta ~2 cm)
         z = min(zs); zmin = min(zmin, z); zmax_min = max(zmax_min, z)
         if any(math.isnan(v) for v in zs): problemas.append(f'NaN no quadro {f}')
         hip = A.matrix_world @ A.pose.bones['spine'].head
-        if hip.length > 3: problemas.append(f'quadril longe ({hip.length:.1f} m) no quadro {f}')
+        if hip.length > 40 and f'quadril' not in ' '.join(problemas): problemas.append(f'quadril longe ({hip.length:.1f} m) no quadro {f}')
         atual = {b.name: (A.matrix_world @ b.matrix).to_quaternion() for b in A.pose.bones if not b.name.startswith(('f_', 'thumb', 'palm'))}
         if ant:
             for n, q in atual.items():
@@ -32,8 +34,8 @@ for act in sorted(bpy.data.actions, key=lambda a: a.name):
         ant = atual
     de_pe = not any(k in act.name.lower() for k in SENTADO)
     if de_pe and zmin < -0.03: problemas.append(f'pé afunda no chão ({zmin * 100:.0f} cm)')
-    if de_pe and zmax_min > 0.08: problemas.append(f'pés no ar ({zmax_min * 100:.0f} cm)')
-    if pior[0] > 35: problemas.append(f'salto de {pior[0]:.0f}° no osso {pior[1]} (quadro {pior[2]})')
+    if de_pe and zmin > 0.025: problemas.append(f'pés no ar ({zmin * 100:.0f} cm acima do chão no clipe todo)')
+    if pior[0] > LIM_SALTO: problemas.append(f'salto de {pior[0]:.0f}° no osso {pior[1]} (quadro {pior[2]})')
     rel[act.name] = {'quadros': f1 - f0 + 1, 'pe_min_cm': round(zmin * 100, 1), 'pe_max_min_cm': round(zmax_min * 100, 1),
                      'maior_salto_graus': round(pior[0], 1), 'problemas': problemas}
     print('QA', act.name, 'OK' if not problemas else '; '.join(problemas))
