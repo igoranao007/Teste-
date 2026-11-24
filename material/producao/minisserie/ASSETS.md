@@ -34,3 +34,15 @@ Arquivos ficam LOCAIS (fora do git): `material/modelos/itch/minisserie/` (itch.i
 | ★ 9 Explosion Sounds — OpenGameArt | CC BY-SA 3.0 (crédito) | explosão da parede do Phantom |
 | ★ Old Locations — Horror Ambiences — canvas-coven | CC BY 4.0 (crédito) | ambiências (bunker, porão, fábrica) |
 | PSX Horror Music Pack 1 — sxtempu | (sem licença explícita — conferir) | trilha |
+
+## Animações aplicadas (24/11) — elenco v2
+`material/producao/modelos-pagos/simple_character_psx/<personagem>_anim_v2.blend/.glb` (fora do git; os `_anim.glb` antigos ficam no disco)
+para **Adryan, Gusta, Nicolas, Frentista, Dom, Luan**: as 10 antigas + 49 novas.
+- UAL (u_): Idle_Loop, Idle_Talking_Loop, Walk_Loop, Walk_Formal_Loop, Jog_Fwd_Loop, Sprint_Loop, Sitting_Enter/Exit/Idle_Loop/Talking_Loop,
+  Driving_Loop, Interact, PickUp_Table, Push_Loop, Hit_Chest, Hit_Head, Death01, Crouch_Idle_Loop, Crouch_Fwd_Loop, Pistol_Idle_Loop,
+  Pistol_Aim_Neutral, Pistol_Shoot, Punch_Jab, Jump_Start/Loop/Land, Roll.
+- Motifect (m_): idle_alert, idle_looking_around, idle_relaxed_weight_shift, idle_neutral, walk_cautious, walk_tired, walk_confident,
+  turn_left_90, turn_right_90, turn_180, stumble_recover, stop_from_run, start_sprint, run_panic, back_to_wall, crouch_rise_up,
+  sidestep_dodge, hit_react_face, stagger_backward, knockdown_fall, get_up, block_high.
+- Pipeline: `animar_bvh.py` (UAL → locomoção → luta) → `aterrar.py` (pés no chão) → `qa_animacoes.py` → `exportar_glb.py`.
+- QA: 57/59 OK em todos; u_Punch_Jab e u_Sprint_Loop marcados só por serem golpes/passos rápidos (conferido no visual: sem defeito).
