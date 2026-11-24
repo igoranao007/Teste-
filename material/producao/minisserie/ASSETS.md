@@ -151,3 +151,6 @@ Sketchfab: o token salvo no ambiente está **inválido** (401) — trocar em Con
 | PSX Rifle — puszke · Guns — maxorbie · M16 — libernoidev | sem licença explícita — conferir | fuzis, armas variadas |
 | Beretta 92 — sotn (já listada) | sem licença explícita — conferir | pistola do Nicolas (`material/modelos/psx/beretta.glb`) |
 Pagos (não baixados): postdev, mcsteeg (handgun/shotgun/sniper/uzi), crimsongcat, wupss, primalugly, lothbroklabs, amos-makes, floreswa, redpolar…
+
+# ATENÇÃO (24/11): os arquivos referencia/mapa_ilha_barloth.png e referencia/logo_star_comics.png estão com os NOMES TROCADOS (o "mapa" é o logo e vice-versa).
+# Use mapa_ilha_barloth_v2.png (o mapa) e logo_star_comics_v2.png (o logo). Os originais ficam (regra: nada é apagado).
