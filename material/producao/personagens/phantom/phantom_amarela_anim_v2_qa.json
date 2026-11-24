@@ -1,0 +1,419 @@
+{
+ "attack": {
+  "quadros": 22,
+  "pe_min_cm": -2.0,
+  "pe_max_min_cm": -0.7,
+  "maior_salto_graus": 32.3,
+  "problemas": []
+ },
+ "cower": {
+  "quadros": 49,
+  "pe_min_cm": -6.9,
+  "pe_max_min_cm": -6.9,
+  "maior_salto_graus": 2.7,
+  "problemas": []
+ },
+ "death": {
+  "quadros": 49,
+  "pe_min_cm": -8.9,
+  "pe_max_min_cm": 5.9,
+  "maior_salto_graus": 16.6,
+  "problemas": []
+ },
+ "hit": {
+  "quadros": 15,
+  "pe_min_cm": -1.9,
+  "pe_max_min_cm": -0.8,
+  "maior_salto_graus": 18.2,
+  "problemas": []
+ },
+ "idle": {
+  "quadros": 97,
+  "pe_min_cm": -2.5,
+  "pe_max_min_cm": -1.8,
+  "maior_salto_graus": 1.1,
+  "problemas": []
+ },
+ "m_back_to_wall": {
+  "quadros": 300,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 1.5,
+  "maior_salto_graus": 0.7,
+  "problemas": []
+ },
+ "m_block_high": {
+  "quadros": 90,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 3.8,
+  "maior_salto_graus": 24.7,
+  "problemas": []
+ },
+ "m_crouch_rise_up": {
+  "quadros": 120,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 8.0,
+  "maior_salto_graus": 3.7,
+  "problemas": []
+ },
+ "m_get_up": {
+  "quadros": 180,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 16.6,
+  "maior_salto_graus": 16.5,
+  "problemas": []
+ },
+ "m_hit_react_face": {
+  "quadros": 120,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 2.6,
+  "maior_salto_graus": 17.4,
+  "problemas": []
+ },
+ "m_idle_alert": {
+  "quadros": 300,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 4.0,
+  "maior_salto_graus": 10.8,
+  "problemas": []
+ },
+ "m_idle_looking_around": {
+  "quadros": 300,
+  "pe_min_cm": 0.5,
+  "pe_max_min_cm": 2.1,
+  "maior_salto_graus": 8.5,
+  "problemas": []
+ },
+ "m_idle_neutral": {
+  "quadros": 300,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 0.2,
+  "maior_salto_graus": 0.3,
+  "problemas": []
+ },
+ "m_idle_relaxed_weight_shift": {
+  "quadros": 300,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 0.6,
+  "maior_salto_graus": 0.6,
+  "problemas": []
+ },
+ "m_knockdown_fall": {
+  "quadros": 150,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 38.1,
+  "maior_salto_graus": 28.3,
+  "problemas": []
+ },
+ "m_run_panic": {
+  "quadros": 180,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 10.2,
+  "maior_salto_graus": 43.2,
+  "problemas": []
+ },
+ "m_sidestep_dodge": {
+  "quadros": 90,
+  "pe_min_cm": 0.4,
+  "pe_max_min_cm": 8.4,
+  "maior_salto_graus": 17.3,
+  "problemas": []
+ },
+ "m_stagger_backward": {
+  "quadros": 150,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 4.6,
+  "maior_salto_graus": 31.5,
+  "problemas": []
+ },
+ "m_start_sprint": {
+  "quadros": 120,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 5.7,
+  "maior_salto_graus": 23.3,
+  "problemas": []
+ },
+ "m_stop_from_run": {
+  "quadros": 120,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 16.4,
+  "maior_salto_graus": 54.6,
+  "problemas": []
+ },
+ "m_stumble_recover": {
+  "quadros": 150,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 9.1,
+  "maior_salto_graus": 31.9,
+  "problemas": []
+ },
+ "m_turn_180": {
+  "quadros": 90,
+  "pe_min_cm": -0.3,
+  "pe_max_min_cm": 3.4,
+  "maior_salto_graus": 22.7,
+  "problemas": []
+ },
+ "m_turn_left_90": {
+  "quadros": 90,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 1.8,
+  "maior_salto_graus": 14.1,
+  "problemas": []
+ },
+ "m_turn_right_90": {
+  "quadros": 90,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 2.7,
+  "maior_salto_graus": 11.7,
+  "problemas": []
+ },
+ "m_walk_cautious": {
+  "quadros": 300,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 7.6,
+  "maior_salto_graus": 23.3,
+  "problemas": []
+ },
+ "m_walk_confident": {
+  "quadros": 180,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 4.3,
+  "maior_salto_graus": 32.3,
+  "problemas": []
+ },
+ "m_walk_tired": {
+  "quadros": 300,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 3.4,
+  "maior_salto_graus": 11.8,
+  "problemas": []
+ },
+ "run": {
+  "quadros": 18,
+  "pe_min_cm": -1.6,
+  "pe_max_min_cm": 9.3,
+  "maior_salto_graus": 39.6,
+  "problemas": []
+ },
+ "sit": {
+  "quadros": 97,
+  "pe_min_cm": -5.8,
+  "pe_max_min_cm": -5.8,
+  "maior_salto_graus": 0.9,
+  "problemas": []
+ },
+ "talk": {
+  "quadros": 73,
+  "pe_min_cm": -2.5,
+  "pe_max_min_cm": -1.8,
+  "maior_salto_graus": 8.1,
+  "problemas": []
+ },
+ "u_Crouch_Fwd_Loop": {
+  "quadros": 49,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 5.3,
+  "maior_salto_graus": 19.7,
+  "problemas": []
+ },
+ "u_Crouch_Idle_Loop": {
+  "quadros": 71,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 0.5,
+  "maior_salto_graus": 0.7,
+  "problemas": []
+ },
+ "u_Death01": {
+  "quadros": 58,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 33.6,
+  "maior_salto_graus": 38.2,
+  "problemas": []
+ },
+ "u_Driving_Loop": {
+  "quadros": 41,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 0.0,
+  "maior_salto_graus": 0.3,
+  "problemas": []
+ },
+ "u_Hit_Chest": {
+  "quadros": 9,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 1.4,
+  "maior_salto_graus": 17.5,
+  "problemas": []
+ },
+ "u_Hit_Head": {
+  "quadros": 11,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 0.1,
+  "maior_salto_graus": 10.8,
+  "problemas": []
+ },
+ "u_Idle_Loop": {
+  "quadros": 61,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 0.3,
+  "maior_salto_graus": 0.7,
+  "problemas": []
+ },
+ "u_Idle_Talking_Loop": {
+  "quadros": 71,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 0.1,
+  "maior_salto_graus": 6.2,
+  "problemas": []
+ },
+ "u_Interact": {
+  "quadros": 49,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 0.4,
+  "maior_salto_graus": 16.2,
+  "problemas": []
+ },
+ "u_Jog_Fwd_Loop": {
+  "quadros": 23,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 32.5,
+  "maior_salto_graus": 46.6,
+  "problemas": []
+ },
+ "u_Jump_Land": {
+  "quadros": 31,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 5.1,
+  "maior_salto_graus": 26.7,
+  "problemas": []
+ },
+ "u_Jump_Loop": {
+  "quadros": 61,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 4.2,
+  "maior_salto_graus": 0.7,
+  "problemas": []
+ },
+ "u_Jump_Start": {
+  "quadros": 33,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 42.5,
+  "maior_salto_graus": 41.2,
+  "problemas": []
+ },
+ "u_PickUp_Table": {
+  "quadros": 21,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 0.7,
+  "maior_salto_graus": 26.3,
+  "problemas": []
+ },
+ "u_Pistol_Aim_Neutral": {
+  "quadros": 5,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": -0.0,
+  "maior_salto_graus": 0,
+  "problemas": []
+ },
+ "u_Pistol_Idle_Loop": {
+  "quadros": 41,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": -0.0,
+  "maior_salto_graus": 0.4,
+  "problemas": []
+ },
+ "u_Pistol_Shoot": {
+  "quadros": 16,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": -0.0,
+  "maior_salto_graus": 17.2,
+  "problemas": []
+ },
+ "u_Punch_Jab": {
+  "quadros": 21,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 0.8,
+  "maior_salto_graus": 62.0,
+  "problemas": [
+   "salto de 62° no osso forearm.L (quadro 5)"
+  ]
+ },
+ "u_Push_Loop": {
+  "quadros": 65,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 2.2,
+  "maior_salto_graus": 14.6,
+  "problemas": []
+ },
+ "u_Roll": {
+  "quadros": 36,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 100.7,
+  "maior_salto_graus": 57.8,
+  "problemas": []
+ },
+ "u_Sitting_Enter": {
+  "quadros": 32,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 1.5,
+  "maior_salto_graus": 14.1,
+  "problemas": []
+ },
+ "u_Sitting_Exit": {
+  "quadros": 25,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 3.1,
+  "maior_salto_graus": 18.1,
+  "problemas": []
+ },
+ "u_Sitting_Idle_Loop": {
+  "quadros": 41,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 0.0,
+  "maior_salto_graus": 0.4,
+  "problemas": []
+ },
+ "u_Sitting_Talking_Loop": {
+  "quadros": 71,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 0.4,
+  "maior_salto_graus": 6.2,
+  "problemas": []
+ },
+ "u_Sprint_Loop": {
+  "quadros": 17,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 26.4,
+  "maior_salto_graus": 61.8,
+  "problemas": [
+   "salto de 62° no osso thigh.R (quadro 13)"
+  ]
+ },
+ "u_Walk_Formal_Loop": {
+  "quadros": 33,
+  "pe_min_cm": 0.0,
+  "pe_max_min_cm": 2.2,
+  "maior_salto_graus": 22.3,
+  "problemas": []
+ },
+ "u_Walk_Loop": {
+  "quadros": 33,
+  "pe_min_cm": -0.0,
+  "pe_max_min_cm": 1.9,
+  "maior_salto_graus": 22.3,
+  "problemas": []
+ },
+ "walk": {
+  "quadros": 27,
+  "pe_min_cm": -0.8,
+  "pe_max_min_cm": 2.8,
+  "maior_salto_graus": 15.4,
+  "problemas": []
+ },
+ "wave": {
+  "quadros": 49,
+  "pe_min_cm": -2.5,
+  "pe_max_min_cm": -1.8,
+  "maior_salto_graus": 5.7,
+  "problemas": []
+ }
+}

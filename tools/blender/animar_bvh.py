@@ -10,7 +10,14 @@ from mathutils import Matrix, Quaternion, Vector
 a = sys.argv[sys.argv.index('--') + 1:]; PASTA, OUT = a[0], a[1]
 CLIPES = [c for c in os.environ.get('CLIPES', '').split(',') if c]; PREF = os.environ.get('PREFIXO', '')
 sc = bpy.context.scene
-T = next(o for o in bpy.data.objects if o.type == 'ARMATURE' and 'spine' in o.data.bones)
+T = next(o for o in bpy.data.objects if o.type == 'ARMATURE' and ('spine' in o.data.bones or 'Hips' in o.data.bones))
+# Esqueleto com nomes estilo Mixamo (Metalis: Hips, Spine, Head, LeftArm, LeftUpLeg…): traduz os nomes do elenco pros dele
+_MIX = {'spine': 'Hips', 'spine.002': 'Spine', 'spine.005': 'Head'}
+for _s, _S in (('L', 'Left'), ('R', 'Right')):
+    _MIX.update({f'upper_arm.{_s}': f'{_S}Arm', f'forearm.{_s}': f'{_S}ForeArm', f'hand.{_s}': f'{_S}Hand',
+                 f'thigh.{_s}': f'{_S}UpLeg', f'shin.{_s}': f'{_S}Leg', f'foot.{_s}': f'{_S}Foot'})
+NB = (lambda n: n) if 'spine' in T.data.bones else (lambda n: _MIX.get(n, '-'))
+RAIZ = NB('spine')
 MAP = [('spine', 'Hips'), ('spine.001', 'Spine1'), ('spine.002', 'Spine2'), ('spine.003', 'Chest'), ('spine.004', 'Neck1'), ('spine.005', 'Head'),
        ('pelvis.L', 'Hips'), ('pelvis.R', 'Hips')]
 for s, S in (('L', 'Left'), ('R', 'Right')):
@@ -28,12 +35,12 @@ for s, u in (('L', 'l'), ('R', 'r')):
                 (f'thumb.01.{s}', f'thumb_01_{u}'), (f'thumb.02.{s}', f'thumb_02_{u}'), (f'thumb.03.{s}', f'thumb_03_{u}')]
     for d in ('index', 'middle', 'ring', 'pinky'):
         MAP_UAL += [(f'f_{d}.01.{s}', f'{d}_01_{u}'), (f'f_{d}.02.{s}', f'{d}_02_{u}'), (f'f_{d}.03.{s}', f'{d}_03_{u}')]
-MAP_UAL = [(t, f) for t, f in MAP_UAL if t in T.pose.bones]
-MAP = [(t, f) for t, f in MAP if t in T.pose.bones]
+MAP_UAL = [(NB(t), f) for t, f in MAP_UAL if NB(t) in T.pose.bones and not (t.startswith('pelvis') and NB(t) == RAIZ)]
+MAP = [(NB(t), f) for t, f in MAP if NB(t) in T.pose.bones and not (t.startswith('pelvis') and NB(t) == RAIZ)]
 def q_rest(arm, b): return arm.matrix_world.to_quaternion() @ b.matrix_local.to_quaternion()
 def q_pose(arm, pb): return arm.matrix_world.to_quaternion() @ pb.matrix.to_quaternion()
 Aq = T.matrix_world.to_quaternion(); Ainv = T.matrix_world.inverted()
-ht = (T.matrix_world @ T.data.bones['spine'].head_local).z
+ht = (T.matrix_world @ T.data.bones[RAIZ].head_local).z
 for pb in T.pose.bones: pb.rotation_mode = 'QUATERNION'
 T.animation_data_create()
 def retarget(nome, S, fa, mapa, quadril):
@@ -45,7 +52,7 @@ def retarget(nome, S, fa, mapa, quadril):
     # escala pelo comprimento da PERNA em repouso (não pelo 1º quadro: clipes que começam sentados/agachados ficavam flutuando)
     perna = lambda arm, a_, b_: ((arm.matrix_world @ arm.data.bones[a_].head_local) - (arm.matrix_world @ arm.data.bones[b_].head_local)).length
     coxa_s, pe_s = ('LeftLeg', 'LeftFoot') if quadril == 'Hips' else ('thigh_l', 'foot_l')
-    esc = perna(T, 'thigh.L', 'foot.L') / max(1e-4, perna(S, coxa_s, pe_s))
+    esc = perna(T, NB('thigh.L'), NB('foot.L')) / max(1e-4, perna(S, coxa_s, pe_s))
     if nome in bpy.data.actions: bpy.data.actions.remove(bpy.data.actions[nome])
     nova = bpy.data.actions.new(nome); nova.use_fake_user = True
     T.animation_data.action = nova
@@ -57,16 +64,16 @@ def retarget(nome, S, fa, mapa, quadril):
             R = D[fn] @ trest_de[tn]
             pb = T.pose.bones[tn]
             bpy.context.view_layer.update()
-            if tn == 'spine':
+            if tn == RAIZ:
                 hp = S.matrix_world @ S.pose.bones[quadril].head                 # altura do quadril ABSOLUTA (chão = 0), deslocamento no chão relativo ao 1º quadro
                 dx, dy = (hp.x - hip0.x) * esc, (hp.y - hip0.y) * esc
                 if os.environ.get('SEM_DESLOC') == '1': dx = dy = 0.0
-                base = T.matrix_world @ T.data.bones['spine'].head_local
+                base = T.matrix_world @ T.data.bones[RAIZ].head_local
                 head = Ainv @ Vector((base.x + dx, base.y + dy, hp.z * esc))
             else: head = pb.head.copy()
             pb.matrix = Matrix.Translation(head) @ (Aq.inverted() @ R).to_matrix().to_4x4()
             pb.keyframe_insert('rotation_quaternion', frame=f - f0 + 1)
-            if tn == 'spine': pb.keyframe_insert('location', frame=f - f0 + 1)
+            if tn == RAIZ: pb.keyframe_insert('location', frame=f - f0 + 1)
     print('CLIPE', nome, f1 - f0 + 1, 'quadros', 'esc', round(esc, 3))
 trest_de = {t: q_rest(T, T.data.bones[t]) for t in T.data.bones.keys()}
 if PASTA.lower().endswith('.glb'):                                   # biblioteca num GLB só (Quaternius UAL): um esqueleto, várias ações

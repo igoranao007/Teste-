@@ -35,3 +35,11 @@ material/producao/personagens/corsa/backup/
 material/modelos/office/
 material/modelos/oga/
 entrega_local/
+
+# bibliotecas de animação (Motifect: sem redistribuir; Quaternius UAL: CC0, pesada)
+material/modelos/motifect/
+material/modelos/ual/
+# animações v2 (derivadas de Motifect, sem redistribuir): ficam locais
+*_anim_v2.blend
+*_anim_v2.glb
+*_anim_v2.log

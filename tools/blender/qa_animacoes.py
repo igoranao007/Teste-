@@ -6,8 +6,15 @@ Uso: blender -b personagem_anim.blend --python qa_animacoes.py -- relatorio.json
 import bpy, sys, json, math
 OUT = sys.argv[sys.argv.index('--') + 1]
 sc = bpy.context.scene
-A = next(o for o in bpy.data.objects if o.type == 'ARMATURE' and 'spine' in o.data.bones)
-PES = [n for n in ('foot.L', 'foot.R', 'toe.L', 'toe.R') if n in A.pose.bones]
+A = next(o for o in bpy.data.objects if o.type == 'ARMATURE' and ('spine' in o.data.bones or 'Hips' in o.data.bones))
+# Esqueleto com nomes estilo Mixamo (Metalis: Hips, Spine, Head, LeftArm, LeftUpLeg…): traduz os nomes do elenco pros dele
+_MIX = {'spine': 'Hips', 'spine.002': 'Spine', 'spine.005': 'Head'}
+for _s, _S in (('L', 'Left'), ('R', 'Right')):
+    _MIX.update({f'upper_arm.{_s}': f'{_S}Arm', f'forearm.{_s}': f'{_S}ForeArm', f'hand.{_s}': f'{_S}Hand',
+                 f'thigh.{_s}': f'{_S}UpLeg', f'shin.{_s}': f'{_S}Leg', f'foot.{_s}': f'{_S}Foot'})
+NB = (lambda n: n) if 'spine' in A.data.bones else (lambda n: _MIX.get(n, '-'))
+RAIZ = NB('spine')
+PES = [NB(n) for n in ('foot.L', 'foot.R', 'toe.L', 'toe.R') if NB(n) in A.pose.bones]
 REPOUSO = {n: (A.matrix_world @ A.data.bones[n].head_local).z for n in PES}
 LIM_SALTO = 60   # graus por quadro (golpes e corridas rápidas passam de 35°; acima de 60° é estalo)
 SENTADO = ('sit', 'driv', 'crouch', 'death', 'knock', 'fall', 'get_up', 'kneel', 'crawl', 'swim', 'roll', 'land', 'jump', 'climb', 'vault', 'cower', 'fixing')
@@ -23,9 +30,9 @@ for act in sorted(bpy.data.actions, key=lambda a: a.name):
         zs = [(A.matrix_world @ A.pose.bones[n].head).z - REPOUSO[n] for n in PES]   # altura em relação à de descanso (tornozelo ~7,5 cm, ponta ~2 cm)
         z = min(zs); zmin = min(zmin, z); zmax_min = max(zmax_min, z)
         if any(math.isnan(v) for v in zs): problemas.append(f'NaN no quadro {f}')
-        hip = A.matrix_world @ A.pose.bones['spine'].head
+        hip = A.matrix_world @ A.pose.bones[RAIZ].head
         if hip.length > 40 and f'quadril' not in ' '.join(problemas): problemas.append(f'quadril longe ({hip.length:.1f} m) no quadro {f}')
-        atual = {b.name: (A.matrix_world @ b.matrix).to_quaternion() for b in A.pose.bones if not b.name.startswith(('f_', 'thumb', 'palm'))}
+        atual = {b.name: (A.matrix_world @ b.matrix).to_quaternion() for b in A.pose.bones if not b.name.startswith(('f_', 'thumb', 'palm', 'halo', 'engr'))}   # halo/engrenagens giram de propósito (girar_ossos.py)
         if ant:
             for n, q in atual.items():
                 ang = math.degrees(q.rotation_difference(ant[n]).angle)

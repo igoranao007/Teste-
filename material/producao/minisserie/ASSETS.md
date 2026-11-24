@@ -46,3 +46,19 @@ para **Adryan, Gusta, Nicolas, Frentista, Dom, Luan**: as 10 antigas + 49 novas.
   sidestep_dodge, hit_react_face, stagger_backward, knockdown_fall, get_up, block_high.
 - Pipeline: `animar_bvh.py` (UAL → locomoção → luta) → `aterrar.py` (pés no chão) → `qa_animacoes.py` → `exportar_glb.py`.
 - QA: 57/59 OK em todos; u_Punch_Jab e u_Sprint_Loop marcados só por serem golpes/passos rápidos (conferido no visual: sem defeito).
+
+## Animações aplicadas (24/11, 2ª rodada) — o RESTO do elenco
+Mesmas 49 animações (27 `u_` + 22 `m_`) com `bash tools/animar_elenco_v2.sh <origem> <saida>` (retarget → aterrar → QA → GLB; nunca sobrescreve a origem):
+| Personagem | Arquivo novo (fora do git) | No motor | QA |
+|---|---|---|---|
+| Igor (corpo; cabeça de caracal do motor) | `personagens/igor/igor_corpo_anim_v2.glb` | `T.igor({ anim: true })` → `I.corpo.clip(nome, t)` + `I.assentar()` | 47/49 |
+| Dod (farda V4; cabeça do motor) | `personagens/dod/modelo/dod_farda_v4_anim_v2.glb` | `T.dod({ anim: true })` → `D.corpo.clip(nome, t)` + `D.assentar()` | 47/49 |
+| Entrada | `personagens/entrada/entrada_militar_anim_v2.glb` | `E4.ator('entrada')` | 47/49 |
+| Corsa | `personagens/corsa/corsa_militar_anim_v2.glb` | `E4.ator('corsa')` | 47/49 |
+| Zangão original / militar | `personagens/zangao/zangao_{original,militar}_anim_v2.glb` | `E4.ator('zangao' / 'zangao_militar')` | 47/49 |
+| Phantom clássico / amarelo | `personagens/phantom/phantom_{classica,amarela}_anim_v2.glb` (10 antigas + 49) | `E4.ator('phantom' / 'phantom_amarelo')` | 57/59 |
+| Metalis (esqueleto Hips/LeftArm…: nomes traduzidos no script) | `personagens/metalis/metalis_final_anim_v2.glb` (10 + 49) | `E4.ator('metalis')` | 57/59 |
+| Oliveira (halo/engrenagens girando de novo em todas) | `modelos-pagos/simple_character_psx/oliveira_anim_v2.glb` (10 + 49) | `E4.ator('oliveira')` | 57/59 |
+Os 2 avisos em todos são `u_Punch_Jab` e `u_Sprint_Loop` (golpe/passada rápidos — sem defeito no visual). O QA agora ignora `halo`/`engr*` (giram de propósito).
+Folha no motor do elenco inteiro: `material/producao/minisserie/folha_elenco_v2.jpg` (`PAGINA=88-folha-v2 node tools/folha_elenco.mjs …` + `tools/montar_folha_elenco.py`).
+Bibliotecas: `material/modelos/ual/` (Quaternius, CC0) e `material/modelos/motifect/` (sem redistribuir) — fora do git.
