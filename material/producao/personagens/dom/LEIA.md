@@ -18,3 +18,8 @@
 - Chapéu cônico laranja/branco com 火 e véu: `await T.acessoriosDom(A)` (lib/tgp.js), presos ao osso da cabeça; `D.atualizar(t, { boca, pisca })`.
 - Uso: `const A = await E4.ator('dom'); cena.add(A.obj); const D = await T.acessoriosDom(A);` e a cada quadro `D.atualizar(t, { boca, pisca })` · folha: `videos/98-dom` (?v=frente|tres|lado|costas|rosto &clip=walk).
 - Versão antiga (corpo simples + cabeça procedural): `videos/98-dom?base=procedural`.
+- **v2 da capa/chapéu/véu** (`acessoriosDom` em lib/tgp.js; rosto continua a FOTO, escolha do diretor):
+  capa de PANO (malha 12×34 recalculada a cada quadro: `pano()`), aberta na frente com a abertura alargando pra baixo (pernas aparecem ao
+  andar), ombros marcados, 9 dobras verticais, barra irregular, balanço atrasado (barra balança mais que o ombro), até a canela;
+  DEBRUM ACESO amarelo + aura aditiva nas bordas da frente e na barra (a tecnologia do Dom, como a dos aliados); véu de pano com dobras e
+  barra irregular que balança; chapéu com aba grossa, ARO ACESO amarelo por baixo e pino no topo.
