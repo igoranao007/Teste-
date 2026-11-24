@@ -206,3 +206,60 @@ música, mixagem, créditos (incluir os créditos CC BY dos sons e o aviso de pr
 
 **Pendências abertas com o diretor**: título novo da minissérie (se mudar de novo), falas antigas que mudam por causa do grupo Dom,
 decisão sobre Phantom/Metalis/Zangão/Oliveira, licenças dos pacotes "sem licença explícita".
+
+---
+
+## 11. MODELOS-BASE (de onde saiu cada corpo)
+- **Simple PSX Character (JashiPSX)** — modelo PAGO pelo diretor (`material/producao/modelos-pagos/simple_character_psx/simple-character-psx.blend`,
+  textura `texture/character_256.png`). Corpo de **Adryan, Gusta, Nicolas, Frentista, Dom, Luan** e do corpo do **Oliveira**. Licença: usar e
+  modificar no projeto, não redistribuir.
+- **PSX Character Creator (itch, `material/modelos/itch/psx-creator/man_2.glb`)** — fonte das **10 animações antigas** (`animar_jashi.py`).
+- **personagem-simples.glb** (`material/modelos/`) — corpo de **Entrada** e **Corsa** (via `vestir_personagem.py`).
+- **Modelos-base enviados pelo diretor** — **Phantom** (arquivo 3D convertido pra PSX em `phantom.py`), **Metalis**, **Zangão**,
+  cabeça/braços do **Oliveira**; arquivos em `material/producao/personagens/<nome>/` e `referencia/` (preservados, ver §0).
+- **Pistola Malorian** (enviada pelo diretor, textura 128) — nos coldres do Phantom e solta em `phantom/malorian.glb`.
+
+## 12. ESTRATÉGIAS DE MODIFICAÇÃO (como cada um ficou do jeito aprovado)
+- **Adryan** (aprovado como referência de qualidade): textura repintada em 1024 sobre as dobras do original (uniforme do Vasco, nº 99,
+  patrocínio, cruz), rosto da foto; folha `material/producao/personagens/vegetti_jashi/inspecao/folha_vegetti_vasco_APROVADO.jpg`.
+- **Gusta**: mesma base, `ROUPA=terno` (terno preto, camisa/gravata verde). **Frentista**: `ROUPA=frentista` (camisa azul, faixa refletiva, crachá).
+- **Nicolas**: rosto realinhado da folha de referência (`realinhar_rosto.py`), camisa 10, `CABELO_CURTO=0`.
+- **Dom**: `ROUPA=dom` + rosto em FOTO na própria malha (`rosto_foto.py`, piscada/boca no canvas); no motor: capa de pano com chamas e
+  bordado, capote com emblema da Toca do Anão, chapéu cônico com faixa e reator, véu, gola alta preta, bastão com IK, círculo de comando;
+  no corpo (`dom_lider.py`): medalhão-reator, linhas de energia, braçadeiras, placa do emblema.
+- **Luan**: camisa = foto real projetada no tronco/mangas/ombros (costas montadas da própria foto), corpo engordado com a MESMA escala no
+  pescoço e cabeça, cabelo cacheado (AFRO), óculos 3D, máscara de gás moldada por raios com filtros acesos, tiras, gola blindada, linhas de energia.
+- **Oliveira**: corpo em V, armadura de placas curvas (chanfro, rebites, sulcos acesos), gorjal, ombreiras com garras, reator nas costas
+  com engrenagens girando, moldura octogonal, halo de energia girando, anéis nos pulsos/tornozelos, tabardo, cabeça e braços com bake
+  da malha alta (textura 512), aura aditiva amarela.
+- **Phantom**: conversão PSX (solda → 7 mil tri → bake 512 em 15 bits → esqueleto do elenco → pose T), 2 versões de cor (vermelha;
+  amarela = vermelho trocado por amarelo forte preservando luz/sombra), pistolas medidas dentro dos coldres.
+- **Metalis**: modelo-base do diretor montado e vestido de mendigo (`montar_metalis.py`, `mendigar_metalis.py`; poncho, bermuda, cobertor, trapos).
+- **Zangão**: duas versões (original e militar), bigode centralizado no eixo do rosto (`zangao.py`), distintivo de águia (trocar pelo escudo do Universitário).
+- **Entrada**: cabeça 3D nova feita a partir das fotos (`entrada_cabeca.py`/`cabeca_entrada.py`), uniforme militar v2, luvas pretas.
+- **Corsa**: cabeça de pardal limpa (malha nova com as cores do original transferidas), pescoço de penas, uniforme.
+- **Dod**: gato preto com cérebro exposto, uniforme verde v3 (gola alta, poncho assimétrico, alças, bolsas, bandeira).
+- **Igor**: corpo de moletom azul + cabeça de caracal (`T.igor()` em lib/tgp.js), emblema da Toca do Anão.
+
+## 13. VOZES (o que existe e como foi feito)
+- `audio/voz/original.mp3` — voz original do Igor (do dono do projeto); `audio/voz/igor-ref.wav` — referência limpa.
+- **Clonadas localmente** (Chatterbox multilíngue, nada enviado pra fora): `tools/clonar_voz.py`, `tools/falas_v4.py` (v4), `tools/falas_v5.py` (v5).
+  - `audio/voz/v4/adryan/`, `metalis/`, `igor/`, `gusta/` (tomadas `pX-N.wav`), `cortadas/` (prontas pro filme), `mix/`, `ESCOLHIDAS.txt`
+    (quais tomadas entraram), `falas_v4_previa.mp3`.
+  - `audio/voz/v5/adryan|igor|dom/` — falas da v5 (maleta aberta, cena do Dom).
+- **Voz pública** (sem clonar ninguém): Dom = voz padrão do modelo + `tools/vilao.sh` (−4 semitons, camada oitava abaixo, graves, eco).
+- **A fazer**: Gusta, Oliveira (grave), Luan (adolescente) e TODAS as falas novas da minissérie com atuação (ver §8).
+
+## 14. TUDO QUE O DIRETOR MANDOU NESTA FASE (24/11)
+- `Motifect_combat_complete_v1_0.zip` (40 animações de luta, BVH+FBX), `Motifect_locomotion_complete_v1_0.zip` (45 de locomoção),
+  `motifect_ai_motion.zip` (plugin do Blender que gera animação por texto — precisa de conta/chave/créditos no motifect.io),
+  `Universal_Animation_LibraryStandard.zip` (Quaternius, 43 animações, CC0, GLB com e sem root motion), `OFFICE_1.zip` (escritório),
+  `deadpool-character.zip`/`Malorian.zip` (base do Phantom e a pistola), logo A SILENT WAR, mapa de Barloth, capas Star Comics,
+  porta-retrato, pose do Dom, escudo do Universitário, 3 vídeos pra tela do Corsa, documentos jurídicos do diretor.
+- Onde ficaram: animações em `material/modelos/` (copiar pra lá a partir do zip original) / referências em `material/producao/minisserie/referencia/`.
+
+## 15. BACKUP DOS ARQUIVOS LOCAIS (o que NÃO está no git)
+O ambiente de trabalho é temporário. Tudo que fica fora do git (modelos pagos e derivados, `.blend`/`.glb` dos personagens com
+animações v2) foi empacotado em **`backup_modelos.zip`** (entregue à parte, uso pessoal — **não publicar**, licenças). Pra restaurar:
+descompactar na raiz do repositório. Pacotes baixados (itch/OpenGameArt) se rebaixam pelos links em `ASSETS.md`; os zips de animação
+e o escritório o diretor já tem.
