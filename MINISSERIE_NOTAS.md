@@ -172,3 +172,20 @@
   **Phantom, Metalis, Zangão e Oliveira seguem com os modelos atuais do projeto**, sem pendência. Os arquivos continuam preservados
   (versão nova só em arquivo novo) e os créditos CC BY dos modelos-base (Sketchfab) continuam nos créditos do episódio.
 - **AUTORIZADO COMEÇAR A PRODUÇÃO.**
+
+## 8. PRODUÇÃO DO EPISÓDIO 1 — estado (24/11, noite)
+Ordem da montagem (`tools/ep1_previa.sh` → `entrega/ep1/the-green-path-ep1_previa.mp4`, fora do git):
+41 estrada · 42 Nicolas no carro · **60 posto** · **61 Metalis** · **75 título A SILENT WAR** · 57 maleta (v5) · 46 Casmiron · 47 cabana · 48 senha ·
+**62 Nicolas (mão na arma)** · 50 elevador · **63 sala do Igor** · **64 entrega (POV Adryan)** · **65 fita ARG-14 (POV)** · **66 computador novo + Wallen (POV)** ·
+**67 tela ARG-14** · **68 chiado** · **69 Dom na tela + Igor cai com a cadeira + sirene** · **70 "Malditos, eles me acharam!"** · **71 porta-bunker, Gusta, botão vermelho,
+sala secreta** · **72 Kessinburgh** · **73 base do Dom (Oliveira e Luan)** · **74 4 horas antes — Phantom + explosão + FIM**. (Planos 43, 44, 49, 51–58 do v4/v5 ficam intactos.)
+Feito: elenco inteiro com as 49 animações novas; carro com aparência GGBot (CC0) mantendo interior/porta/vidro; alojamento reformulado; computador novo com mouse;
+porta-bunker; sala secreta; base de Kessinburgh (bunker CC0 + armas); telão com o mapa de Barloth; casa do Phantom com as capas Star Comics; legendas de prévia.
+**Pendente (etapa C — áudio)**: gravar/gerar TODAS as falas novas com atuação (Igor: "Preciso apagar…Wallen", "Então… o ARG-14", "Malditos…", "Fecha essa porta…";
+Adryan: "Mas é o Nicolas…"; Gusta: "Ele vai ficar bem…" e as falas do elevador trocando "Projeto Mogg" por "ARG-14"; Oliveira (grave), Luan (adolescente), Dom).
+**Para o diretor confirmar**:
+1. Fala do Igor sobre os procedimentos (o diretor deu a ideia, não a frase): proposta "Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência."
+2. A fala do Dom na tela do v5 ("Finalmente… depois de tanto tempo, nos encontramos. Dessa vez você não vai escapar, Igor.") foi MANTIDA, com o Dom parado; o
+   "Dom?! É você?" do Igor SAIU (agora é "Malditos, eles me acharam!").
+3. As falas do Gusta no elevador (plano 50) citam "Projeto Mogg": trocar por "ARG-14" na regravação.
+4. Referências: `mapa_ilha_barloth.png` e `logo_star_comics.png` estavam com os nomes trocados — usar os `_v2`.

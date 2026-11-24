@@ -1,0 +1,14 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 75 · TÍTULO (novo, 7 s): o logo THE GREEN PATH — A SILENT WAR acende no preto com brilho verde; "EPISÓDIO 1" embaixo. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:7}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.t img{width:62%;image-rendering:pixelated;filter:drop-shadow(0 0 24px rgba(57,255,106,.45))}.t div{color:#39ff6a;font:800 44px 'JetBrains Mono',monospace;letter-spacing:.45em;margin-top:26px}</style></head><body>
+<div id="stage"><div class="t"><img src="../../material/producao/minisserie/titulo_the_green_path_a_silent_war.png"><div>EPISÓDIO 1</div></div></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+window.SETUP = async () => { const t0 = document.querySelector('.t'), img = t0.querySelector('img'), ep = t0.querySelector('div');
+  window.onTick(t => { const a = P.suave(.4, 1.6, t) * (1 - P.suave(6.0, 6.8, t)), f = P.rng(Math.round(t * 30))() < .06 ? .7 : 1;
+    img.style.opacity = (a * f).toFixed(2); img.style.transform = `scale(${1 + .03 * t / 7})`; ep.style.opacity = (P.suave(1.8, 2.6, t) * (1 - P.suave(6.0, 6.8, t))).toFixed(2); });
+};
+</script></body></html>
