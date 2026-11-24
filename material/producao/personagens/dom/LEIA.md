@@ -25,3 +25,16 @@
   barra irregular que balança; chapéu com aba grossa, ARO ACESO amarelo por baixo e pino no topo.
   GOLA ALTA PRETA de zíper (a blusa da foto) fechada do ombro até logo abaixo do queixo; abaixo do queixo a foto do rosto vira pele com sombra
   (antes a malha do rosto mostrava o pescoço e a gola da FOTO esticados por ~11 cm).
+
+## DOM LÍDER (v3) — desenho próprio por cima da referência de fã
+A referência de fã ao Hokage (chapéu cônico com 火, capa branca com chamas, 小人の隠れ家) fica como estava; tudo o que é novo é desenho do projeto:
+- Preso no corpo (`tools/blender/dom_lider.py`, roda no dom.blend DEPOIS do rosto_foto.py e ANTES do animar_jashi.py):
+  medalhão-reator dourado no peito (aro com 8 raios, núcleo aceso), linhas de energia finas até ombros e punhos, braçadeiras douradas
+  com borda acesa, placa do EMBLEMA na fivela. `blender -b dom.blend --python tools/blender/dom_lider.py -- dom_lider.blend` →
+  `animar_jashi.py -- dom_anim.blend` → `exportar_glb.py -- dom_anim.glb`.
+- Emblema da Toca do Anão (`tools/dom_emblema.py`): porta em arco de toca acesa, 3 pedras, hexágono dourado → `texturas/emblema*.png`.
+- No motor (`acessoriosDom`): capote curto nos ombros (bordado grego dourado, emblema nas costas, barra acesa), bordado dourado nas bordas
+  da capa, chapéu com faixa dourada acesa, reator no topo, contas e talismãs balançando; BASTÃO DE COMANDO na mão direita (anéis
+  dourados, gaiola, núcleo aceso pulsando; `{ bastao: false }` tira); CÍRCULO DE COMANDO no chão (`D.comando(0..1)`; folha: `?comando=1`).
+  O medalhão do GLB pulsa (materiais `d_nucleo_brilho`/`d_aura`).
+- Folha: `folha_dom_lider.jpg` (videos/98-dom: `?v=frente|tres|lado|costas|mao|rosto&comando=1&clip=...`).

@@ -16,11 +16,11 @@ window.SETUP = async () => {
   // ?base=procedural: o modelo antigo (corpo simples + cabeça com a foto). Padrão: o mesmo modelo base do elenco (JashiPSX), com animações
   const jashi = q.get('base') !== 'procedural';
   let D, c, A;
-  if (jashi) { A = await E4.ator('dom'); S.scene.add(A.obj); A.pose(q.get('clip') || 'idle', +(q.get('t') || 1)); D = await T.acessoriosDom(A, { cabecaOriginal: q.get('cabeca') === 'elenco', cabeca: q.get('cabeca'), semVeu: q.get('semveu') === '1', ...(q.get('esc') ? { escRosto: +q.get('esc') } : {}), ...(q.get('dz') ? { dz: +q.get('dz') } : {}), ...(q.get('corte') ? { corteZ: +q.get('corte') } : {}) }); }
+  if (jashi) { A = await E4.ator('dom'); S.scene.add(A.obj); A.pose(q.get('clip') || 'idle', +(q.get('t') || 1)); D = await T.acessoriosDom(A, { cabecaOriginal: q.get('cabeca') === 'elenco', cabeca: q.get('cabeca'), semVeu: q.get('semveu') === '1', ...(q.get('esc') ? { escRosto: +q.get('esc') } : {}), ...(q.get('dz') ? { dz: +q.get('dz') } : {}), ...(q.get('corte') ? { corteZ: +q.get('corte') } : {}), ...(q.get('comando') ? { comando: +q.get('comando') } : {}), ...(q.get('bastao') === '0' ? { bastao: false } : {}) }); }
   else { D = await T.dom(); S.scene.add(D.obj); c = D.corpo; c.braco('L', [.18, -1, -.02], [.1, -1, .12], [0, -1, .1]); c.braco('R', [-.18, -1, -.02], [-.1, -1, .12], [0, -1, .1]); c.guardar(); D.assentar(); }
   const b = new THREE.Box3().setFromObject(jashi ? A.obj : D.obj), h = b.max.y, cab = jashi ? A.osso('spine.005').getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, .1, 0)) : D.cabeca.getWorldPosition(new THREE.Vector3());
   const V = { frente: [0, h * .55, 4.4, 0, h * .5, 0, 30], tres: [2.5, h * .62, 3.6, 0, h * .5, 0, 30], lado: [4.4, h * .55, 0, 0, h * .5, 0, 30],
-    costas: [-1.2, h * .6, -4.2, 0, h * .5, 0, 30], rosto: [cab.x + .1, cab.y + .02, cab.z + .9, cab.x, cab.y - .02, cab.z, 24] }[q.get('v') || 'frente'];
+    costas: [-1.2, h * .6, -4.2, 0, h * .5, 0, 30], mao: [-1.6, h * .55, 1.9, -.25, h * .55, 0, 30], rosto: [cab.x + .1, cab.y + .02, cab.z + .9, cab.x, cab.y - .02, cab.z, 24] }[q.get('v') || 'frente'];
   S.update = t => { if (jashi) { A.pose(q.get('clip') || 'idle', t); D?.atualizar?.(t, { pisca: (t % 3.2) > 3.05 ? 1 : 0 }); } else { c.repor(); D.assentar(); D.animar(t, { pisca: (t % 3.2) > 3.05 ? 1 : 0 }); }
     if (!q.get('cam')) { S.camera.fov = V[6]; S.camera.position.set(V[0], V[1], V[2]); S.camera.lookAt(V[3], V[4], V[5]); S.camera.updateProjectionMatrix(); } };
   window.D = D;
