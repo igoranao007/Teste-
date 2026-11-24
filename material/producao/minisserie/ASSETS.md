@@ -132,3 +132,22 @@ Tudo LOCAL (fora do git). ★ = crédito obrigatório. Rebaixar: `python3 tools/
 Pagos (não baixados): bunkers militares (lowbitlab, harning, retroassetslibrary), armários (tillion, pomarf), móveis (vertexvandal, gravyassets,
 hutski3d), entulho (aquicor), PSX Mega Pack 1/2 (pizzadoggy), ambiências de terror (cyberleaf, lowbitlab, chuckyassets, gravity-sound…).
 Sketchfab: o token salvo no ambiente está **inválido** (401) — trocar em Configurações do ambiente se quiser usar.
+
+## 3ª leva (24/11) — carros e armas
+- **Carros: PSX Style Cars — GGBot (CC0)** (`material/modelos/itch/ggbot/`, GLBs em `material/modelos/psx/ggbot_car1..8.glb`).
+  O sedã do filme ganhou a APARÊNCIA do carro 2 (textura preta) assada na geometria do sedã antigo (que tem interior, portas,
+  vidro que desce e volante): `tools/blender/sedan_ggbot.py` → `material/modelos/itch/carros/hey-sedan-ggbot.glb` (local).
+  O pacote antigo do sedã (heyheythere, PSX Vehicles) virou PAGO — a textura original `atlas.png` não existe mais aqui.
+- **Armas (itch)** em `material/modelos/itch/armas/` (convertidas pra PSX em `material/modelos/psx/arma_*.glb`, fora do git):
+| Pacote | Licença | Itens |
+|---|---|---|
+| PSX Weapons Pack — yugg0 | sem licença explícita — conferir | Glock-18, Remington 870, Remington M700, MAC-11, FN FAL |
+| M1 Garand PSX — yugg0 | uso em projetos comerciais | M1 Garand |
+| AK47 — mcsteeg | uso comercial | AK-47 |
+| PSX Guns Ammo — mcsteeg | sem licença explícita — conferir | caixas de munição |
+| Retro AK-47 — bricchi-games | sem licença explícita | (textura faltando no pacote) |
+| PSX firearms basic kit — codecola | sem licença explícita | pistola, revólver, escopeta, MP, AK, fuzil, granada de fumaça |
+| PSX Assault Rifles — doctor-sci3nce | página cita CC-BY (crédito) — conferir | AK, AKM, AK74U, RPK, G3, FAL, M16A2 |
+| PSX Rifle — puszke · Guns — maxorbie · M16 — libernoidev | sem licença explícita — conferir | fuzis, armas variadas |
+| Beretta 92 — sotn (já listada) | sem licença explícita — conferir | pistola do Nicolas (`material/modelos/psx/beretta.glb`) |
+Pagos (não baixados): postdev, mcsteeg (handgun/shotgun/sniper/uzi), crimsongcat, wupss, primalugly, lothbroklabs, amos-makes, floreswa, redpolar…

@@ -1,0 +1,73 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 66 · O COMPUTADOR (versão nova do plano 54 — o 54 fica intacto, 16 s): computador NOVO do Igor (monitor CRT,
+     torre, teclado e MOUSE do pacote de escritório); a fita entra no videocassete, o monitor liga, ele digita. FALA TROCADA (diretor):
+     IGOR: "Preciso apagar imediatamente os experimentos que o Wallen fez." Tomadas abertas pelos OLHOS do ADRYAN (POV), de pé ao lado.
+     ?cam=x,y,z,ax,ay,az,fov (mundo) força uma câmera; ?tela=y,z,l,a e ?k= ajustam o encaixe da tela no monitor. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:16}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+import * as E from "../../lib/ep1.js";
+import * as K from "../../lib/terminal.js";
+import * as V from "../../lib/v4.js";
+import * as E4 from "../../lib/elenco4.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 11 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, c, Y, lamp, pc, vcr, est, rot, ANG } = sala, q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
+  const PCN = await E.computadorNovo(sala, { k: q.get('k') ? +q.get('k') : undefined, tela: q.get('tela')?.split(',').map(Number) });
+  const hol = new THREE.Group(); hol.rotation.y = ANG; cena.add(hol); const fita = await T.fitaVHS(); hol.add(fita); fita.rotation.x = -Math.PI / 2;
+  const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj); Ad.obj.position.set(...rot(.98, 0, -.08)); Ad.obj.rotation.y = ANG; Gu.obj.position.set(...rot(-.2, 0, -1.15)); Gu.obj.rotation.y = ANG;
+  const mal = T.maleta(); cena.add(mal); mal.position.set(-.3, Y, .46); mal.deitar(1); mal.abrir(1.85); mal.brilho(1);
+  const falaV = await V.vozes(); const boca = TT => falaV('54', TT, 'igor');
+  const term = K.terminal(), D = 4.5, B = [-.07, Y + .055, .49];                       // boca do videocassete (coordenada de frente pro computador)
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...rot(...p)); S.camera.lookAt(...rot(...a)); S.camera.updateProjectionMatrix(); };
+  S.update = TT => {
+    const t = TT - D, ligada = TT >= 3.7 ? 1 : 0;
+    F.telaCodigo(pc, TT, ligada); vcr.led(TT >= 3.2); I.girar(P.suave(-.4, .9, TT));
+    const tremor = ligada * (.75 + .25 * Math.sin(TT * 23) * Math.sin(TT * 7));
+    V.luzSalaVerde(sala, TT, S.camera);                                              // sala verde e escura desde o começo (antes era luz de sala clara)
+    const m = {};
+    if (TT < D) {                                                                       // a fita vai da mão pra boca do videocassete (pelo lado direito dele, sem cruzar o corpo)
+      const leva = P.suave(.2, 1.5, TT), entra = P.suave(1.7, 2.7, TT), sai = P.suave(2.8, 3.5, TT);
+      const fz = P.lerp(B[2] - .2, B[2] - .075, leva) + entra * .16, fy = P.lerp(Y + .26, B[1], leva), fx = P.lerp(-.24, B[0], leva);
+      fita.visible = true; hol.position.set(...rot(fx, fy, fz));
+      m.R = rot(fx - .02, fy + .035 + sai * .1, fz - .1 - sai * .12); m.poloR = rot(-.9, -.3, -.2); m.extra = .06;
+      m.pegada = { R: { dedos: rot(0, -.25, 1), indice: rot(1, 0, 0) } };                // segura a fita por cima, palma pra baixo
+    } else { fita.visible = false; const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .016;
+      // transição sem tranco (4,5–5,1 s): a direita sai do videocassete até o teclado; a esquerda sai do descanso
+      const tr = P.suave(4.5, 5.1, TT), R0 = rot(B[0] - .02, B[1] + .135, B[2] - .075 + .16 - .22), R1 = rot(-.1 + Math.sin(t * 5.1) * .035, Y + .075 + tk(0), .2);
+      m.R = R0.map((v, i) => P.lerp(v, R1[i], tr)); m.L = rot(.1 + Math.sin(t * 4.3 + 1) * .035, Y + .075 + tk(2), .2); m.kL = tr;
+      m.poloR = rot(-.9, -.3, -.2); m.poloL = rot(.9, -.3, -.2); m.plana = true; m.extra = .04;
+      m.pegada = { R: { dedos: rot(0, -.45, 1), indice: rot(1, 0, 0) }, L: { dedos: rot(0, -.45, 1), indice: rot(-1, 0, 0) } }; }   // digitando: palmas pra baixo
+    const fala = boca(TT); I.pose(TT, m); I.animar(TT, { boca: fala, pisca: (TT % 4.1) > 3.95 ? 1 : 0 });
+    // a fita fica NA PALMA enquanto ele leva até o videocassete; ao encaixar, passa pro trilho da boca do aparelho (sem flutuar)
+    if (TT < D) { I.obj.updateMatrixWorld(true); const c = I.corpo, h = c.osso('hand.R').getWorldPosition(new THREE.Vector3()), md = c.osso('f_middle.01.R');
+      const palma = (md ? h.clone().lerp(md.getWorldPosition(new THREE.Vector3()), .6) : h).add(new THREE.Vector3(0, -.03, 0)), trilho = hol.position.clone();
+      hol.position.copy(palma.lerp(trilho, P.suave(1.55, 2.0, TT))); } I.cabeca.rotation.x += .12 * (TT < 9 ? 1 : .3);
+    Ad.pose('idle', TT); Gu.pose('idle', TT + .4); mal.pulsar(TT);
+    const tela = { ...F.LUZ_SALA, keyDir: rot(0, .1, 1), keyCor: '#' + new THREE.Color('#39ff6a').multiplyScalar(tremor).getHexString(), fillDir: rot(-.6, .6, -.4), fillCor: '#16321f', amb: '#12241a' };
+    if (q.get('semIgor')) I.obj.visible = false;
+    if (camQ) { S.camera.fov = camQ[6]; S.camera.position.set(camQ[0], camQ[1], camQ[2]); S.camera.lookAt(camQ[3], camQ[4], camQ[5]); S.camera.updateProjectionMatrix(); }
+    // POV DO ADRYAN: de pé atrás, à direita do Igor; a câmera é o olho dele (o corpo dele some), o olhar passeia: mãos/fita → videocassete
+    //   → monitor ligando → o rosto do Igor iluminado ("Preciso apagar imediatamente...") → o código na tela, o Gusta do lado
+    else { const OLHO = rot(.98, 1.64, -.08), mira = (alvo, fov) => { S.camera.fov = fov; S.camera.position.set(...OLHO); S.camera.lookAt(...alvo); S.camera.updateProjectionMatrix(); };
+      const cabI = I.cabeca.getWorldPosition(new THREE.Vector3()).toArray(), balanco = .01 * Math.sin(TT * 1.3);
+      if (TT < 1.7) mira(rot(-.04 + balanco, Y + .24, .3), 46);                                   // o Igor gira com a fita na mão
+      else if (TT < D) mira(rot(B[0] + .02, B[1] + .05, B[2]), P.lerp(30, 22, P.suave(1.7, 3.2, TT)));   // a fita entrando no videocassete
+      else if (t < 4) { P.luz({ ...tela, keyDir: rot(0, .2, 1), amb: '#1a2c20' }); mira(rot(.05, Y + .25, .42), 40); }   // monitor liga, ele digita
+      else if (t < 7.4) { P.luz(tela); mira([cabI[0], cabI[1] - .02, cabI[2]], P.lerp(34, 28, P.suave(4, 7.4, t))); }   // o rosto dele: "Preciso apagar imediatamente..."
+      else { P.luz(tela); mira(rot(-.35 + .25 * P.suave(7.4, 9.5, t), 1.25, -.4), 46); } }   // olha pro Gusta do lado e de volta pra tela
+    Ad.obj.visible = !!camQ; est.visible = true; lamp.visible = TT < D + 4;
+
+    const cod = t >= 8.3; term.el.style.opacity = cod ? 1 : 0;
+    if (cod) { const u = t - 8.3; term.limpar(); term.codigo(u, { vel: 70, projeto: 'ARG-14' }); term.caixa(110, 108, 260, 54, '#010a04'); term.moldura(110, 108, 260, 54);
+      term.txt('ACESSANDO' + '.'.repeat(1 + Math.floor(u * 3) % 3), 240, 122, 22, K.CLARO, { alinhar: 'center', peso: 800 }); term.pixelar(); term.sinal(Math.round(TT * 30), .04); }
+  };
+};
+</script></body></html>

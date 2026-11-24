@@ -1,0 +1,64 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 65 · A FITA ARG-14 (versão nova do plano 53 — o 53 fica intacto, 12 s), pelos OLHOS DO ADRYAN: o Igor abre a maleta
+     (dois estalos), brilho verde; dentro, a fita VHS; o olhar do Adryan desce até ela: "Então é isso. O ARG-14." (antes "Projeto Mogg");
+     o Igor pega a fita e o olhar acompanha a mão. Computador novo. ?cam= força uma câmera. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:12}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as T from '../../lib/tgp.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 36, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, Y, lamp } = sala, fala = await V.vozes(), q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
+  await E.computadorNovo(sala);
+  const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj);
+  Ad.obj.position.set(-.38, 0, 1.22); Ad.obj.rotation.y = Math.PI; Gu.obj.position.set(-1.25, 0, 1.55); Gu.obj.rotation.y = Math.PI;
+  const mal = T.maleta(); cena.add(mal); const fita = await T.fitaVHS(); mal.dentro.add(fita);
+  const MESA = new THREE.Vector3(-.3, Y, .46), V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));
+  const chi = F.chiadoVerde();
+  S.update = t => {
+    sala.video(t + 27); I.girar(0);
+    Ad.pose('idle', t); Gu.pose('idle', t + .5); V.girar(Gu, 'spine.005', [1, 0, 0], .2 * P.suave(2, 3, t));
+    const abre = P.suave(1.0, 2.0, t), maos = P.suave(.2, .8, t) * (1 - P.suave(2.1, 2.6, t)), pega = t >= 8.6, close = t >= 3.2 && t < 8.6;
+    const m = {};
+    if (maos > 0) { m.R = [MESA.x - .13, Y + .135, MESA.z - .03]; m.L = [MESA.x + .13, Y + .135, MESA.z - .03]; m.kR = m.kL = maos; }
+    if (pega) { const a = P.suave(8.6, 9.6, t), s = P.suave(9.8, 11.6, t);
+      const mao = V3(P.lerp(-.02, FR.x, a), P.lerp(Y + .3, FR.y + .05, a) + s * .34, P.lerp(.3, FR.z, a) - s * .3);
+      m.R = mao.toArray(); m.poloR = [-.8, .2, -.5]; m.kR = P.suave(8.6, 9.1, t);
+    }
+    m.pegada = { R: { dedos: [0, -.5, 1], indice: [1, 0, 0] }, L: { dedos: [0, -.5, 1], indice: [-1, 0, 0] } };   // palmas pra baixo na maleta / na fita
+    m.inclina = .16; const v = fala('53', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });
+    // a fita vai NA PALMA de verdade (antes ia pro alvo do IK e ficava flutuando quando o braço não alcançava)
+    const segura = pega ? P.suave(9.6, 9.85, t) : 0;
+    if (segura <= 0) { if (fita.parent !== mal.dentro) mal.dentro.add(fita); fita.position.set(0, 0, 0); fita.rotation.set(0, 0, 0); }
+    else { I.obj.updateMatrixWorld(true); const c = I.corpo, h = c.osso('hand.R').getWorldPosition(V3(0, 0, 0)), md = c.osso('f_middle.01.R'), palma = md ? h.clone().lerp(md.getWorldPosition(V3(0, 0, 0)), .6) : h;
+      const s2 = P.suave(9.8, 11.6, t); if (fita.parent !== cena) cena.attach(fita);
+      fita.position.copy(FR.clone().lerp(palma.add(V3(0, -.035, 0)), segura)); fita.rotation.set(-Math.PI / 2 + s2 * .4, 0, .12 * s2); }
+    I.cabeca.rotation.x += .34; I.cabeca.rotation.y += -.18;   /* olha pra maleta sem 'quebrar' o pescoço (antes .52/−.3 + cabeça deslocada: parecia solta) */
+    mal.abrir(abre * 1.85); mal.brilho(abre); mal.pulsar(t);
+    const g = abre * (.75 + .25 * Math.sin(t * 9));
+    V.luzSalaVerde(sala, t, S.camera, { fillDir: [-.3, -.4, .85], fillCor: '#' + new THREE.Color('#16321f').lerp(new THREE.Color('#39ff6a'), g * .45).getHexString() });   // sala verde + brilho da maleta
+    // POV DO ADRYAN (de pé na frente da mesa): o Igor abre a maleta → o olhar desce até a fita (zoom) → acompanha a mão que pega a fita
+    Ad.obj.updateMatrixWorld(true);
+    const cab = Ad.osso('spine.005').getWorldPosition(V3(0, 0, 0)), OLHO = cab.clone().add(V3(0, .07, -.16)), cabI = I.cabeca.getWorldPosition(V3(0, 0, 0));
+    let alvo, fov;
+    if (t < 3.2) { alvo = MESA.clone().add(V3(0, .1, 0)).lerp(cabI, .35); fov = 40; }
+    else if (close) { const u = P.suave(3.2, 5.2, t); alvo = FR.clone().lerp(MESA.clone().add(V3(0, .1, 0)), 1 - u); fov = P.lerp(36, 17, u); }
+    else { const h = I.corpo.osso('hand.R').getWorldPosition(V3(0, 0, 0)); alvo = h.lerp(cabI, .3); fov = 36; }
+    S.camera.up.set(0, 1, 0); S.camera.fov = fov;
+    if (camQ) { S.camera.fov = camQ[6]; S.camera.position.set(camQ[0], camQ[1], camQ[2]); S.camera.lookAt(camQ[3], camQ[4], camQ[5]); }
+    else { S.camera.position.copy(OLHO); S.camera.lookAt(alvo); }
+    S.camera.updateProjectionMatrix();
+    Ad.obj.visible = !!camQ; lamp.visible = true;
+    chi.desenha(Math.round(t * 30), close ? .1 : 0, { dens: .25 });
+  };
+};
+</script></body></html>

@@ -1,0 +1,69 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 64 · A ENTREGA (versão nova do plano 52 — o 52 fica intacto, 13 s). MUDANÇA DO DIRETOR: antes em terceira pessoa;
+     agora pelos OLHOS DO ADRYAN (POV) — é o ADRYAN que ENTREGA A MALETA NA MÃO DO IGOR. O Nicolas NUNCA esteve na sala (só Gusta e Adryan).
+     A porta abre, eles entram; o Igor vira: "Trouxeram?"; o Adryan estende a maleta, o Igor pega com as duas mãos e põe na mesa; as pastas
+     PIOLHO, RORAIMA, JV, PHANTOM; "Então... o ARG-14." (antes "Projeto Mogg"). ?cam= força uma câmera. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:13}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as T from '../../lib/tgp.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, Y, lamp, est } = sala, fala = await V.vozes(), q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
+  await E.computadorNovo(sala);                                                   // EP1: computador novo do Igor (com mouse)
+  const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj); T.poses(Ad.modelo);
+  const mal = T.maleta(); cena.add(mal);
+  const MESA = new THREE.Vector3(-.3, Y, .46), v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  // as 4 fichas, deitadas na mesa uma por cima da outra
+  const NOMES = ['piolho', 'roraima', 'jv', 'phantom'], fichas = [];
+  for (const [i, n] of NOMES.entries()) { const tx = await V.pastaFicha(n); const f = P.malha(new THREE.PlaneGeometry(.4, .3), P.mat({ mapa: tx }), { pos: [.32, Y + .004 + i * .002, .62], rot: [-Math.PI / 2, 0, -.08 + i * .05] }); cena.add(f); fichas.push(f); }
+  const capa = P.caixa(.42, .012, .32, P.mat({ cor: '#7a6a44' }), { pos: [.32, Y + .02, .62] }); cena.add(capa);
+  const porta = P.malha(new THREE.PlaneGeometry(1.1, 3.4, 2, 6), P.mat({ cor: '#7dffa0', opac: .16, aditivo: true, semLuz: true, lados: THREE.DoubleSide }), { pos: [-.7, .02, 3.6], rot: [-Math.PI / 2, 0, 0] }); cena.add(porta);
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  S.update = t => {
+    sala.video(t + 14); V.luzSalaVerde(sala, t, S.camera); porta.scale.x = P.suave(0, .6, t);
+    I.girar(1 - P.suave(1.0, 2.0, t));
+    // Adryan (com a maleta) e Gusta entram (0,3–3,6) até a frente da mesa
+    const AD1 = [-.38, 1.22];
+    for (const [A2, a, b] of [[Ad, [-.9, 3.6], AD1], [Gu, [-1.6, 3.9], [-1.25, 1.62]]]) if (!V.caminhar(A2, a, b, t, .3, 3.6)) { A2.obj.rotation.y = V.angLerp(Math.atan2(b[0] - a[0], b[1] - a[1]), Math.PI, P.suave(3.6, 4.0, t)); A2.pose('idle', t); }
+    // ENTREGA NA MÃO: o Adryan estende a maleta por cima da mesa (4,0–4,9); o Igor pega com as duas mãos (4,7–5,2) e põe na mesa (5,2–6,0)
+    const estende = P.suave(4.0, 4.9, t) * (1 - P.suave(5.15, 5.7, t)), pegaI = P.suave(4.7, 5.2, t), pousa = P.suave(5.2, 6.0, t);
+    const ENTREGA = v3(-.22, Y + .3, .82);
+    Ad.obj.updateMatrixWorld(true);
+    if (pegaI < 1) { V.segurarMaleta(Ad, mal, t); mal.deitar(0);
+      if (estende > 0) { const h0 = Ad.osso('hand.R').getWorldPosition(v3()); Ad.modelo.alcancar('R', h0.lerp(ENTREGA.clone().add(v3(0, .16, .05)), estende).toArray(), [.7, -.6, .3], .08); V.segurarMaleta(Ad, mal, t); } }
+    else { const pIgor = ENTREGA.clone().lerp(MESA, pousa); pIgor.y += Math.sin(pousa * Math.PI) * .06; mal.position.copy(pIgor); mal.deitar(P.suave(.2, .9, pousa));
+      if (estende > 0) { const h0 = Ad.osso('hand.R').getWorldPosition(v3()); Ad.modelo.alcancar('R', h0.lerp(ENTREGA.clone().add(v3(0, .16, .05)), estende).toArray(), [.7, -.6, .3], .08); } }
+    mal.pulsar(t);
+    // Igor: fala, abre as pastas (5,4–10,6), fecha e olha a maleta
+    const ab = P.clamp((t - 6.1) / 4.6), qual = Math.min(3, Math.floor(ab * 4)), aberto = t > 6.1 && t < 10.7;
+    capa.visible = !aberto; fichas.forEach((f, i) => { f.visible = aberto ? i <= qual : false; });
+    const m = { inclina: .02 * Math.sin(t * 1.1) + .1 * P.suave(4.5, 5.0, t) * (1 - P.suave(5.6, 6.1, t)) };
+    const maoIgor = P.suave(4.55, 5.05, t) * (1 - P.suave(5.9, 6.4, t));                                              // as duas mãos do Igor na maleta (pega e pousa)
+    if (maoIgor > 0) { const c = mal.position; m.R = [c.x - .12, c.y + .12, c.z - .04]; m.L = [c.x + .12, c.y + .12, c.z - .04]; m.kR = m.kL = maoIgor; m.pegada = { R: { dedos: [0, -.5, 1], indice: [1, 0, 0] }, L: { dedos: [0, -.5, 1], indice: [-1, 0, 0] } }; }
+    if (aberto) { m.L = [.32 + .1 * Math.sin(t * 3), Y + .07, .5]; m.kL = P.suave(5.0, 5.75, t) * (1 - P.suave(10.3, 10.9, t)); m.plana = true; m.pegada = { L: { dedos: [0, -.5, 1], indice: [-1, 0, 0] } }; }   // folheando as pastas (lado ESQUERDO dele) com a mão esquerda, palma pra baixo — antes a direita cruzava o corpo
+    const v = fala('52', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });
+    const praEles = P.suave(1.2, 2.0, t) * (1 - P.suave(4.6, 5.2, t)), praMesa = P.suave(5.0, 5.6, t);
+    I.cabeca.rotation.y += .35 * praEles; I.cabeca.rotation.x += -.05 * praEles + .5 * praMesa;
+    est.visible = true;
+    // POV DO ADRYAN: a câmera é o olho dele (um palmo à frente do rosto, pra não ver a própria cabeça); o olhar segue a ação
+    Ad.obj.updateMatrixWorld(true);
+    const cab = Ad.osso('spine.005').getWorldPosition(v3()), rAd = Ad.obj.rotation.y, fAd = v3(Math.sin(rAd), 0, Math.cos(rAd));
+    const OLHO = cab.clone().addScaledVector(fAd, .16).add(v3(0, .07, 0)), cabI = I.cabeca.getWorldPosition(v3());
+    let alvo, fov = 44;
+    if (t < 4.0) { alvo = cabI.clone().add(v3(0, -.1 - .04 * Math.sin(t * 7.5) * (t < 3.6 ? 1 : 0), 0)); fov = 46; }                       // entrando: o Igor de costas → vira: "Trouxeram?"
+    else if (t < 6.1) { alvo = mal.position.clone().add(v3(0, .1, 0)).lerp(cabI, .25); fov = 44; }                                       // a maleta passando pra mão dele
+    else if (t < 10.7) { alvo = fichas[qual].position.clone(); fov = 30; }                                                               // as pastas, uma por uma
+    else { alvo = cabI.clone().lerp(mal.position, .35); fov = 36; }                                                                       // "Então... o ARG-14."
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]); else cam(OLHO.toArray(), alvo.toArray(), fov);
+  };
+};
+</script></body></html>
