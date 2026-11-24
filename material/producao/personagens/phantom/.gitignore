@@ -1,0 +1,5 @@
+# modelo de origem do usuário (licença não informada): os derivados 3D ficam fora do git — ver LEIA.md
+*.glb
+*.blend
+*.blend1
+texturas/phantom_*.png
