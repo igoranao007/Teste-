@@ -6,6 +6,8 @@
 
 ---
 
+> **Pra aprender a mexer em tudo (Blender, motor, efeitos, som, ffmpeg, Remotion, itch.io, git): `GUIA_DO_ALUNO.md`.**
+
 ## 0. LEIA PRIMEIRO (regras do diretor — valem pra tudo)
 1. **Nada é apagado nem sobrescrito.** Toda mudança gera arquivo NOVO com sufixo (`_v2`, `_v3`…). Os antigos ficam.
 2. **A história não muda** sem o diretor autorizar. Referência da história: `MINISSERIE_NOTAS.md` (+ `ROTEIRO_v4.md` como base antiga).
