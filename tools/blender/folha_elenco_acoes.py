@@ -5,7 +5,7 @@ import bpy, sys, os
 from mathutils import Vector
 a = sys.argv[sys.argv.index('--') + 1:]; OUT, PRE = a[0], a[1]; os.makedirs(OUT, exist_ok=True)
 sc = bpy.context.scene; sc.render.engine = 'BLENDER_WORKBENCH'; sh = sc.display.shading
-sh.light = 'STUDIO'; sh.color_type = 'TEXTURE'; sh.background_type = 'VIEWPORT'; sh.background_color = (.13, .13, .14)
+sc.view_settings.view_transform = 'Standard'; sh.light = 'STUDIO'; sh.color_type = 'TEXTURE'; sh.background_type = 'VIEWPORT'; sh.background_color = (.13, .13, .14)
 for m in bpy.data.materials:
     if m.use_nodes:
         for n in m.node_tree.nodes:
@@ -38,7 +38,7 @@ for i, item in enumerate(x for x in os.environ.get('ACOES', '').split(',') if x)
     except Exception: pass
     f0, f1 = int(act.frame_range[0]), int(act.frame_range[1]); sc.frame_set(int(f0 + (f1 - f0) * float(fr)))
     h = A.matrix_world @ A.pose.bones[RAIZ].head; alvo = Vector((h.x, h.y, H * .5))
-    d = H / 1.8
+    d = max(H, 1.2) / 1.8 * 1.2
     cam.location = alvo + Vector((2.0, -2.7, .35)) * d; cam.rotation_euler = (alvo - cam.location).to_track_quat('-Z', 'Y').to_euler()
     sc.render.filepath = f'{OUT}/{PRE}__{i:02d}__{nome}.png'; bpy.ops.render.render(write_still=True)
 print('FOLHA OK', PRE, round(H, 2))
