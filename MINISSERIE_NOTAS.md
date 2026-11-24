@@ -168,7 +168,15 @@
   **Oliveira mais "grosso"** (grave, pesado); **Luan com voz de adolescente**.
 - **Boca**: quando o **Oliveira** fala ele **mexe a boca** (mandíbula), e quando para fica de **boca fechada**. (Vale pra todos que falam.)
 - **Pesquisar e baixar pacotes**: itens, modelos, sons, músicas, efeitos (itch.io ou qualquer site), conferindo a licença. **MUITO IMPORTANTE.**
-- **Phantom**: o diretor quer o Phantom = Deadpool. **PENDENTE**: na produção da série não dá pra renderizar personagem famoso de terceiros
-  (Deadpool, e o mesmo vale pro Cartman do Zangão, o Sonic do Metalis e a cabeça do Godzilla do Oliveira) — proposta: visual próprio
-  mantendo papel, cores, armas e jeito de cada um. Aguardando decisão.
+- ~~Phantom/Zangão/Metalis/Oliveira com visual próprio~~ → **DECIDIDO (diretor, 24/11): os modelos ATUAIS são os definitivos** e os
+  quatro entram no episódio como estão (Phantom clássico e amarelo, Zangão original e militar, Metalis, Oliveira v3). Arquivos continuam preservados.
 - **AUTORIZADO COMEÇAR A PRODUÇÃO.**
+
+## 8. VERSÃO DA OUTRA SESSÃO — REJEITADA (diretor, 24/11)
+- Uma outra sessão fez um episódio de 7:11 no ramo `ccr-cf37d244-6qtio3` (cenas 60–75). O diretor reprovou: "tudo errado, bugs,
+  o que antes estava bom ficou errado". Defeitos achados: a linha que dá a altura e encosta os pés no chão de TODOS os personagens
+  ficou dentro de um comentário em `lib/elenco4.js` (todo mundo do tamanho errado e enterrado no chão, até nas cenas antigas aprovadas);
+  as cenas apontam pra modelos `_anim_v2` que nunca foram salvos (não abrem fora daquela máquina); a aparência do carro foi trocada no
+  filme inteiro sem pedido; a montagem é só uma emenda dos planos, sem a edição do v4, com o som recortado do vídeo antigo e falas só em legenda.
+- **Decisão**: o episódio é REFEITO a partir deste ramo (`claude/mp4-animation-threejs-remotion-xyh5wp`), cena por cena, com aprovação
+  em imagem de cada etapa. O ramo da outra sessão fica guardado no GitHub, sem uso; dele só se aproveita o que for conferido antes.

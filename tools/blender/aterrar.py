@@ -5,10 +5,17 @@ import bpy, sys
 from mathutils import Vector
 OUT = sys.argv[sys.argv.index('--') + 1]
 sc = bpy.context.scene
-A = next(o for o in bpy.data.objects if o.type == 'ARMATURE' and 'spine' in o.data.bones)
-PES = [n for n in ('foot.L', 'foot.R', 'toe.L', 'toe.R') if n in A.pose.bones]
+A = next(o for o in bpy.data.objects if o.type == 'ARMATURE' and ('spine' in o.data.bones or 'Hips' in o.data.bones))
+# Esqueleto com nomes estilo Mixamo (Metalis: Hips, Spine, Head, LeftArm, LeftUpLeg…): traduz os nomes do elenco pros dele
+_MIX = {'spine': 'Hips', 'spine.002': 'Spine', 'spine.005': 'Head'}
+for _s, _S in (('L', 'Left'), ('R', 'Right')):
+    _MIX.update({f'upper_arm.{_s}': f'{_S}Arm', f'forearm.{_s}': f'{_S}ForeArm', f'hand.{_s}': f'{_S}Hand',
+                 f'thigh.{_s}': f'{_S}UpLeg', f'shin.{_s}': f'{_S}Leg', f'foot.{_s}': f'{_S}Foot'})
+NB = (lambda n: n) if 'spine' in A.data.bones else (lambda n: _MIX.get(n, '-'))
+RAIZ = NB('spine')
+PES = [NB(n) for n in ('foot.L', 'foot.R', 'toe.L', 'toe.R') if NB(n) in A.pose.bones]
 REP = {n: (A.matrix_world @ A.data.bones[n].head_local).z for n in PES}
-B = A.data.bones['spine']; R = (A.matrix_world.to_3x3() @ B.matrix_local.to_3x3()).inverted()   # sem normalizar: o objeto do esqueleto tem escala
+B = A.data.bones[RAIZ]; R = (A.matrix_world.to_3x3() @ B.matrix_local.to_3x3()).inverted()   # sem normalizar: o objeto do esqueleto tem escala
 def curvas(act):
     try: return list(act.fcurves)
     except Exception: return [c for l in act.layers for st in l.strips for cb in st.channelbags for c in cb.fcurves]
@@ -23,7 +30,7 @@ for act in bpy.data.actions:
     if abs(zmin) < 0.005: print('ATERRAR', act.name, 'ok'); continue
     d = R @ Vector((0, 0, -zmin))
     for c in curvas(act):
-        if c.data_path == 'pose.bones["spine"].location':
+        if c.data_path == f'pose.bones["{RAIZ}"].location':
             for k in c.keyframe_points: k.co.y += d[c.array_index]; k.handle_left.y += d[c.array_index]; k.handle_right.y += d[c.array_index]
     print('ATERRAR', act.name, f'{-zmin * 100:+.1f} cm')
 A.animation_data.action = bpy.data.actions.get('idle')
