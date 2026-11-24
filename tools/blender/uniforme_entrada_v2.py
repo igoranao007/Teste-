@@ -44,10 +44,11 @@ def cadarco_e(x, y, w, h):                                         # língua + c
     if abs(u - .5) < .3 and abs((u - .5) * 10) - abs(yy - 3) < 1.2 and abs(u - .5) * 10 > abs(yy - 3) - 1.0: c = hx('#4e3d29')
     if abs(abs(u - .5) - .3) < .05 and yy == 3: c = hx('#9d9a8c')
     return c
-def luva_e(x, y, w, h):                                            # luva verde-oliva: nós dos dedos e costuras
-    c = mix(hx('#3f4730'), hx('#5c6646'), .5 * ruido(x // 2, y // 2, 141) ** 2)
-    if y % 8 == 0: c = hx('#343b28')
-    if x % 8 == 4 and y % 2 == 0: c = mix(hx(E_COST_E), c, .5)
+def luva_e(x, y, w, h):                                            # luva tática PRETA-grafite (contrasta com a manga verde): nós dos dedos e costuras
+    c = mix(hx('#1c1d1f'), hx('#34363a'), .5 * ruido(x // 2, y // 2, 141) ** 2)
+    if y % 8 == 0: c = hx('#121314')
+    if x % 8 == 4 and y % 2 == 0: c = mix(hx('#55575c'), c, .5)
+    if 10 <= y % 16 <= 13 and x % 8 in (1, 2, 5, 6): c = hx('#4a4c52')   # protetor dos nós (borracha)
     return c
 def ziper_e(x, y, w, h): return hx('#8d8b80') if (x + y) % 2 == 0 else hx('#3b4036')
 def coldre_e(x, y, w, h): return bolsa_f('#3d3c2e', '#26261d', '#545240', 151, aba=.72, tira=False)(x, y, w, h)
@@ -208,13 +209,16 @@ def uv_bota(bm, uvl):
         plana(bm, uvl, fs, lambda q, xc=xc: (q.x - xc) / .09 + .5, lambda q: (q.z - .07) / (BOTA - .07))
 objeto(bm, 'bota', ['e2_bota', 'e2_sola', 'e2_entressola', 'e2_biqueira', 'e2_cadarco', 'e2_bota', 'e2_colarinho'], mat_de=lambda f: f.material_index, uv_extra=uv_bota)
 
-# ================================================================== LUVAS verde-oliva (punho por cima da manga, palma de couro)
-bm = extrair(lambda f: REG[f.index] == 'luva'); afastar(bm, .006)
+# ================================================================== LUVAS táticas pretas (punho largo por cima da manga, palma de couro)
+bm = extrair(lambda f: REG[f.index] == 'luva'); afastar(bm, .010)
+for v in bm.verts:                                                   # mão mais cheia (a do corpo base é fina e sumia dentro da manga)
+    p = W(v.co); s_ = 1 if p.x > 0 else -1; ax = osso('hand.L' if s_ > 0 else 'hand.R')
+    d = Vector((0, p.y - ax.y, p.z - ax.z)); v.co = MWi @ Vector((p.x + s_ * .012, ax.y + d.y * 1.28, ax.z + d.z * 1.28))
 for s in (1, -1):
     pu = bordas(bm, lambda e, s=s: all(abs(W(v.co).x - s * PULSO) < .01 for v in e.verts))
     if pu:
-        vs = extrudar_borda(bm, pu, (-s * .035, 0, 0)); c0 = sum((W(v.co) for v in vs), Vector()) / len(vs)
-        for v in vs: p = W(v.co); d = Vector((0, p.y - c0.y, p.z - c0.z)); v.co = MWi @ (p + d.normalized() * .009)
+        vs = extrudar_borda(bm, pu, (-s * .045, 0, 0)); c0 = sum((W(v.co) for v in vs), Vector()) / len(vs)
+        for v in vs: p = W(v.co); d = Vector((0, p.y - c0.y, p.z - c0.z)); v.co = MWi @ (p + d.normalized() * .016)   # punho largo por cima da manga
 for f in bm.faces: f.material_index = 1 if normal(f).z < -.45 else 0
 objeto(bm, 'luva', ['e2_luva', 'e2_palma'], mat_de=lambda f: f.material_index, dens=8)
 
