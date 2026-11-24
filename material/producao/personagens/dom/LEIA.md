@@ -35,6 +35,8 @@ A referência de fã ao Hokage (chapéu cônico com 火, capa branca com chamas,
 - Emblema da Toca do Anão (`tools/dom_emblema.py`): porta em arco de toca acesa, 3 pedras, hexágono dourado → `texturas/emblema*.png`.
 - No motor (`acessoriosDom`): capote curto nos ombros (bordado grego dourado, emblema nas costas, barra acesa), bordado dourado nas bordas
   da capa, chapéu com faixa dourada acesa, reator no topo, contas e talismãs balançando; BASTÃO DE COMANDO na mão direita (anéis
-  dourados, gaiola, núcleo aceso pulsando; `{ bastao: false }` tira); CÍRCULO DE COMANDO no chão (`D.comando(0..1)`; folha: `?comando=1`).
+  dourados, gaiola, núcleo aceso pulsando) SEMPRE APOIADO NO CHÃO ao lado do pé direito (preso no ator) e o braço direito posto nele a
+  cada quadro (IK de 2 ossos ombro→cotovelo→punho, mão com o polegar pra cima, dedos fechados na haste) em todas as animações;
+  2 versões: com bastão (padrão) e sem bastão (`{ bastao: false }`, folha `?bastao=0`; close da mão: `?v=pega&ang=1.6`); CÍRCULO DE COMANDO no chão (`D.comando(0..1)`; folha: `?comando=1`).
   O medalhão do GLB pulsa (materiais `d_nucleo_brilho`/`d_aura`).
 - Folha: `folha_dom_lider.jpg` (videos/98-dom: `?v=frente|tres|lado|costas|mao|rosto&comando=1&clip=...`).
