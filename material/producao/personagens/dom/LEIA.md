@@ -23,3 +23,5 @@
   andar), ombros marcados, 9 dobras verticais, barra irregular, balanço atrasado (barra balança mais que o ombro), até a canela;
   DEBRUM ACESO amarelo + aura aditiva nas bordas da frente e na barra (a tecnologia do Dom, como a dos aliados); véu de pano com dobras e
   barra irregular que balança; chapéu com aba grossa, ARO ACESO amarelo por baixo e pino no topo.
+  GOLA ALTA PRETA de zíper (a blusa da foto) fechada do ombro até logo abaixo do queixo; abaixo do queixo a foto do rosto vira pele com sombra
+  (antes a malha do rosto mostrava o pescoço e a gola da FOTO esticados por ~11 cm).
