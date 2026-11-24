@@ -1,0 +1,82 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 74 · 4 HORAS ANTES (nova, 25 s): letreiro "4 HORAS ANTES". A casa do PHANTOM (versão vermelha/clássica) cheia de livros:
+     estantes, pilhas no chão, quadros com as capas da STAR COMICS que ele fez. O Phantom numa cadeira QUASE CAINDO (meio deitado), analisando
+     o PORTA-RETRATO, mexendo com a mão. A PAREDE EXPLODE nas costas dele; na poeira aparece a SOMBRA DO DOM; o Phantom olha pra trás.
+     DOM: "Phantom, podemos conversar?" — FIM DO EPISÓDIO 1 (logo A SILENT WAR). Legendas na cena (?leg=0). ?cam= força câmera. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:25}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}
+.letreiro{position:absolute;z-index:30;left:0;right:0;top:44%;text-align:center;color:#e9fff0;font:800 58px 'JetBrains Mono',monospace;letter-spacing:.25em}
+.fim{position:absolute;inset:0;z-index:31;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000}
+.fim img{width:58%;image-rendering:pixelated}.fim div{color:#39ff6a;font:800 40px 'JetBrains Mono',monospace;letter-spacing:.3em;margin-top:28px}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as T from '../../lib/tgp.js';
+import * as E from '../../lib/ep1.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as M from '../../lib/modelo.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const qs = new URLSearchParams(location.search), camQ = qs.get('cam')?.split(',').map(Number);
+  const S = P.palco({ fov: 44, cam: [0, 1.6, 2], alvo: [0, 1, 0], fundo: '#020101', nevoa: { cor: '#020101', perto: 6, longe: 14 }, luz: { keyDir: [.5, .8, .4], keyCor: '#d8b98a', fillDir: [-.5, .3, -.3], fillCor: '#3a2a1e', amb: '#1e1612' } }), cena = S.scene;
+  const C = await E.casaPhantom(cena);
+  // cadeira quase caindo: Phantom + cadeira num pivô nas pernas de trás
+  const piv = new THREE.Group(); piv.position.set(0, 0, -1.42); cena.add(piv);
+  const cad = await V.peca('material/modelos/itch/minisserie/juggypuggy__low-poly-psx-bunker-pack/PSXPack_SovietBunker_01 _2_/PSXPack_SovietBunker_01/GLB/SM_Prop_Chair_01.glb', { tex: 256, verde: false });
+  cad.position.set(0, 0, .2); piv.add(cad);
+  const Ph = await E4.ator('phantom'); piv.add(Ph.obj); T.poses(Ph.modelo); Ph.obj.position.set(0, 0, .22);
+  const ret = new THREE.Group(); const imR = await M.imagem('material/producao/minisserie/referencia/porta_retrato_phantom.png');
+  const tR = new THREE.CanvasTexture((() => { const c = document.createElement('canvas'); c.width = 64; c.height = 100; c.getContext('2d').drawImage(imR, 0, 0, 64, 100); return c; })()); tR.magFilter = tR.minFilter = THREE.NearestFilter; tR.generateMipmaps = false; tR.colorSpace = THREE.NoColorSpace;
+  ret.add(P.caixa(.17, .24, .015, P.mat({ cor: '#d8c9a8' })), P.malha(new THREE.PlaneGeometry(.13, .2), P.mat({ mapa: tR }), { pos: [0, 0, .009] })); cena.add(ret);
+  const Dm = await E4.ator('dom'); cena.add(Dm.obj); const DD = await T.acessoriosDom(Dm, { bastao: false });
+  Dm.obj.traverse(n => { if (n.isMesh) for (const m of [].concat(n.material)) if (m.uniforms?.uCor) { m.uniforms.uCor.value.set('#030303'); m.uniforms.uSemLuz.value = 1; if (m.uniforms.uTemMapa) m.uniforms.uTemMapa.value = 0; } });   // só a SOMBRA dele
+  const contra = P.malha(new THREE.PlaneGeometry(2.4, 2.8), P.mat({ cor: '#ffcf8a', semLuz: true, aditivo: true, opac: 0 }), { pos: [0, 1.3, -3.6] }); cena.add(contra);
+  const v3 = (x, y, z) => new THREE.Vector3(x, y, z), env = (t, a, b, c, d) => P.suave(a, b, t) * (1 - P.suave(c, d, t));
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const letreiro = document.createElement('div'); letreiro.className = 'letreiro'; letreiro.textContent = '4 HORAS ANTES'; document.getElementById('stage').appendChild(letreiro);
+  const flash = F.camada('background:#fff3d8'); const preto = F.camada('background:#000');
+  const fim = document.createElement('div'); fim.className = 'fim'; fim.innerHTML = '<img src="../../material/producao/minisserie/titulo_the_green_path_a_silent_war.png"><div>FIM DO EPISÓDIO 1</div>'; document.getElementById('stage').appendChild(fim);
+  const BOOM = 11.5, leg = E.legendas([[15.6, 18.6, 'DOM', 'Phantom, podemos conversar?']]);
+  S.update = t => {
+    leg(t);
+    const k = t - BOOM, boom = t >= BOOM, clarao = boom ? Math.max(0, 1 - k / .5) : 0, fogo = boom ? Math.max(0, 1 - k / 2.5) : 0;
+    P.luz({ keyDir: [.5, .8, .4], keyCor: '#' + new THREE.Color('#d8b98a').lerp(new THREE.Color('#ffd9a0'), clarao).multiplyScalar(1 + 1.5 * clarao).getHexString(), fillDir: [0, .3, -1],
+      fillCor: '#' + new THREE.Color('#3a2a1e').lerp(new THREE.Color('#ff8a30'), fogo).getHexString(), amb: '#' + new THREE.Color('#1e1612').lerp(new THREE.Color('#4a2a14'), fogo * .7).getHexString() });
+    C.explodir(t, BOOM, S.camera);
+    // PHANTOM: sentado, a cadeira inclinada pra trás (quase caindo, balançando); segura o retrato na frente do rosto e passa a mão nele;
+    //          na explosão a cadeira bate de volta no chão e ele vira a cabeça e o tronco pra trás
+    const quase = boom ? -.32 * (1 - P.suave(BOOM, BOOM + .35, t)) : -.3 - .04 * Math.sin(t * 1.3);
+    piv.rotation.x = quase; Ph.pose('u_Sitting_Idle_Loop', t); piv.updateMatrixWorld(true);
+    const cabP = Ph.osso('spine.005').getWorldPosition(v3()), fr = v3(0, 0, 1).applyAxisAngle(v3(1, 0, 0), quase);
+    const olhaTras = P.suave(BOOM + 1.2, BOOM + 2.2, t), largou = P.suave(BOOM, BOOM + .3, t);
+    const RP = cabP.clone().addScaledVector(fr, .34).add(v3(.02, -.12, 0)).lerp(cabP.clone().add(v3(.25, -.55, .25)), largou);
+    V.ik2(Ph, 'upper_arm.R', 'forearm.R', 'hand.R', RP, [.8, -.6, 0], 1);
+    const passa = Math.sin(t * 3.1) * .03, LP = RP.clone().add(v3(-.05 + passa, .05 * Math.sin(t * 2.2), -.02)).lerp(cabP.clone().add(v3(-.3, -.5, .2)), largou);
+    V.ik2(Ph, 'upper_arm.L', 'forearm.L', 'hand.L', LP, [-.8, -.6, 0], 1);
+    if (olhaTras > 0) { V.girar(Ph, 'spine.003', [0, 1, 0], .55 * olhaTras); V.girar(Ph, 'spine.005', [0, 1, 0], 1.0 * olhaTras); }
+    if (!boom) V.girar(Ph, 'spine.005', [1, 0, 0], .15);
+    piv.updateMatrixWorld(true);
+    const hR = Ph.osso('hand.R').getWorldPosition(v3()); ret.position.copy(largou < 1 ? hR.clone().add(v3(0, .08, .03)) : v3(.35, .02, -.9)); ret.lookAt(cabP); if (largou >= 1) ret.rotation.set(-Math.PI / 2, 0, .6);
+    // DOM: a sombra aparece na poeira, dá um passo pra dentro do buraco
+    const dPasso = P.suave(BOOM + 1.6, BOOM + 2.8, t); Dm.obj.visible = t > BOOM + 1.2; Dm.obj.position.set(0, 0, P.lerp(-3.3, -2.75, dPasso)); Dm.obj.rotation.y = 0;
+    Dm.pose(dPasso > 0 && dPasso < 1 ? 'm_walk_confident' : 'u_Idle_Loop', t); DD.atualizar(t, {});
+    contra.material.uniforms.uOpac.value = boom ? Math.min(.55, .2 + .6 * fogo) * P.suave(BOOM, BOOM + .3, t) : 0;
+    // camadas
+    letreiro.style.opacity = (P.suave(.5, 1.0, t) * (1 - P.suave(2.4, 2.9, t))).toFixed(2);
+    flash.style.opacity = (clarao * .95).toFixed(2); preto.style.opacity = Math.max(1 - P.suave(2.9, 3.4, t), P.suave(19.0, 19.3, t)).toFixed(2);
+    fim.style.opacity = P.suave(19.6, 20.6, t).toFixed(2);
+    // câmeras (com tremor na explosão)
+    const tr = boom ? Math.max(0, 1 - k / 1.2) * .05 : 0, sh = v3((Math.random() - .5) * 0, 0, 0); const q = Math.sin(t * 61) * tr, w = Math.cos(t * 47) * tr;
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
+    else if (t < 7.5) { const u = P.suave(3, 7.5, t); cam([P.lerp(2.2, 1.4, u), 1.6, P.lerp(1.9, 1.2, u)], [P.lerp(-2.9, 0, u), P.lerp(1.8, 1.0, u), P.lerp(1.2, -1.3, u)], 50); }   // a sala: capas, estantes, livros… até ele
+    else if (t < 9.6) cam([1.25, 1.05, .2], [0, .95, -1.25], 40);                                                    // a cadeira quase caindo
+    else if (t < 11.0) { cam([cabP.x - .18, cabP.y + .1, cabP.z - .18], ret.position.toArray(), 34); }                // por cima do ombro: o retrato, a mão
+    else if (t < BOOM + 1.3) cam([.15 + q, 1.35 + w, 1.6], [0, 1.15, -1.8], 52);                                   // de frente: a parede explode atrás dele
+    else if (t < BOOM + 4.0) cam([1.3 + q, 1.25 + w, .1], [-.1, 1.1, -2.2], 46);                                   // ele olha pra trás; a sombra do Dom na poeira
+    else cam([.55, 1.25, -.7], [0, 1.45, -2.75], 38);                                                               // "Phantom, podemos conversar?"
+  };
+};
+</script></body></html>

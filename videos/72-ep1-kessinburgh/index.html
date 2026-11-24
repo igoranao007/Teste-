@@ -1,0 +1,85 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 72 · KESSINBURGH — CASMIRON (nova, 28 s). Corte casado do verde da sala secreta pro VERDE DA FARDA DO DOD: a câmera
+     começa colada nas costas dele e faz o DEZOOM revelando a base dos RENEGADOS ANTI-CAOS (bunker subterrâneo + base militar). Letreiro
+     "KESSINBURGH — CASMIRON". SEM FALAS. · DOD sentado na estação meteorológica, telas verdes, ESCREVENDO · CORSA no computador vendo vídeos:
+     clica e PULA o do Igor dançando e o do pardal, DEIXA O DO HOMER ATÉ O FINAL · ZANGÃO e ENTRADA sentados comendo ENLATADO, esperando algo ·
+     o TELÃO vira "⚠ ALERTA · MISSÃO DE RESGATE · CASMIRON (CAPITAL)" · todos olham pro alerta · tela preta. ?cam= força uma câmera. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:28}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}
+.letreiro{position:absolute;z-index:30;left:0;right:0;bottom:12%;text-align:center;color:#39ff6a;font:800 54px 'JetBrains Mono',monospace;letter-spacing:.18em;text-shadow:0 0 18px rgba(57,255,106,.6),3px 3px 0 #000}
+.letreiro small{display:block;font-size:26px;letter-spacing:.4em;color:#b9ffc9;margin-top:6px}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as T from '../../lib/tgp.js';
+import * as E from '../../lib/ep1.js';
+import * as E4 from '../../lib/elenco4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const qs = new URLSearchParams(location.search), camQ = qs.get('cam')?.split(',').map(Number);
+  const S = P.palco({ fov: 50, cam: [0, 1.6, 4], alvo: [0, 1, 0], fundo: '#050806', nevoa: { cor: '#050806', perto: 9, longe: 22 }, luz: { keyDir: [.2, .9, .3], keyCor: '#cfc7a2', fillDir: [-.6, .3, -.5], fillCor: '#2f5a3a', amb: '#262d28' } }), cena = S.scene;
+  const B = await E.baseKessinburgh(cena), PT = B.pontos;
+  const D = await T.dod({ anim: true }); cena.add(D.obj);
+  const Co = await E4.ator('corsa'), Ze = await E4.ator('zangao_militar'), En = await E4.ator('entrada'); cena.add(Co.obj, Ze.obj, En.obj);
+  for (const A of [Co, Ze, En]) T.poses(A.modelo);
+  const lata = []; for (const n of [1, 2]) { const l = await V.peca('material/modelos/itch/minisserie/juggypuggy__low-poly-psx-bunker-pack/PSXPack_SovietBunker_01 _2_/PSXPack_SovietBunker_01/GLB/SM_Prop_CanFood_0' + n + '.glb', { tex: 128, verde: false }); l.scale.setScalar(1.2); cena.add(l); lata.push(l); }
+  const lapis = P.caixa(.008, .008, .14, P.mat({ cor: '#e8c21a' })); cena.add(lapis);
+  const v3 = (x, y, z) => new THREE.Vector3(x, y, z), angLerp = V.angLerp, env = (t, a, b, c, d) => P.suave(a, b, t) * (1 - P.suave(c, d, t));
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const letreiro = document.createElement('div'); letreiro.className = 'letreiro'; letreiro.innerHTML = 'KESSINBURGH<small>CASMIRON</small>'; document.getElementById('stage').appendChild(letreiro);
+  const preto = F.camada('background:#000'); const verdeFlash = F.camada('background:#39ff6a');
+  const TELAO = v3(...PT.telao), ALERTA = 19.3;
+  // vídeos do Corsa: Igor dançando (8,0–9,4 → CLIQUE) · pardal (9,4–10,8 → CLIQUE) · Homer (10,8 até o fim, 8,4 s)
+  const video = t => t < 9.4 ? [0, t - 8.0 + 3.0] : t < 10.8 ? [1, t - 9.4 + 1.5] : [2, Math.min(8.3, t - 10.8)];
+  const sentar = (A, p, rot, t, fase = 0) => { A.obj.position.set(p[0], p[1], p[2]); A.obj.rotation.y = rot; A.pose('u_Sitting_Idle_Loop', t + fase); };
+  S.update = t => {
+    const alerta = t >= ALERTA ? 1 : 0, olhar = P.suave(ALERTA + .5, ALERTA + 1.6, t);
+    // luz: sala industrial (amarelada) + verde das telas; no alerta, vermelho pulsando vindo do telão
+    const pul = alerta ? (Math.floor(t * 3.2) % 2 === 0 ? 1 : .35) : 0;
+    P.luz({ keyDir: [.2, .9, .3], keyCor: '#cfc7a2', fillDir: [0, .3, 1], fillCor: '#' + new THREE.Color('#2f5a3a').lerp(new THREE.Color('#ff2a14'), .8 * pul).getHexString(), amb: '#' + new THREE.Color('#262d28').lerp(new THREE.Color('#3a0c08'), .6 * pul).getHexString() });
+    B.telao(t, alerta); B.estacao(t); const [vi, vt] = video(Math.max(8, t)); B.tela(vi, Math.max(0, vt));
+    // DOD: sentado de frente pras telas, escrevendo (mão direita no papel, rabisca); no alerta vira o tronco e a cabeça pro telão
+    D.obj.position.set(PT.dod[0] + .02, 0, PT.dod[2]); D.obj.rotation.y = -Math.PI / 2 + 1.1 * olhar; D.corpo.clip('u_Sitting_Idle_Loop', t);
+    D.obj.updateMatrixWorld(true);
+    const escreve = 1 - olhar, pap = v3(...PT.papel).add(v3(.04 * Math.sin(t * 7.3), 0, .05 * Math.sin(t * 2.1) + .02 * Math.sin(t * 11)));
+    if (escreve > 0) D.corpo.alcancar('R', D.corpo.osso('hand.R').getWorldPosition(v3()).lerp(pap.clone().add(v3(0, .04, 0)), escreve).toArray(), [0, -.6, .8], .05);
+    D.assentar(); D.animar?.(t);
+    const hD = D.corpo.osso('hand.R').getWorldPosition(v3()); lapis.position.copy(hD).add(v3(0, -.03, 0)); lapis.rotation.set(.5, -Math.PI / 2, 0);
+    // CORSA: sentado no computador; mão no mouse; dois cliques (9,4 e 10,8); no alerta gira na cadeira e olha
+    sentar(Co, PT.corsa, Math.PI / 2 - 1.3 * olhar, t, 1.1); Co.obj.updateMatrixWorld(true);
+    const mouse = PT.mouse(), clique = Math.max(env(t, 9.25, 9.35, 9.4, 9.5), env(t, 10.65, 10.75, 10.8, 10.9));
+    const naMao = 1 - olhar; if (naMao > 0) Co.modelo.alcancar('R', Co.osso('hand.R').getWorldPosition(v3()).lerp(mouse.clone().add(v3(-.04, .05 - .012 * clique, 0)), naMao).toArray(), [-.2, -.8, .5], .05);
+    // ZANGÃO e ENTRADA: sentados comendo enlatado (lata na mão esquerda, a direita leva a colher à boca); no alerta param e olham pra cima
+    for (const [A, p, f, k] of [[Ze, PT.zangao, .3, 0], [En, PT.entrada, 1.9, 1]]) {
+      sentar(A, p, Math.PI, t, f); A.obj.updateMatrixWorld(true);
+      const r = A.obj.rotation.y, fr = v3(Math.sin(r), 0, Math.cos(r)), quad = A.osso('spine').getWorldPosition(v3());
+      const colo = quad.clone().addScaledVector(fr, .22).add(v3(0, .12, 0));
+      A.modelo.alcancar('L', colo.clone().add(v3(k ? .05 : -.05, 0, 0)).toArray(), [k ? .8 : -.8, -.6, 0], .05);
+      const ciclo = ((t + f * 2) % 2.6) / 2.6, leva = Math.sin(Math.PI * P.clamp((ciclo - .35) / .45)) * (1 - olhar);
+      const boca = A.osso('spine.005').getWorldPosition(v3()).addScaledVector(fr, .1).add(v3(0, -.04, 0));
+      A.modelo.alcancar('R', colo.clone().lerp(boca, leva).toArray(), [k ? -.8 : .8, -.6, 0], .05);
+      if (olhar > 0) V.girar(A, 'spine.005', [1, 0, 0], -.35 * olhar);
+      A.obj.updateMatrixWorld(true); const hL = A.osso('hand.L').getWorldPosition(v3()); lata[k].position.copy(hL).add(v3(0, -.05, 0));
+    }
+    if (olhar > 0) { V.girar(Co, 'spine.005', [0, 1, 0], -.3 * olhar); V.girar(Co, 'spine.005', [1, 0, 0], -.15 * olhar); }
+    // camadas: letreiro (0,6–4,6), flash verde do corte casado (0–0,25), preto no fim
+    letreiro.style.opacity = (P.suave(.6, 1.2, t) * (1 - P.suave(4.0, 4.6, t))).toFixed(2);
+    verdeFlash.style.opacity = (1 - P.suave(0, .35, t)) * .85; preto.style.opacity = P.suave(26.6, 27.0, t).toFixed(2);
+    // câmeras
+    const cabD = D.cabeca.getWorldPosition(v3()), cabC = Co.osso('spine.005').getWorldPosition(v3());
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
+    else if (t < 5.2) { const u = P.suave(0, 5.2, t), costas = cabD.clone().add(v3(.0, -.42, 0)), de = costas.clone().add(v3(.28, .02, .05)), ate = v3(-1.2, 2.15, 3.2);   // DEZOOM: colado na farda verde → a base inteira
+      cam(de.lerp(ate, u * u * (3 - 2 * u)).toArray(), costas.lerp(v3(-2.5, .9, -1.6), P.suave(.3, 1, u)).toArray(), P.lerp(30, 60, u)); }
+    else if (t < 8.0) cam([-5.0, 1.55, -.3], [-6.6, 1.05, -1.6], 42);                                            // o Dod escrevendo, as telas verdes
+    else if (t < 14.0) { const u = P.suave(8, 14, t); cam([P.lerp(5.0, 5.25, u), 1.4, P.lerp(-.75, -.95, u)], [6.4, .85, -1.6], P.lerp(40, 30, u)); }   // o Corsa clicando: pula, pula, deixa o Homer
+    else if (t < 18.4) { const u = P.suave(14, 18.4, t); cam([P.lerp(1.9, 1.5, u), 1.15, P.lerp(-.2, .1, u)], [0, .85, 1.6], 40); }                   // Zangão e Entrada comendo, esperando
+    else if (t < ALERTA) cam([4.95, 1.38, -1.0], [6.4, .85, -1.6], 30);                                         // o Homer chegando ao fim
+    else if (t < 22.6) cam([-.2, 1.9, 4.4], [0, 1.25, -3], 54);                                                  // o telão: ALERTA — todos olham
+    else if (t < 24.8) cam([0, 1.5, -1.2], TELAO.toArray(), 44);                                                 // MISSÃO DE RESGATE · CASMIRON (CAPITAL)
+    else { const u = P.suave(24.8, 26.6, t); cam([P.lerp(.6, 0, u), 1.15, P.lerp(-.6, -.1, u)], [0, 1.0, 1.6], P.lerp(52, 44, u)); }                                                                // os rostos virados pro alerta
+  };
+};
+</script></body></html>

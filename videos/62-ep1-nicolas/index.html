@@ -1,0 +1,70 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 62 · NICOLAS SOZINHO (versão nova do plano 49 — o 49 fica intacto, 9 s): o Nicolas perto do carro; um ruído na mata.
+     MUDANÇA DO DIRETOR: antes ele só virava e via os olhos; agora ele LEVA A MÃO DIREITA ÀS COSTAS (na cintura) antes de virar — dá a
+     entender que está segurando uma ARMA. Uma tomada por trás mostra a mão fechada no cabo da pistola (Beretta PSX) presa no cós da calça;
+     ele encara os olhos amarelos na mata, imóvel, mão nas costas. Close no rosto; volta pra mata: os olhos continuam lá. ?cam= inspeção. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:9}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as T from '../../lib/tgp.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 40, perto: 6, longe: 40, luz: { keyDir: [.3, .7, .7], keyCor: '#9fc4ab', amb: '#2b4636', fillCor: '#24703c' } }), cena = S.scene;
+  await V.montarCabana(S);
+  const car = await F.carro(); car.scale.setScalar(1.25); car.position.set(0, .02, 8.6); car.rotation.y = Math.PI; car.luzes(0); cena.add(car);
+  const Ni = await E4.ator('nicolas'); cena.add(Ni.obj); Ni.obj.position.set(1.55, 0, 9.4); Ni.obj.rotation.y = Math.PI; T.poses(Ni.modelo);
+  const arma = await E.prop('beretta', { tex: 128 }); cena.add(arma);
+  const q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number), v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  // pistola: comprimento no z local, ferrolho em +y. SC = lado do cano (+1 = +z); GRIP = ponto do cabo (local) que vai na palma / no cós
+  const SC = +(q.get('sc') || 1), GRIP = v3(0, .05, -SC * .065), [CF, CD, CY] = (q.get('cos') || '.118,.05,-.075').split(',').map(Number);
+  const baseQ = (L, U) => { const z = L.clone().normalize().multiplyScalar(SC), y = U.clone().addScaledVector(z, -U.dot(z)).normalize(), x = new THREE.Vector3().crossVectors(y, z);
+    return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z)); };
+  // os olhos na mata são do METALIS: ele parado no escuro entre as árvores, só a íris amarela acesa (mesmos olhos do posto)
+  const Me = await E4.ator('metalis'); cena.add(Me.obj); Me.obj.position.set(8.5, 0, 13.5); Me.obj.rotation.y = Math.atan2(1.55 - 8.5, 9.4 - 13.5);
+  Me.pose('idle', 0); const olhos = V.olhosMetalis(Me, { soIris: true });
+  for (const ml of Me.malhas) if (![].concat(ml.material).some(m => /olho/.test(m.name))) ml.visible = false;   // corpo some: no escuro só a íris aparece
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const OLHO = new THREE.Vector3(8.5, 1.0, 13.5);
+  S.update = t => {
+    Ni.pose('idle', t * .6);
+    const vira = P.suave(2.2, 3.8, t); Ni.obj.rotation.y = Math.PI - 1.15 * vira;                // vira devagar pros olhos
+    Ni.obj.updateMatrixWorld(true);
+    // ARMA + MÃO (refeito: antes a pistola ficava "colada" por fora da camisa e girava solta na mão)
+    //  · no cós: vertical, CANO PRA BAIXO dentro da calça, o cabo pra fora logo abaixo da barra da camisa, encostado nas costas
+    //  · a mão direita vai até o CABO (1,4–2,0), fecha nele (2,0–2,15) e puxa um pouco pra cima (2,15–2,5), ficando atrás das costas
+    //  · na mão: o cabo assentado na PALMA (eixo do cabo = linha dos nós dos dedos), o cano segue o antebraço
+    const r = Ni.obj.rotation.y, fr = v3(Math.sin(r), 0, Math.cos(r)), di = v3(-Math.cos(r), 0, Math.sin(r));
+    const W = n => Ni.osso(n).getWorldPosition(v3()), quadril = W('spine');
+    const cabo0 = quadril.clone().addScaledVector(fr, -CF).addScaledVector(di, CD).add(v3(0, CY, 0));          // ponto do cabo no cós
+    const costas = P.suave(1.4, 2.0, t), pega = P.suave(2.0, 2.15, t), puxa = P.suave(2.15, 2.5, t);
+    const caboAlvo = cabo0.clone().add(v3(0, .045 * puxa, 0)).addScaledVector(fr, -.02 * puxa);
+    if (costas > 0) { const F0 = W('f_middle.01.R').sub(W('hand.R')).normalize(), mao0 = W('hand.R');
+      Ni.modelo.alcancar('R', mao0.lerp(caboAlvo.clone().addScaledVector(F0, -.05), costas).toArray(), di.clone().multiplyScalar(.9).addScaledVector(fr, -.6).add(v3(0, -.2, 0)).toArray(), .02);
+      V.punho(Ni, 'R', .3 * costas + .7 * pega); }
+    if (t > 4.4) V.girar(Ni, 'spine.005', [1, 0, 0], .06 * Math.sin(t * 23) * .3);              // tremendo de leve
+    Ni.obj.updateMatrixWorld(true);
+    { const qCos = baseQ(v3(0, -1, 0), di.clone().negate());                                    // no cós: cano pra baixo, ferrolho virado pro lado esquerdo
+      const F = W('f_middle.01.R').sub(W('hand.R')).normalize(), K = W('f_pinky.01.R').sub(W('f_index.01.R')).normalize();
+      const Fa = W('hand.R').sub(W('forearm.R')).normalize(), L = Fa.clone().addScaledVector(K, -Fa.dot(K));
+      const qMao = baseQ(L, K.clone().negate()), palma = W('hand.R').addScaledVector(F, .045);
+      const ank = cabo0.clone().lerp(palma, pega), qa = qCos.clone().slerp(qMao, pega);
+      arma.quaternion.copy(qa); arma.position.copy(ank).sub(GRIP.clone().applyQuaternion(qa)); }
+    const pis = Math.floor(t * 30) === 165;                                                      // uma piscada
+    Me.pose('idle', t * .4); olhos.acender(pis ? 0 : P.suave(2.6, 3.2, t), S.camera);
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
+    else if (t < 2.2) { const u = P.suave(0, 2.2, t); cam([3.0, P.lerp(1.45, 1.25, u), P.lerp(11.6, 11.0, u)], [1.5, P.lerp(1.15, .95, u), 9.4], P.lerp(40, 34, u)); }   // por trás: a pistola no cós; a mão vai até ela
+    else if (t < 3.4) cam([3.4, 1.3, 7.2], [1.5, 1.4, 9.4], 36);                                  // vira a cabeça
+    else if (t < 4.5) cam([3.0, 1.2, 11.0], [1.5, .98, 9.4], 30);                                  // de lado/por trás: ele encara a mata com a mão no cabo
+    else if (t < 5.4) cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], 20);                       // por cima do ombro: os olhos na mata
+    else if (t < 7.2) { const u = P.suave(5.4, 7.2, t); cam([P.lerp(2.9, 2.6, u), 1.48, P.lerp(10.7, 10.45, u)], [1.55, 1.42, 9.4], P.lerp(30, 22, u)); }   // close no rosto
+    else { const u = P.suave(7.2, 9, t); cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], P.lerp(16, 6.5, u)); }                                    // de volta: continuam lá
+  };
+};
+</script></body></html>

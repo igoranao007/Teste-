@@ -1,0 +1,55 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 70 · "MALDITOS, ELES ME ACHARAM!" (nova, 8 s): continua a 69. A sala vermelha da SIRENE girando, a cadeira tombada;
+     o Igor no chão (de bruços) levanta a cabeça e grita — ele NÃO fala "Dom" (pra não revelar). A câmera foca nele SE LEVANTANDO
+     (animação m_get_up no corpo novo do Igor, tools/animar_elenco_v2.sh) e ele já se vira pra porta. ?cam= força uma câmera. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:8}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as T from '../../lib/tgp.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, Y, pc, rot, ANG } = sala, qs = new URLSearchParams(location.search), camQ = qs.get('cam')?.split(',').map(Number);
+  await E.computadorNovo(sala);
+  I.girar(1); I.obj.visible = false;                                                // o Igor sentado sai: entra o corpo com as animações (v2)
+  // a cadeira continua tombada como ficou na 69
+  const piv = new THREE.Group(); piv.position.set(...rot(0, 0, -.42)); cena.add(piv); cena.updateMatrixWorld(true);
+  if (sala.cadeira) piv.attach(sala.cadeira); piv.quaternion.setFromAxisAngle(new THREE.Vector3(...rot(1, 0, 0)).normalize(), -1.42);
+  const I2 = await T.igor({ anim: true }); cena.add(I2.obj);
+  const INI = [-1.05, 0, -1.02], RUMO = Math.PI / 2;                                // de bruços no chão entre a cadeira tombada e a parede; o levantar anda pra +x
+  I2.obj.position.set(...INI); I2.obj.rotation.y = RUMO;
+  // o monitor continua com o chiado amarelo
+  const monitor = t => { const x = pc.ctx, W = pc.cv.width, H = pc.cv.height, r = P.rng(Math.floor(t * 30) + 9);
+    for (let i = 0; i < W * H / 3; i++) { const v = 90 + r() * 165; x.fillStyle = `rgb(${v | 0},${(v * .84) | 0},${(v * .1) | 0})`; x.fillRect(Math.floor(r() * W), Math.floor(r() * H), 1, 1); } pc.tex.needsUpdate = true; };
+  const sir = F.camada('background:radial-gradient(circle at 50% 45%, rgba(255,20,10,0) 35%, rgba(255,20,10,.85) 100%)');
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const LEG = E.legendas([[0.5, 2.3, 'IGOR', 'Malditos, eles me acharam!']]);   // prévia: falas novas/trocadas (as vozes vêm na etapa de áudio)
+  S.update = t => { LEG(t);
+    const gira = (Math.sin(t * 9.5) + 1) / 2;
+    P.luz({ keyDir: [Math.cos(t * 4.7), .4, Math.sin(t * 4.7)], keyCor: '#' + new THREE.Color('#ff2a14').multiplyScalar(.35 + .9 * gira).getHexString(), fillDir: [...rot(0, .3, -1)], fillCor: '#4a3a08', amb: '#' + new THREE.Color('#1a0604').lerp(new THREE.Color('#4a2418'), P.suave(4, 6, t)).getHexString() });
+    sir.style.opacity = (.12 + .32 * gira).toFixed(2); monitor(t);
+    // levantar (clipe m_get_up a partir de 0,4 s); antes disso, de bruços (1º quadro do clipe), cabeça erguendo pro grito
+    const k = Math.max(0, t - .4), D = I2.corpo.dur('m_get_up');
+    if (k < D - .2) I2.corpo.clip('m_get_up', Math.min(k * 1.05, D - .25));
+    else { I2.corpo.clip('m_idle_alert', k - D); }
+    I2.obj.position.y = .07 * (1 - P.suave(1.8, 3.4, k));                        // deitado: o rosto/peito não afunda no piso
+    I2.obj.updateMatrixWorld(true); I2.assentar();
+    const grito = P.suave(.4, .6, t) * (1 - P.suave(1.9, 2.3, t)), boca = grito * (.6 + .4 * Math.sin(t * 17));
+    I2.animar(t, { boca, pisca: 0 });
+    // câmera: rente ao chão no rosto dele → sobe acompanhando a cabeça até ele ficar de pé
+    // câmera NA FRENTE DO ROSTO: direção bacia → cabeça (deitado) e, de pé, a frente do corpo; fica no vão entre a mesa e a parede
+    const cab = I2.cabeca.getWorldPosition(new THREE.Vector3()), bac = I2.corpo.osso('spine').getWorldPosition(new THREE.Vector3()), u = P.suave(2.4, 5.6, t);
+    const d = cab.clone().sub(bac); d.y = 0; const fr = I2.corpo.osso('spine.003').getWorldDirection(new THREE.Vector3()); fr.y = 0;
+    const dir = (d.length() > .25 ? d : fr).normalize(), lado = new THREE.Vector3(-dir.z, 0, dir.x);
+    const p = cab.clone().addScaledVector(dir, P.lerp(.75, 1.25, u)).addScaledVector(lado, .3); p.y = P.lerp(.28, 1.42, u);
+    p.x = P.clamp(p.x, -1.0, 1.0); p.z = P.clamp(p.z, -1.38, -.12);
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]); else cam(p.toArray(), [cab.x, cab.y - .03, cab.z], P.lerp(40, 44, u));
+  };
+};
+</script></body></html>

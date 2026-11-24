@@ -178,7 +178,7 @@ esticaram > 2,2× → acessórios presos no osso.
 
 ## 10. PLANO PRA CONTINUAR (ordem combinada)
 **Etapa A — terminar as animações**
-1. Mapear os ossos de **Igor, Entrada, Corsa e Dod** (esqueletos diferentes) e acrescentar o mapa no `animar_bvh.py` (`MAP_*`), aplicar o mesmo
+1. ✅ **FEITO (24/11)**: TODO o elenco tem as 49 animações novas (Igor, Dod, Entrada, Corsa, Zangão ×2, Phantom ×2, Metalis, Oliveira — ver ASSETS.md e `tools/animar_elenco_v2.sh`). Texto antigo: Mapear os ossos de **Igor, Entrada, Corsa e Dod** (esqueletos diferentes) e acrescentar o mapa no `animar_bvh.py` (`MAP_*`), aplicar o mesmo
    conjunto `u_`/`m_`, `aterrar.py`, `qa_animacoes.py`, folha visual, exportar `_v2` e ligar no motor sem apagar os antigos.
 2. Clipes extras que as cenas pedem: Igor caindo com a cadeira (knockdown + get_up), apertar botão (Interact), Corsa clicando no mouse
    (Sitting_Idle + mão), Zangão/Entrada comendo sentados (Sitting_Idle + braço), Dod digitando/escrevendo, todos virando pro telão (turn_*).
@@ -205,7 +205,8 @@ esticaram > 2,2× → acessórios presos no osso.
 música, mixagem, créditos (incluir os créditos CC BY dos sons e o aviso de produção independente de `DIRETRIZES_PRODUCAO.md`), render final.
 
 **Pendências abertas com o diretor**: título novo da minissérie (se mudar de novo), falas antigas que mudam por causa do grupo Dom,
-decisão sobre Phantom/Metalis/Zangão/Oliveira, licenças dos pacotes "sem licença explícita".
+licenças dos pacotes "sem licença explícita".
+(Phantom/Metalis/Zangão/Oliveira: **sem pendência** — seguem com os modelos atuais, ver MINISSERIE_NOTAS §7.)
 
 ---
 

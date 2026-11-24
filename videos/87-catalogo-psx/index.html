@@ -1,0 +1,17 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- Catálogo dos objetos PSX convertidos (material/modelos/psx/<p>.glb, tools/blender/psx_prop.py): ?p=<nome> — enquadra pelo tamanho -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as V from '../../lib/v4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), nome = q.get('p') || 'old_bed_frame';
+  const S = P.palco({ fov: 30, cam: [0, 1, 5], alvo: [0, 1, 0], fundo: '#1a1a1c', luz: { keyDir: [-.4, .7, .8], keyCor: '#f2efe6', fillDir: [.8, .2, .3], fillCor: '#6a7078', amb: '#626a66' } });
+  const g = await V.peca('material/modelos/psx/' + nome + '.glb', { tex: 256, verde: false }); S.scene.add(g);
+  const b = new THREE.Box3().setFromObject(g), c = b.getCenter(new THREE.Vector3()), r = b.getSize(new THREE.Vector3()).length() * .5;
+  S.scene.add(P.caixa(r * 6, .01, r * 6, P.mat({ cor: '#2a2a2c' }), { pos: [0, -.005, 0] }));
+  S.update = t => { const d = r / Math.tan(15 * Math.PI / 180) * 1.1; S.camera.position.set(c.x + d * .55, c.y + d * .35, c.z + d * .75); S.camera.lookAt(c); };
+};
+</script></body></html>

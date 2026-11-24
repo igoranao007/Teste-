@@ -46,3 +46,111 @@ para **Adryan, Gusta, Nicolas, Frentista, Dom, Luan**: as 10 antigas + 49 novas.
   sidestep_dodge, hit_react_face, stagger_backward, knockdown_fall, get_up, block_high.
 - Pipeline: `animar_bvh.py` (UAL → locomoção → luta) → `aterrar.py` (pés no chão) → `qa_animacoes.py` → `exportar_glb.py`.
 - QA: 57/59 OK em todos; u_Punch_Jab e u_Sprint_Loop marcados só por serem golpes/passos rápidos (conferido no visual: sem defeito).
+
+## Animações aplicadas (24/11, 2ª rodada) — o RESTO do elenco
+Mesmas 49 animações (27 `u_` + 22 `m_`) com `bash tools/animar_elenco_v2.sh <origem> <saida>` (retarget → aterrar → QA → GLB; nunca sobrescreve a origem):
+| Personagem | Arquivo novo (fora do git) | No motor | QA |
+|---|---|---|---|
+| Igor (corpo; cabeça de caracal do motor) | `personagens/igor/igor_corpo_anim_v2.glb` | `T.igor({ anim: true })` → `I.corpo.clip(nome, t)` + `I.assentar()` | 47/49 |
+| Dod (farda V4; cabeça do motor) | `personagens/dod/modelo/dod_farda_v4_anim_v2.glb` | `T.dod({ anim: true })` → `D.corpo.clip(nome, t)` + `D.assentar()` | 47/49 |
+| Entrada | `personagens/entrada/entrada_militar_anim_v2.glb` | `E4.ator('entrada')` | 47/49 |
+| Corsa | `personagens/corsa/corsa_militar_anim_v2.glb` | `E4.ator('corsa')` | 47/49 |
+| Zangão original / militar | `personagens/zangao/zangao_{original,militar}_anim_v2.glb` | `E4.ator('zangao' / 'zangao_militar')` | 47/49 |
+| Phantom clássico / amarelo | `personagens/phantom/phantom_{classica,amarela}_anim_v2.glb` (10 antigas + 49) | `E4.ator('phantom' / 'phantom_amarelo')` | 57/59 |
+| Metalis (esqueleto Hips/LeftArm…: nomes traduzidos no script) | `personagens/metalis/metalis_final_anim_v2.glb` (10 + 49) | `E4.ator('metalis')` | 57/59 |
+| Oliveira (halo/engrenagens girando de novo em todas) | `modelos-pagos/simple_character_psx/oliveira_anim_v2.glb` (10 + 49) | `E4.ator('oliveira')` | 57/59 |
+Os 2 avisos em todos são `u_Punch_Jab` e `u_Sprint_Loop` (golpe/passada rápidos — sem defeito no visual). O QA agora ignora `halo`/`engr*` (giram de propósito).
+Folha no motor do elenco inteiro: `material/producao/minisserie/folha_elenco_v2.jpg` (`PAGINA=88-folha-v2 node tools/folha_elenco.mjs …` + `tools/montar_folha_elenco.py`).
+Bibliotecas: `material/modelos/ual/` (Quaternius, CC0) e `material/modelos/motifect/` (sem redistribuir) — fora do git.
+
+## Pacotes baixados — 2ª leva (24/11, pra deixar o episódio vivo)
+Tudo LOCAL (fora do git). ★ = crédito obrigatório. Rebaixar: `python3 tools/oga.py material/modelos/oga <slug>` ·
+`python3 tools/itch.py material/modelos/itch/minisserie <url>` · `python3 tools/polyhaven.py material/modelos/polyhaven <id>`.
+
+### Sons e músicas — OpenGameArt (`material/modelos/oga/<slug>/LICENCA.txt` em cada pasta)
+| Pacote — autor | Licença |
+|---|---|
+| 100 CC0 metal and wood SFX — rubberduck (`oga/100-cc0-metal-and-wood-sfx`) | CC0 |
+| 100 CC0 SFX #2 — rubberduck (`oga/100-cc0-sfx-2`) | CC0 |
+| 100 CC0 SFX — rubberduck (`oga/100-cc0-sfx`) | CC0 |
+| 25 CC0 bang / firework SFX — rubberduck (`oga/25-cc0-bang-firework-sfx`) | CC0 |
+| 50 CC0 Sci-Fi SFX — rubberduck (`oga/50-cc0-sci-fi-sfx`) | CC0 |
+| 7 Eating Crunches — StarNinjas (`oga/7-eating-crunches`) | CC0 |
+| 75 CC0 breaking / falling / hit sfx — rubberduck (`oga/75-cc0-breaking-falling-hit-sfx`) | CC0 |
+| ★ 9 explosion sounds — Unnamed (`oga/9-explosion-sounds`) | CC-BY-SA 3.0 |
+| ★ 9 sci-fi computer sounds and beeps — qubodup (`oga/9-sci-fi-computer-sounds-and-beeps`) | CC-BY 3.0 |
+| Car engine start 01 — looneybits (`oga/car-engine-start-01`) | CC0 |
+| Cave In — StarNinjas (`oga/cave-in`) | CC0 |
+| Crickets Ambient Noise - loopable — Wolfgang_ (`oga/crickets-ambient-noise-loopable`) | CC0 |
+| cutlery sounds — TinyWorlds (`oga/cutlery-sounds`) | CC0 |
+| Door Lock Sounds — Cough-E (`oga/door-lock-sounds`) | CC0 |
+| Door Open, Door Close Set — qubodup (`oga/door-open-door-close-set`) | CC0 |
+| ★ Double Click Mouse Sfx Sound Effect —  (`oga/double-click-mouse-sfx-sound-effect`) | CC-BY 4.0 |
+| ★ Facility Alert Siren — FiveBrosStopMosYT (`oga/facility-alert-siren`) | CC-BY 3.0, CC-BY 4.0, OGA-BY 3.0 |
+| Factory ambiance — yd (`oga/factory-ambiance`) | CC0 |
+| Gunshot Sounds — Tabasco (`oga/gunshot-sounds`) | CC0 |
+| Heartbeat sounds — bart (`oga/heartbeat-sounds`) | CC0 |
+| Horror Atmosphere — SubspaceAudio (`oga/horror-atmosphere`) | CC0 |
+| ★ Imminent Threat — Matthew Pablo (`oga/imminent-threat`) | CC-BY-SA 3.0 |
+| Keyboard Soundpack #1 [Typing and Single Keystrokes] — unicaegames (`oga/keyboard-soundpack-1-typing-and-single-keystrokes`) | CC0 |
+| Metal Interactions — qubodup (`oga/metal-interactions`) | CC0 |
+| mouse click — LFA (`oga/mouse-click`) | CC0 |
+| Night of the Streets [Horror/Suspense] — nene (`oga/night-of-the-streets-horrorsuspense`) | CC0 |
+| ★ Office Chair Roll Sfx Sound Effect —  (`oga/office-chair-roll-sfx-sound-effect`) | CC-BY 4.0 |
+| ★ Perpetual Tension — Zander Noriega (`oga/perpetual-tension`) | CC-BY 3.0 |
+| ★ Sci-Fi Drone Loop — jdagenet (`oga/sci-fi-drone-loop`) | CC-BY 3.0 |
+| Short alarm — yd (`oga/short-alarm`) | CC0 |
+| Sirens and Alarm Noise — aquinn (`oga/sirens-and-alarm-noise`) | CC0 |
+| Sirens in Darkness — cynicmusic (`oga/sirens-in-darkness`) | CC0 |
+| ★ static noise similar to an untuned tv (also known as white noise) — thebardofblasphemy (`oga/static-noise-similar-untuned-tv-also-known-white-noise`) | GPL 2.0 |
+| ★ Super Foley Pack — dklon (`oga/super-foley-pack`) | CC-BY 3.0 |
+| ★ Wooden Debris — spookymodem (`oga/wooden-debris`) | CC-BY 3.0 |
+
+### Modelos 3D — Poly Haven (CC0, `material/modelos/polyhaven/`) — 50 modelos, precisam virar PSX (reduzir + textura 128–256)
+- **Base de Kessinburgh**: old_military_crate, wooden_military_crate, ammo_box, vintage_radio_transceiver (estação do Dod), metal_office_desk,
+  steel_frame_shelves_01/02, worn_metal_rack, portable_generator, metal_tool_chest, metal_jerrycan_green, russian_food_cans_01, can_rusted,
+  power_box_01, hanging_industrial_lamp, industrial_wall_lamp, plastic_monobloc_chair_01, metal_stool_01, service_pistol, portable_searchlight,
+  Megaphone_01, concrete_road_barrier
+- **Alojamento do posto**: old_bed_frame, drawer_cabinet, WoodenChair_01, wall_clock, metal_trash_can, desk_lamp_arm_01, cardboard_box_01,
+  rollershutter_door, utility_box_01
+- **Casa do Phantom**: wooden_bookshelf_worn, book_encyclopedia_set_01, hanging_picture_frame_01/02/03 (capas Star Comics),
+  standing_picture_frame_01/02 (porta-retrato), ArmChair_01, Sofa_01, side_table_01, binder_notebook, Rockingchair_01 (cadeira quase caindo),
+  ceiling_fan, boombox, portable_cassette_player
+- **Base do Dom**: modern_arm_chair_01, industrial_coffee_table · **Pedrinha do Metalis**: rock_07, rock_09
+
+### Modelos 3D — itch.io (`material/modelos/itch/minisserie/`)
+| Pacote | Licença | Uso |
+|---|---|---|
+| PSX Weapons & Ammo Free Sampler + Aftermath sampler — the-atr0city | CC0 | armas/munição na base |
+| Low Poly PSX Weapons Pack — juggypuggy | CC0 | armas na base |
+| PSX Style Low Poly Couch — duhgless | CC0 | sofá (casa do Phantom / base do Dom) |
+| PSX 90s Home Interior Props (amostra) — gmingassets | uso comercial, crédito apreciado | casa do Phantom, alojamento |
+| PSX Books — geouug | página cita CC-BY e domínio público — **conferir** | livros da casa do Phantom |
+| PSX Bed — sakepella · PSX Household Items — rubber-ducky-games · PSX Monitor — itsmonss | **sem licença explícita — conferir** | alojamento, base |
+| PSX Barrel, Jerry Can, Wooden Box, VHS, TV, Air Conditioner, Vending Machine — iishazlyii | **sem licença explícita — conferir** | posto, base |
+| ★ Old Locations — Horror Ambiences — canvas-coven (`itch/minisserie_som/`) | CC BY 4.0 | ambiências |
+Pagos (não baixados): bunkers militares (lowbitlab, harning, retroassetslibrary), armários (tillion, pomarf), móveis (vertexvandal, gravyassets,
+hutski3d), entulho (aquicor), PSX Mega Pack 1/2 (pizzadoggy), ambiências de terror (cyberleaf, lowbitlab, chuckyassets, gravity-sound…).
+Sketchfab: o token salvo no ambiente está **inválido** (401) — trocar em Configurações do ambiente se quiser usar.
+
+## 3ª leva (24/11) — carros e armas
+- **Carros: PSX Style Cars — GGBot (CC0)** (`material/modelos/itch/ggbot/`, GLBs em `material/modelos/psx/ggbot_car1..8.glb`).
+  O sedã do filme ganhou a APARÊNCIA do carro 2 (textura preta) assada na geometria do sedã antigo (que tem interior, portas,
+  vidro que desce e volante): `tools/blender/sedan_ggbot.py` → `material/modelos/itch/carros/hey-sedan-ggbot.glb` (local).
+  O pacote antigo do sedã (heyheythere, PSX Vehicles) virou PAGO — a textura original `atlas.png` não existe mais aqui.
+- **Armas (itch)** em `material/modelos/itch/armas/` (convertidas pra PSX em `material/modelos/psx/arma_*.glb`, fora do git):
+| Pacote | Licença | Itens |
+|---|---|---|
+| PSX Weapons Pack — yugg0 | sem licença explícita — conferir | Glock-18, Remington 870, Remington M700, MAC-11, FN FAL |
+| M1 Garand PSX — yugg0 | uso em projetos comerciais | M1 Garand |
+| AK47 — mcsteeg | uso comercial | AK-47 |
+| PSX Guns Ammo — mcsteeg | sem licença explícita — conferir | caixas de munição |
+| Retro AK-47 — bricchi-games | sem licença explícita | (textura faltando no pacote) |
+| PSX firearms basic kit — codecola | sem licença explícita | pistola, revólver, escopeta, MP, AK, fuzil, granada de fumaça |
+| PSX Assault Rifles — doctor-sci3nce | página cita CC-BY (crédito) — conferir | AK, AKM, AK74U, RPK, G3, FAL, M16A2 |
+| PSX Rifle — puszke · Guns — maxorbie · M16 — libernoidev | sem licença explícita — conferir | fuzis, armas variadas |
+| Beretta 92 — sotn (já listada) | sem licença explícita — conferir | pistola do Nicolas (`material/modelos/psx/beretta.glb`) |
+Pagos (não baixados): postdev, mcsteeg (handgun/shotgun/sniper/uzi), crimsongcat, wupss, primalugly, lothbroklabs, amos-makes, floreswa, redpolar…
+
+# ATENÇÃO (24/11): os arquivos referencia/mapa_ilha_barloth.png e referencia/logo_star_comics.png estão com os NOMES TROCADOS (o "mapa" é o logo e vice-versa).
+# Use mapa_ilha_barloth_v2.png (o mapa) e logo_star_comics_v2.png (o logo). Os originais ficam (regra: nada é apagado).

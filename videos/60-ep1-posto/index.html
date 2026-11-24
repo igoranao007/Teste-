@@ -1,0 +1,177 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 60 · POSTO (versão nova do plano 43 — o 43 fica intacto): igual ao v4 até o pagamento; depois o frentista
+     NÃO some: anda até o ALOJAMENTO reformulado (lib/ep1.js), abre a porta, entra e ela bate. Enquanto isso o METALIS (escondido no
+     escuro) joga uma PEDRINHA que bate no teto do carro; o Adryan se assusta, abre a porta e SAI pra verificar (continua na cena 61).
+     ?cam=x,y,z,ax,ay,az,fov força uma câmera (inspeção). -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:37}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E from '../../lib/ep1.js';
+import * as E4 from '../../lib/elenco4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 42, perto: 14, longe: 70, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
+  const C = await V.montarPosto(S), { D, Fr, bico } = C, fala = await V.vozes();
+  const AL = await E.alojamento(C), q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
+  // EP1: Adryan DE PÉ (fora do carro) — o de dentro (sentado, escala do carro) some no corte em que ele já está do lado de fora
+  const AdF = await E4.ator('adryan'); S.scene.add(AdF.obj); AdF.obj.visible = false;
+  const pedra = await E.prop('rock_09', { altura: .06 }); S.scene.add(pedra); pedra.visible = false;
+  const PEDRA = [[9.2, 1.1, -5.6], [.15, 1.43, -.05], [-1.4, .02, 1.6]];          // mão do Metalis (no escuro, à direita da lojinha) → teto do carro → chão
+  const FORA = [AL.fora[0], AL.fora[2]], SOLEIRA = [AL.soleira[0], AL.soleira[2]], DENTRO = [AL.dentro[0], AL.dentro[2]];
+  const MESA = [AL.mesa[0], AL.mesa[2]];
+  const AD_PORTA = [.55, -1.55], AD_TRAS = [-1.15, -1.62];
+  const JANELA = [.4, -1.7], PB = [-2.5, -1.92], TAMPA = [-1.95, -1.46], v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const { car } = D, Me = C.Me; Me.obj.visible = false;
+  const notas = V.dinheiro('notas'); S.scene.add(notas);
+  const CAP = v3(-1.85, .88, -.95);                                  // boca do tanque (tampa traseira, lado do motorista)
+  const ROT_BOMBA = Math.atan2(bico.suporte.x - PB[0], bico.suporte.z - PB[1]), ROT_CARRO = 0;
+  const angLerp = (a, b, u) => { let d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return a + d * u; };
+  // BICO (referência: fotos de abastecimento): em uso o eixo do corpo do bico (Y do modelo) vira a FRENTE (mangueira → ponteira)
+  // e o lado do gatilho (−Z do modelo) fica pra BAIXO; a mão segura o cabo por cima, dedos envolvendo o gatilho.
+  const tampa = V.tampaTanque(car), K = bico.scale.x, GRIP = v3(0, .09, -.05), PONTA = v3(0, .38, -.117), UP = v3(0, 1, 0);
+  const frente = r => v3(Math.sin(r), 0, Math.cos(r)), direita = r => v3(-Math.cos(r), 0, Math.sin(r));
+  const poseBico = (q, gripW) => ({ q, p: gripW.clone().sub(GRIP.clone().multiplyScalar(K).applyQuaternion(q)) });
+  const noSuporte = (sobe = 0) => ({ q: new THREE.Quaternion(), p: bico.suporte.clone().add(v3(.1 * sobe, .16 * sobe, 0)) });   // sobe: tirar/pendurar (sai pra fora e pra cima do gancho)
+  const carregado = () => { const r = Fr.obj.rotation.y, f = frente(r), d = direita(r);
+    const F = f.clone().multiplyScalar(.95).add(v3(0, -.3, 0)), G = Fr.obj.position.clone().addScaledVector(d, .24).addScaledVector(f, .1).add(v3(0, .78, 0)); return poseBico(V.base(F, UP), G); };   // carregado na horizontal, ponteira um pouco pra baixo (pulso reto, braço solto)
+  const noTanque = (t, fundo = 1) => { const F = v3(.0, -.2, 1), q = V.base(F, UP), ponta = PONTA.clone().multiplyScalar(K).applyQuaternion(q);
+    const alvo = CAP.clone().addScaledVector(F.clone().normalize(), P.lerp(-.13, .035, fundo) + .004 * Math.sin(t * 2.1)); return { q, p: alvo.sub(ponta) }; };
+  const mix = (A, B, u) => ({ p: A.p.clone().lerp(B.p, u), q: A.q.clone().slerp(B.q, u) });
+  const PEGA_D = v3(bico.suporte.x - PB[0], -.35, bico.suporte.z - PB[1]).normalize();          // direção do braço até o cabo, no gancho
+  S.update = t => {
+    // carro chegando e parado
+    const ch = P.suave(0, 5, t); C.naCurva(C.curva, 1 - (1 - P.clamp(t / 5)) ** 2.2);
+    const v = fala('43', t, 'adryan');
+    // Adryan: abaixa o vidro (botão na porta) quando o frentista chega; paga com notas tiradas do bolso
+    car.janela(P.suave(5.1, 6.0, t));
+    const bolso = P.suave(19.8, 20.2, t) * (1 - P.suave(20.4, 20.8, t)), fora = P.suave(21.9, 22.5, t) * (1 - P.suave(23.4, 23.9, t));
+    D.atualizar(t, { giro: t < 5 ? .25 * Math.sin(t * .9) : 0, falaAd: v, janela: P.clamp((t - 4.8) / 1.4), bolso, maoFora: fora,
+      olhaAd: .75 * (P.suave(5.3, 5.8, t) * (1 - P.suave(11.4, 11.9, t)) + P.suave(14, 14.4, t) * (1 - P.suave(19.8, 20.1, t)) + P.suave(21.4, 21.8, t) * (1 - P.suave(23.6, 24, t))) - .25 * P.suave(19.8, 20.1, t) * (1 - P.suave(20.4, 20.7, t)) });
+    // FRENTISTA: bomba → janela (5–7) · janela → bomba (11,2–12,3) · tira o bico (12,6–13,5) · tampa (13,5–14,3) · abastece (14,8–18,3)
+    //            · devolve o bico (18,7–19,9) · janela (19,9–20,9) · recebe e guarda no bolso (20,9–21,7) · vai embora (21,9–)
+    // FRENTISTA (sequência completa, como num posto real): vai até a bomba (11,2–12,3) · estende o braço e pega o cabo (12,6–13,15)
+    //   · tira o bico do gancho, pra cima e pra fora (13,15–13,6) · leva até a traseira do carro (13,6–14,3) · abre a portinhola (14,3–14,65)
+    //   · encaixa o bico (14,65–15,15) · segura enquanto abastece (até 18,3) · tira o bico (18,3–18,7) · fecha a portinhola (18,7–19,0)
+    //   · volta à bomba (19,0–19,95) · pendura o bico (20,2–20,6) · solta (20,6–20,85) · janela (20,85–23,0) · recebe (23,1–23,45) · bolso (23,5–24)
+    let anda = false;
+    if (t < 5) { Fr.obj.position.set(1.05, 0, -3.45); Fr.obj.rotation.y = -1.2; Fr.pose('idle', t); }
+    else if (t < 9.6) { anda = V.caminhar(Fr, [1.05, -3.45], JANELA, t, 5, 7, { de: -1.2 }); if (!anda) { Fr.obj.rotation.y = angLerp(Fr.obj.rotation.y, 0, P.suave(7, 7.4, t)); Fr.pose('idle', t); } }
+    else if (t < 13.9) { anda = V.caminhar(Fr, JANELA, PB, t, 9.6, 11.9, { de: 0 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(PB[0] - JANELA[0], PB[1] - JANELA[1]), ROT_BOMBA, P.suave(11.9, 12.35, t)); if (t > 13.35) Fr.obj.rotation.y = angLerp(ROT_BOMBA, ROT_CARRO, P.suave(13.35, 13.9, t)); Fr.pose('idle', t); } }
+    else if (t < 19.0) { anda = V.caminhar(Fr, PB, TAMPA, t, 13.9, 14.5, { de: ROT_CARRO }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(TAMPA[0] - PB[0], TAMPA[1] - PB[1]), ROT_CARRO, P.suave(14.5, 14.85, t)); Fr.pose('idle', t * .6); } }
+    else if (t < 20.85) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.25, 20.05, { de: ROT_CARRO - .9 }); if (!anda) { const rTP = Math.atan2(PB[0] - TAMPA[0], PB[1] - TAMPA[1]);   /* vira ~50° parado depois de fechar a portinhola, e anda */
+      Fr.obj.rotation.y = t < 19.25 ? ROT_CARRO - .9 * P.suave(18.98, 19.28, t) : angLerp(rTP, ROT_BOMBA, P.suave(20.05, 20.25, t)) - .8 * P.suave(20.5, 20.85, t); Fr.pose('idle', t); } }
+    else if (t < 24.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.85, 23.0, { de: ROT_BOMBA - .8 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(JANELA[0] - PB[0], JANELA[1] - PB[1]), 0, P.suave(23.0, 23.3, t)); Fr.pose('idle', t); } }
+    // EP1 — vai pro ALOJAMENTO: janela → porta (24,4–28,0) · vira pra porta, pega a maçaneta, abre (28,0–29,1) · entra (29,1–30,5)
+    //       · a porta bate (30,7–31,1) · lá dentro anda até a mesa e senta (31,2–34,5) — dá pra ver pela janela iluminada
+    else if (t < 28.0) { anda = V.caminhar(Fr, JANELA, FORA, t, 24.4, 28.0, { de: 0 }); }
+    else if (t < 29.1) { Fr.obj.position.set(FORA[0], 0, FORA[1]); Fr.obj.rotation.y = angLerp(Math.atan2(FORA[0] - JANELA[0], FORA[1] - JANELA[1]), Math.PI, P.suave(28.0, 28.4, t)); Fr.pose('idle', t); }
+    else if (t < 31.2) { anda = V.caminhar(Fr, FORA, DENTRO, t, 29.1, 30.2, { de: Math.PI }); if (!anda) { Fr.obj.rotation.y = Math.PI; Fr.pose('idle', t); } }
+    else if (t < 33.3) { anda = V.caminhar(Fr, DENTRO, MESA, t, 31.2, 33.3, { de: Math.PI }); }
+    else { Fr.obj.position.set(MESA[0], 0, MESA[1]); Fr.obj.rotation.y = angLerp(Math.atan2(MESA[0] - DENTRO[0], MESA[1] - DENTRO[1]), .1, P.suave(33.3, 33.7, t)); const k = (t - 33.3); Fr.pose(k < Fr.dur('u_Sitting_Enter') ? 'u_Sitting_Enter' : 'u_Sitting_Idle_Loop', k < Fr.dur('u_Sitting_Enter') ? k : k - Fr.dur('u_Sitting_Enter')); }
+    Fr.obj.updateMatrixWorld(true);
+    const curva = P.suave(14.5, 15.0, t) * (1 - P.suave(18.6, 19.0, t));                       // inclina o tronco pra alcançar a traseira
+    if (curva > 0) { V.girar(Fr, 'spine.002', [1, 0, 0], .28 * curva); V.girar(Fr, 'spine.003', [1, 0, 0], .14 * curva); Fr.obj.updateMatrixWorld(true); }
+    // bico
+    let B;
+    if (t < 13.15) B = noSuporte();
+    else if (t < 13.4) B = noSuporte(P.suave(13.15, 13.4, t));
+    else if (t < 13.95) B = mix(noSuporte(1), carregado(), P.suave(13.4, 13.95, t));
+    else if (t < 14.85) B = carregado();
+    else if (t < 15.15) B = mix(carregado(), noTanque(t, 0), P.suave(14.85, 15.15, t));
+    else if (t < 18.3) B = noTanque(t, P.suave(15.15, 15.35, t));
+    else if (t < 18.45) B = noTanque(t, 1 - P.suave(18.3, 18.45, t));
+    else if (t < 18.75) B = mix(noTanque(t, 0), carregado(), P.suave(18.45, 18.75, t));
+    else if (t < 20.2) B = carregado();
+    else if (t < 20.45) B = mix(carregado(), noSuporte(1), P.suave(20.2, 20.45, t));
+    else if (t < 20.6) B = noSuporte(1 - P.suave(20.45, 20.6, t));
+    else B = noSuporte();
+    const arco = Math.sin(Math.PI * P.clamp((t - 14.85) / .3)) + Math.sin(Math.PI * P.clamp((t - 18.25) / .5));   // encaixando/tirando (0→1→0, sem tranco)
+    if (arco > 0) { const sp = Fr.osso('spine').getWorldPosition(v3()), dv = B.p.clone().sub(sp); dv.y = 0;          // o caminho do bico passa por fora da barriga
+      if (dv.length() > 1e-4) B.p.addScaledVector(dv.normalize(), .07 * arco); }
+    bico.position.copy(B.p); bico.quaternion.copy(B.q); bico.updateMatrixWorld(true); bico.obstaculos = [() => V.capsulasCorpo(Fr)]; bico.mangueira();   // a mangueira contorna o frentista
+    // mão direita: pegada orientada no cabo (palma por cima, dedos no gatilho) — a mão segue a orientação do bico
+    const pegaBico = P.suave(12.6, 13.15, t) * (1 - P.suave(20.6, 20.85, t));
+    if (pegaBico > 0) { const r = Fr.obj.rotation.y, U = v3(0, 0, 1).applyQuaternion(bico.quaternion), F = v3(0, 1, 0).applyQuaternion(bico.quaternion);
+      // no gancho o cabo fica de pé: a mão fecha nele como numa barra (dedos na horizontal, indicador pra cima);
+      // em uso: palma por cima, dedos descendo pela frente do cabo até o gatilho (pulso quase reto)
+      const uso = P.suave(13.4, 13.95, t) * (1 - P.suave(20.2, 20.5, t));
+      const alvoG = bico.localToWorld(GRIP.clone()), hor = alvoG.clone().sub(Fr.obj.position); hor.y = 0; hor.normalize();
+      const dedosGancho = hor, dedosUso = U.clone().negate().multiplyScalar(.8).addScaledVector(F, .45).addScaledVector(direita(r), -.2);
+      // pegada definida NO GANCHO (bico em pé = rotação identidade): dedos na direção do braço até o cabo, indicador pra cima;
+      // depois a mão gira junto com o bico (pegada rígida) — ao deitar o bico, a palma fica por cima e os dedos descem pro gatilho
+      const dd = PEGA_D.clone().applyQuaternion(bico.quaternion), ii = v3(0, 1, 0).applyQuaternion(bico.quaternion);
+      V.pegar(Fr, 'R', alvoG, dd, ii, direita(r).multiplyScalar(.8 + 1.6 * curva).add(v3(0, -.5 + .3 * curva, 0)).addScaledVector(frente(r), -.3), pegaBico, .85); }   /* inclinado: cotovelo mais pra fora */
+    // mão esquerda: abre e fecha a portinhola
+    tampa.abrir(P.suave(14.6, 14.82, t) * (1 - P.suave(18.78, 18.98, t)));
+    const maoTampa = P.suave(14.5, 14.65, t) * (1 - P.suave(14.82, 15.0, t)) + P.suave(18.55, 18.78, t) * (1 - P.suave(18.98, 19.15, t));
+    if (maoTampa > 0) { car.updateMatrixWorld(true); V.pegar(Fr, 'L', tampa.borda(), v3(0, -.3, 1), v3(0, 1, 0), [.8, -.5, -.2], maoTampa, .3); }
+    // pagamento: as notas saem do bolso do Adryan (19,6), vão pra janela, passam pra mão do frentista (21,2) e somem no bolso dele (21,7)
+    const pegaGrana = P.suave(23.0, 23.4, t) * (1 - P.suave(23.45, 23.7, t)), bolsoFr = P.suave(23.5, 23.75, t) * (1 - P.suave(23.8, 24, t));
+    if (pegaGrana > 0 || bolsoFr > 0) {
+      const h = Fr.osso('hand.R').getWorldPosition(v3()), mAd = D.Ad.osso('hand.L').getWorldPosition(v3());
+      const quadril = direita(Fr.obj.rotation.y).multiplyScalar(.27).addScaledVector(frente(Fr.obj.rotation.y), .02).add(v3(0, .92, 0)).add(Fr.obj.position);   // bolso DIREITO (antes: lado trocado, o braço cruzava o corpo)
+      const r = Fr.obj.rotation.y, k = Math.max(pegaGrana, bolsoFr);                           // pegada orientada com mistura (antes: orientação forçada no 1º quadro → salto)
+      V.pegar(Fr, 'R', mAd.clone().lerp(quadril, bolsoFr), frente(r).lerp(v3(0, -1, 0), bolsoFr).normalize(), v3(0, 1, 0).lerp(frente(r), bolsoFr).normalize(),
+        direita(r).multiplyScalar(.8).add(v3(0, -.5, 0)), k, .45);
+    }
+    notas.visible = t > 20.2 && t < 23.75;
+    if (t < 23.42) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
+    Me.obj.visible = false;
+    // ── EP1: porta do alojamento · pedrinha · Adryan sai do carro ──
+    AL.atualizar(t);
+    AL.porta(P.suave(28.45, 29.05, t) * (1 - P.suave(30.25, 30.6, t) ** 2));                 // abre devagar; FECHA com força (bate)
+    const maca = P.suave(28.15, 28.45, t) * (1 - P.suave(29.0, 29.3, t));                      // a mão direita vai na maçaneta e empurra
+    if (maca > 0 && t < 29.5) { const r = Fr.obj.rotation.y; V.pegar(Fr, 'R', AL.macaneta(), frente(r).add(v3(0, -.3, 0)).normalize(), v3(0, 1, 0), direita(r).multiplyScalar(.8).add(v3(0, -.6, 0)), maca, .8); }
+    // pedra: sai da mão do Metalis no escuro (30,55) → bate no teto (31,15) → quica e cai no chão (31,7)
+    pedra.visible = t > 30.55 && t < 37;
+    if (pedra.visible) { const [a, b, c] = PEDRA.map(x => v3(...x)); let p;
+      if (t < 31.15) { const u = (t - 30.55) / .6; p = a.clone().lerp(b, u); p.y += Math.sin(Math.PI * u) * 1.6; }
+      else if (t < 31.7) { const u = (t - 31.15) / .55; p = b.clone().lerp(c, u); p.y = P.lerp(b.y, c.y, u * u) + Math.sin(Math.PI * u) * .35; }
+      else p = c; pedra.position.copy(p); pedra.rotation.set(t * 9, t * 7, 0); }
+    // Adryan: susto (31,2) — olha pro teto e em volta; abre a porta (32,5–33,3); CORTE: já está do lado de fora (33,3)
+    const susto = P.suave(31.2, 31.45, t) * (1 - P.suave(32.3, 32.7, t)), volta = Math.sin(Math.max(0, t - 31.5) * 2.2) * P.suave(31.6, 31.9, t) * (1 - P.suave(32.2, 32.5, t));
+    if (t < 33.3) { V.girar(D.Ad, 'spine.005', [1, 0, 0], -.42 * susto); V.girar(D.Ad, 'spine.005', [0, 1, 0], .5 * volta); V.girar(D.Ad, 'spine.003', [1, 0, 0], -.08 * susto); }
+    car.abrirPorta(P.suave(32.55, 33.25, t));
+    const fora2 = t >= 33.3; D.Ad.obj.visible = !fora2; AdF.obj.visible = fora2;
+    if (fora2) {
+      const olhaTeto = Math.atan2(-AD_PORTA[0], -AD_PORTA[1]), escuro = Math.atan2(PEDRA[0][0] - AD_TRAS[0], PEDRA[0][2] - AD_TRAS[1]);
+      if (t < 34.1) { AdF.obj.position.set(AD_PORTA[0], 0, AD_PORTA[1]); AdF.obj.rotation.y = olhaTeto; AdF.pose('m_idle_alert', t - 33.3); }
+      else if (!V.caminhar(AdF, AD_PORTA, AD_TRAS, t, 34.1, 35.7, { de: olhaTeto, vel: .8 })) { AdF.obj.rotation.y = angLerp(Math.atan2(AD_TRAS[0] - AD_PORTA[0], AD_TRAS[1] - AD_PORTA[1]), escuro, P.suave(35.7, 36.3, t)); AdF.pose('m_idle_looking_around', t - 35.7); }
+      AdF.obj.updateMatrixWorld(true);
+      const cab = (t < 34.1 ? P.suave(33.3, 33.7, t) : 1 - P.suave(34.1, 34.5, t)) * -.45 + P.suave(34.9, 35.3, t) * (1 - P.suave(35.6, 35.9, t)) * -.35;   // olha o teto do carro (e a pedra no chão)
+      V.girar(AdF, 'spine.005', [1, 0, 0], cab);
+    }
+    // câmeras (nas tomadas pela janela, mais luz dentro do carro)
+    const janela = (t >= 15.4 && t < 17.4) || (t >= 18.6 && t < 20.0) || (t >= 20.9 && t < 24.4);
+    P.luz({ keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: janela ? '#5f8068' : '#2c4232', fillDir: [-.1, .2, -1], fillCor: janela ? '#6fae82' : '#1c5a30' });
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
+    else if (t < 5) cam([14, 6, 13], [P.lerp(-10, 0, ch), .8, P.lerp(7, -1, ch)], 40);
+    else if (t < 10.9) cam([1.35, 1.72, -3.55], [.2, 1.0, -.35], 36);                                          // por cima do ombro do frentista
+    else if (t < 14.3) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                     // estende o braço e tira o bico do gancho
+    else if (t < 15.4) cam([-1.05, 1.2, -1.85], [-1.85, .86, -.98], 42);                                     // abre a portinhola e encaixa o bico
+    else if (t < 16.6) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                        // Adryan pela janela
+    else if (t < 17.4) cam([1.4, 1.15, 1.75], [.25, .92, .35], 38);                                         // Nicolas imóvel com a maleta
+    else if (t < 18.6) cam([-3.3, 1.5, -.15], [-2.05, 1.25, -1.4], 40);                                      // frentista calado, abastecendo
+    else if (t < 20.0) cam([.15, 1.12, -1.55], [.28, 1.04, -.3], 40);                                        // "beleza... também não precisa conversar"
+    else if (t < 20.9) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                   // pendura o bico de volta
+    else if (t < 22.4) cam([1.7, 1.3, -1.75], [.3, 1.0, -1.15], 36);                                       // Adryan prepara a grana; o frentista vem da bomba
+    else if (t < 24.4) cam([1.9, 1.5, -2.6], [.35, 1.0, -.9], 40);                                          // de lado: a grana passa de mão em mão na janela                                       // a grana passando pela janela
+    else if (t < 28.0) cam([4.6, 1.9, 2.6], [P.lerp(1.6, 2.0, P.suave(24.4, 28, t)), 1.05, -6.4], 44);        // EP1: o frentista vai até o alojamento
+    else if (t < 30.65) cam([3.05, 1.65, -4.7], [2.0, 1.2, -7.3], 48);                                       // abre a porta, entra, a porta bate
+    else if (t < 31.6) cam([-1.75, 1.85, 2.05], [.35, 1.4, -.5], 50);                                        // a pedrinha vem do escuro e bate no teto
+    else if (t < 32.55) cam([.15, 1.12, -1.55], [.28, 1.08, -.3], 40);                                       // Adryan se assusta, olha pra cima e em volta
+    else if (t < 33.3) cam([1.95, 1.35, -4.3], [.45, 1.0, -.9], 44);                                         // a porta do carro abre
+    else if (t < 35.8) { const a = AdF.obj.position; cam([P.lerp(2.4, .9, P.suave(33.3, 35.8, t)), 1.6, -4.2], [a.x, 1.25, a.z], 40); }   // fora do carro: olha o teto, anda até a traseira
+    else { const a = AdF.obj.position; cam([a.x - 1.1, 1.7, a.z + 1.0], [PEDRA[0][0] * .35, 1.1, PEDRA[0][2] * .4], 44); }   // por trás dele: o escuro de onde veio a pedra
+    C.halos(S.camera);
+    window.C = C; window.dbgNaN = () => { const out = []; for (const [n, A] of [['ad', C.D.Ad], ['ni', C.D.Ni], ['fr', C.Fr]]) A.obj.traverse(o => { if (o.isBone && !isFinite(o.quaternion.x + o.quaternion.w + o.position.x)) out.push(n + ':' + o.name); }); return out; };
+    window.dbgCam = () => { const r = new THREE.Raycaster(); r.setFromCamera(new THREE.Vector2(0, 0), S.camera); const h = r.intersectObjects(S.scene.children, true)[0]; return [S.camera.position.toArray(), h ? [h.object.name, h.distance, h.object.parent?.name] : null]; };
+  };
+};
+</script></body></html>

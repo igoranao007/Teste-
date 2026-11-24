@@ -1,0 +1,38 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 63 · A SALA DO IGOR (versão nova do plano 51 — o 51 fica intacto): igual, com o COMPUTADOR NOVO (monitor, torre,
+     teclado e mouse do pacote de escritório). O Igor sozinho assistindo ao vídeo; ainda ninguém chegou. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:14}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, Y, lamp, pc, est, rot, ANG } = sala, fala = await V.vozes();
+  await E.computadorNovo(sala);                                                   // EP1: computador novo do Igor (com mouse)
+  I.girar(1);
+  const tela = () => pc.localToWorld(new THREE.Vector3(0, .28, -.18));
+  S.update = t => {
+    sala.video(t); est.visible = true;
+    V.luzSalaVerde(sala, t, S.camera);                                                // sala esverdeada e escura (luz do monitor)
+    // mãos no teclado, digita de vez em quando; cabeça vira um pouco quando percebe alguém (12,4)
+    const tk = s => Math.max(0, Math.sin(t * 19 + s)) * .016 * (t > .5 && t < 6.5 ? 1 : P.suave(9.4, 9.6, t) * (1 - P.suave(10.6, 10.8, t)) * .7)   // digita; depois uma rajada curta no meio da fala
+      + .004 * Math.sin(t * 1.7 + s);                                                                   // respiração: as mãos nunca ficam congeladas
+    const m = { R: rot(-.1, Y + .075 + tk(0), .2), L: rot(.1, Y + .075 + tk(2), .2), poloR: rot(-.9, -.3, -.2), poloL: rot(.9, -.3, -.2), plana: true, extra: .04,
+      pegada: { R: { dedos: rot(0, -.45, 1), indice: rot(1, 0, 0) }, L: { dedos: rot(0, -.45, 1), indice: rot(-1, 0, 0) } } };   // palmas pra baixo nas teclas
+    const v = fala('51', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });
+    I.cabeca.rotation.x += .1; I.cabeca.rotation.y += -.5 * P.suave(12.2, 12.9, t);
+    // câmera: aproximação lenta pelas costas (vê a tela), depois gira em volta até o rosto
+    const T0 = tela();
+    if (t < 6.5) { const u = P.suave(0, 6.5, t); S.camera.fov = P.lerp(44, 36, u); S.camera.position.set(...rot(P.lerp(-1.4, -.5, u), P.lerp(1.75, 1.5, u), P.lerp(-1.1, -.55, u))); S.camera.lookAt(T0.x, T0.y - .05, T0.z); }
+    else { const a = P.lerp(-2.1, -.75, P.suave(6.5, 14, t)), R = 1.3, c = rot(0, 0, .25);
+      S.camera.fov = 38; S.camera.position.set(c[0] + Math.sin(a + ANG) * R, 1.42, c[2] + Math.cos(a + ANG) * R); S.camera.lookAt(...rot(0, 1.2, .1)); }
+    S.camera.updateProjectionMatrix();
+  };
+};
+</script></body></html>
