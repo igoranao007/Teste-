@@ -1,0 +1,79 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 · CENA 69 · O DOM NA TELA (versão nova do plano 58 — o 58 fica intacto, 18 s). MUDANÇAS DO DIRETOR: o Dom é o MODELO NOVO,
+     SEM O BASTÃO, quase invisível (contraluz + chiado amarelo) e PARADO. O Igor NÃO diz "Dom": depois que o Dom aparece ele LEVA UM SUSTO E CAI
+     NO CHÃO COM A CADEIRA; aparece o DOM "DE SIRENE" (a tela com ele e o alarme vermelho girando). Continua na 70 ("Malditos, eles me acharam!").
+     ?cam= força uma câmera. -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:18}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as T from '../../lib/tgp.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as K from '../../lib/terminal.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const sala = await V.salaIgor4(cena), { I, Y, lamp, pc, est, rot, ANG } = sala, fala = await V.vozes(), qs = new URLSearchParams(location.search), camQ = qs.get('cam')?.split(',').map(Number);
+  await E.computadorNovo(sala);
+  // QUEDA: o Igor e a cadeira tombam pra TRÁS juntos, girando num pivô no chão atrás da cadeira
+  const piv = new THREE.Group(); piv.position.set(...rot(0, 0, -.42)); cena.add(piv); cena.updateMatrixWorld(true);
+  const DIREITA = new THREE.Vector3(...rot(1, 0, 0)).normalize();
+  I.girar(1);
+  // o DOM "dentro do computador": longe da sala, no escuro (só a câmera da tela chega aqui)
+  const Dm = await E4.ator('dom'); cena.add(Dm.obj); Dm.obj.position.set(0, 0, -40); Dm.obj.rotation.y = 0; Dm.pose('idle', 0);
+  const DD = await T.acessoriosDom(Dm, { bastao: false });                         // modelo novo, SEM o bastão
+  const term = K.terminal(); term.el.style.opacity = 0;
+  const preto = F.camada('background:#000'); preto.style.opacity = 0;
+  const sirLayer = F.camada('background:radial-gradient(circle at 50% 40%, rgba(255,30,20,.0) 20%, rgba(255,20,10,.9) 90%)'); sirLayer.style.opacity = 0;   // a SIRENE: o vermelho girando por cima do Dom
+  const tela = () => pc.localToWorld(new THREE.Vector3(0, .25, -.2));
+  // monitor da sala: chiado amarelo + aviso (no canvas do próprio monitor)
+  const monitorAmarelo = t => { const x = pc.ctx, W = pc.cv.width, H = pc.cv.height, r = P.rng(Math.floor(t * 30) + 9);
+    for (let i = 0; i < W * H / 3; i++) { const v = 90 + r() * 165; x.fillStyle = `rgb(${v | 0},${(v * .84) | 0},${(v * .1) | 0})`; x.fillRect(Math.floor(r() * W), Math.floor(r() * H), 1, 1); }
+    if (Math.floor(t * 3) % 2 === 0) { x.fillStyle = '#ffd21a'; x.fillRect(W * .12, H * .4, W * .76, H * .2); x.fillStyle = '#1a1400'; x.font = `bold ${Math.floor(H * .11)}px monospace`; x.textAlign = 'center'; x.fillText('LOCAL DESCOBERTO', W / 2, H * .54); }
+    pc.tex.needsUpdate = true; };
+  // de frente pro Igor, do lado do monitor (o monitor não tapa o rosto); perto 0–1 aproxima
+  const camIgor = (perto = 0) => { const cab = I.cabeca.getWorldPosition(new THREE.Vector3()), longe = new THREE.Vector3(.95, 1.62, .62), perto2 = new THREE.Vector3(.68, 1.5, .44);   // eixo do olhar dele (de frente, por cima do monitor)
+    S.camera.fov = P.lerp(40, 34, perto); S.camera.position.copy(longe.lerp(perto2, perto)); S.camera.lookAt(cab.x, cab.y - .02, cab.z); };
+  S.update = t => {
+    const q = Math.round(t * 30), tremeLuz = .75 + .25 * Math.sin(t * 23) * Math.sin(t * 7.1);
+    const vI = fala('58', t, 'igor'), vD = fala('58', t, 'dom');
+    // IGOR: assustado, joga o corpo pra trás e balança a cabeça
+    const susto = P.suave(12.35, 12.55, t), braco = P.suave(12.4, 12.7, t);
+    I.pose(t, { inclina: -.1 * P.suave(.2, .8, t) + .02 * Math.sin(t * 1.3) + .04 * Math.sin(t * 7) * P.suave(.4, .7, t) * (1 - P.suave(1.6, 2.2, t)) - .25 * susto,
+      ...(braco > 0 ? { R: rot(-.45, Y + .75, .1), L: rot(.45, Y + .75, .1), kR: braco, kL: braco } : {}) });   /* susto: os braços sobem (as mãos vão pra frente do rosto) */
+    // a cadeira tomba (12,6–13,3, acelerando como queda) e quica no chão
+    if (t > 12.5 && piv.children.length === 0) { piv.attach(I.obj); if (sala.cadeira) piv.attach(sala.cadeira); }
+    if (t <= 12.5 && piv.children.length) { cena.attach(I.obj); if (sala.cadeira) cena.attach(sala.cadeira); }
+    const qd = P.clamp((t - 12.6) / .7), ang = 1.42 * qd * qd + (t > 13.3 ? .07 * Math.sin(Math.min(1, (t - 13.3) / .35) * Math.PI) : 0);
+    piv.quaternion.setFromAxisAngle(DIREITA, -ang);
+    I.animar(t, { boca: vI, pisca: (t % 3.3) > 3.15 ? 1 : 0 });
+    I.cabeca.rotation.x += .05; I.cabeca.rotation.y += .14 * Math.sin(t * 8.5) * P.suave(1.2, 1.5, t) * (1 - P.suave(2.6, 3.0, t)) + .06 * Math.sin(t * 9) * P.suave(12.4, 12.6, t);
+    monitorAmarelo(t);
+    const sirene = t >= 14.2, naTela = (t >= 4.5 && t < 12.3) || sirene;
+    if (!naTela) {   // luz da sala: amarelo forte vindo do monitor, piscando
+      P.luz({ keyDir: [...rot(0, .3, -1)], keyCor: '#' + new THREE.Color('#ffd23a').multiplyScalar(tremeLuz).getHexString(), fillDir: [0, .5, 1], fillCor: '#3a3008', amb: '#1c1704' });
+      lamp && (lamp.visible = true);
+    } else P.luz({ keyDir: [0, .25, 1], keyCor: '#' + new THREE.Color('#8a6f12').multiplyScalar(.8 + .3 * Math.sin(t * 5)).getHexString(), fillDir: [0, -.2, -1], fillCor: '#2a2000', amb: '#080600' });
+    // DOM fala dentro da tela (boca + gesto de fala de leve)
+    Dm.pose('idle', 0); DD.atualizar(t, { boca: vD * .6, pisca: 0 });            // PARADO: nem respira (só a boca, quase invisível)
+    // câmeras + camadas
+    term.el.style.opacity = 0; preto.style.opacity = 0;
+    if (t < 3.9) camIgor(P.suave(2.2, 3.8, t) * .25);
+    else if (t < 4.5) { const u = P.suave(3.9, 4.5, t), T0 = tela(), de = new THREE.Vector3(...rot(-.5, 1.5, -.55)); S.camera.position.copy(de.lerp(T0, u * .8)); S.camera.fov = P.lerp(42, 20, u); S.camera.lookAt(T0); }
+    else if (naTela) {   // dentro do monitor: o Dom mal aparece atrás do chiado amarelo
+      const u = (t - 4.5) / 7.8; S.camera.fov = P.lerp(36, 30, u); S.camera.position.set(.04 * Math.sin(t * .7), 1.63, -40 + P.lerp(1.15, .95, u)); S.camera.lookAt(0, 1.6, -40);
+      term.limpar('#000'); term.sinal(q, .62 + .12 * Math.sin(t * 13)); term.amarelar(1, 1.3);
+      term.el.style.opacity = (.66 + .1 * Math.sin(t * 2.3) + (P.rng(q)() < .08 ? .25 : 0) - .1 * P.suave(5, 6, t) * (1 - P.suave(10.8, 11.6, t))).toFixed(2);   /* mais chiado: ele quase não aparece */
+      if (sirene) { const gira = (Math.sin(t * 9.5) + 1) / 2; sirLayer.style.opacity = (.15 + .45 * gira).toFixed(2); } 
+    } else { const a = new THREE.Vector3(...rot(1.75, 1.05, -.35)), b = new THREE.Vector3(...rot(0, .55, -.45)); S.camera.fov = 44; S.camera.position.copy(a); S.camera.lookAt(b); }   // de lado: o susto e a queda com a cadeira
+    if (!sirene) sirLayer.style.opacity = 0;
+    if (camQ) { S.camera.fov = camQ[6]; S.camera.position.set(camQ[0], camQ[1], camQ[2]); S.camera.lookAt(camQ[3], camQ[4], camQ[5]); }
+    S.camera.updateProjectionMatrix();
+  };
+};
+</script></body></html>
