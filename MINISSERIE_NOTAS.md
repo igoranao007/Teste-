@@ -13,9 +13,8 @@
 - O que se chamava **PROJETO MOGG** passa a se chamar **ARG-14** — e continua sendo uma **FITA** (VHS, a mesma da maleta).
   → trocar em todas as falas, telas e letreiros (planos 10, 12, 13, 15; menu "PROJETO MOGG" vira "ARG-14").
 - **Várias falas mudam** porque agora existe outro grupo, o **DOM** (o grupo do Dom), e o Igor obviamente sabe que ele existe.
-- Fala do Igor sobre a "Toca do Anão" (plano 14: "Vamos ver o que a Toca do Anão escondeu"): o diretor disse
-  "não faz sentido o Igor falar 'toca do anão' — esqueceu, mas o Igor vai falar". **[CONFIRMAR: a fala sai, muda, ou fica?]**
-- Fala nova: **"Preciso apagar imediatamente os experimentos que o Wallen fez."** **[CONFIRMAR: quem fala (Igor?) e em que momento]**
+- **Plano 14 (computador), fala do IGOR — TROCADA** (confirmado): sai "Vamos ver o que a Toca do Anão escondeu" e entra
+  **IGOR: "Preciso apagar imediatamente os experimentos que o Wallen fez."**
 - "Wallen" = nome novo na lore (anotado).
 
 ## 2. Animação — regras gerais (vale pro filme todo)
@@ -39,9 +38,10 @@
 ### 3.2 Nicolas sozinho no carro (plano 9 — olhos na mata)
 - Antes: ele se virava e via o olho.
 - Agora: ele **se vira com o braço pra trás das costas**, dando a entender que **está segurando uma arma**.
-### 3.3 Sala do Igor — Gusta e Adryan chegam (planos 11–12)
-- Antes em **terceira pessoa**. Agora em **POV do ADRYAN** — é **o Adryan que entrega a maleta pro Igor**
-  (no v4 era o Gusta que colocava a maleta na mesa → muda).
+### 3.3 Sala do Igor — Gusta e Adryan chegam (planos 10–12)
+- **O Nicolas NUNCA esteve na sala do Igor** (confirmado): quem desce no elevador e entra na sala são **GUSTA e ADRYAN**
+  (o Nicolas fica lá fora, no carro — por isso "ele tá só"). O texto do ROTEIRO_v4 que punha o Nicolas no elevador/sala está superado.
+- Antes em **terceira pessoa**. Agora em **POV do ADRYAN** — é **o Adryan que entrega a maleta pro Igor**.
 ### 3.4 Dom na tela (aparição do Dom)
 - Usar o **modelo novo SEM o bastão**.
 - **Não deixar ele bem visível** (mistério: sombra/contraluz/ruído) e ele fica **PARADO**.
@@ -91,8 +91,7 @@
 - Falas novas e trocadas → vozes (Igor: voz clonada; Adryan; Gusta ainda sem voz gravada).
 
 ## 6. Dúvidas pra confirmar com o diretor
-1. A fala "Vamos ver o que a Toca do Anão escondeu" (plano 14): tira, troca ou mantém?
-2. "Preciso apagar imediatamente os experimentos que o Wallen fez": quem fala e em que cena?
-3. Quais falas antigas mudam por causa do grupo Dom (o diretor vai mandar)?
-4. Na sala do Igor, o Nicolas não entra mais (fica no carro)? Pelo item 4.6 ("ele tá só"), quem desce é Adryan + Gusta.
-5. Título novo da minissérie (a enviar).
+1. ~~Fala da Toca do Anão (plano 14)~~ → RESOLVIDO: vira "Preciso apagar imediatamente os experimentos que o Wallen fez." (Igor).
+2. ~~Nicolas na sala do Igor~~ → RESOLVIDO: nunca esteve; são Gusta e Adryan.
+3. Quais outras falas antigas mudam por causa do grupo Dom (o diretor vai mandar)?
+4. Título novo da minissérie (a enviar).
