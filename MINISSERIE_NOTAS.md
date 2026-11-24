@@ -76,7 +76,68 @@
 16. **Todos olham pro alerta.**
 17. **A cena fica preta.**
 
-> **"CALMA, ANTES DE FAZER ANIMAÇÃO TEM MAIS COISAS"** — aguardando o restante (inclusive o título novo).
+> **"CALMA, ANTES DE FAZER ANIMAÇÃO TEM MAIS COISAS"** — continuação abaixo (24/11, 2ª parte).
+
+### 4b. Depois do alerta na base dos RENEGADOS ANTI-CAOS (Dod, Corsa, Zangão e Entrada)
+> Nome do grupo de Kerssiburg: **renegados anti-caos**.
+18. A cena fica **preta**. Depois aparece outra sala. Letreiro:
+    **BASE — LOCAL: ????**
+19. O **DOM sentado**: **não dá pra ver o visual dele**; a única coisa que aparece são os **braços apoiados** (mãos entrelaçadas
+    na frente do rosto, cotovelos apoiados — referência de pose: `referencia/terceiros/pose_dom_bracos_apoiados.jpg`).
+    **Ele SEMPRE mexe o braço quando fala.**
+20. A cena mostra uma **TV/telão grande** com o **mapa da ilha de BARLOTH**, parado em **Casmiron**
+    (mapa enviado: `referencia/mapa_ilha_barloth.png`).
+21. **Ao lado: OLIVEIRA e LUAN.** Os dois olham a tela e falam:
+    - **OLIVEIRA:** "Casmiron City? Sério?"
+    - **LUAN:** "Não esperava que o Igor iria se esconder justo nesta cidade que ele odiava tanto."
+    - (os dois se olham)
+    - **OLIVEIRA:** "Então quer dizer que o Igor tem apoio da máfia casmirenha? Eles não se odiavam? Por que a máfia permitiu ele estar nesta cidade?"
+22. O **Oliveira se vira pro Dom**, enquanto o **Luan analisa a tela** com a imagem.
+23. O **Dom intervém, mudando de posição** (braços):
+    **DOM:** "Vocês já tiveram contato com o Igor. Eu esperava que vocês soubessem que ele faz de tudo em prol dos seus objetivos.
+    Entenda: se for pra se aliar a um satanás, ele se alia. Pra ele não existem limites éticos."
+24. O **Luan volta a atenção pro Dom**:
+    **LUAN:** "Dom, já que sabemos a localidade, podemos matar ele, né? Eu e o Oliveira podemos ir agora pra Casmiron City."
+    (**aqui revelam o nome "Dom"**)
+25. O **Dom olha pro Luan**:
+    **DOM:** "Não, não, não, não. Eu não quero que matem o Igor. Ele precisa ser capturado vivo."
+26. **OLIVEIRA:** "Mas, senhor Dom, por que insiste em deixar o Igor vivo? Sabe que isso é arriscado!"
+    (os dois se olham)
+27. **DOM:** "Eu preciso que ele esteja errado... e ele está errado."
+28. O **Oliveira se revira, pensando**: **OLIVEIRA:** "Então... podemos ir agora?"
+29. **DOM:** "Não. Já chamei certas pessoas para esta operação."
+30. **LUAN:** "Quem?"
+31. **Corte.** Letreiro: **4 HORAS ANTES**
+32. **PHANTOM** (versão **vermelha/clássica**). A câmera mostra a **casa do Phantom cheia de livros**: **quadrinhos**, **quadros na
+    parede com capas de quadrinhos que ELE fez**, tudo numa **sala repleta de livros no chão, estantes** etc.
+    Capas enviadas (editora dele, **STAR COMICS**): `referencia/quadrinho_catman.png` (CATMAN nº 2), `referencia/quadrinho_omnis.png`
+    (OMNIS nº 8), `referencia/quadrinho_spaceman.png` (SPACEMAN vol. 6, "Cosmic Comics"), logo `referencia/logo_star_comics.png`.
+33. O **Phantom numa cadeira quase caindo** (meio deitado), **analisando o porta-retrato de uma mulher de biquíni**, examinando
+    bem e mexendo com a mão (imagem do retrato: `referencia/porta_retrato_phantom.png`).
+34. **A parede explode nas costas do Phantom.**
+35. Aparece a **sombra do Dom**; o **Phantom olha pra trás**.
+    **DOM:** "Phantom, podemos conversar?"
+36. **FIM DO EPISÓDIO 1.**
+
+### Detalhes de produção pedidos (24/11, 2ª parte)
+- **"Patches" (pacotes de assets)**: liberdade total pra pesquisar e baixar pacotes gratuitos importantes, pra cena ficar viva e não
+  faltar nada — **armas** por exemplo (e o que mais as cenas pedirem: comida enlatada, equipamentos da base, livros, entulho da explosão…).
+  Sempre conferindo a licença.
+- **Pacote de ESCRITÓRIO enviado** (`OFFICE_1.zip` → `material/modelos/office/`, fora do git): mesas, cadeiras de escritório,
+  computador (monitor, torre, teclado, **mouse**), TV, estantes e livros, arquivos, sofás, poltronas, puffs, divisórias, carpete,
+  luminárias, telefone, relógio de parede, quadro branco, bebedouro, cafeteira, canecas, papéis, canetas.
+  → **trocar o computador do Igor** (hoje nem tem mouse) e usar na sala do Igor, na base do Dom, na base de Kerssiburg e na casa do Phantom.
+- **ZANGÃO**: a águia do distintivo vira o **escudo do Universitário** (águia sobre o círculo com "U") — referência ao clube dele, que
+  está em último (`referencia/terceiros/escudo_universitario_zangao.png`).
+
+### Lore / mundo (do mapa)
+- **Ilha de BARLOTH**. Estados: **St. Albans**, **Casmiron**, **Aurum Port**, **Santa Bárbara** (+ Henryton no norte).
+  **Capital nacional: Casmiron City** (estrela). Cidades de Casmiron: Ville de La Révolution, **Kessinburgh**, New Cowny, Darkhon,
+  Aulton, Canider; outras: Ghalatha City, Cruz Formosa, New Aberdeen, South Flopptown, Ivee, Ossumane, Ânchora, Sierra Blanca,
+  Ville Sainte, Forte Helgares, Monte Calvário, Nouveau Magellan, Nea Korinthios, Santa Maria do Vale, Nova Coimbra, Santa Clarissa,
+  Porto São Grande.
+- **Grupos**: o grupo do **Igor** (Toca do Anão), os **renegados anti-caos** (Dod, Corsa, Zangão, Entrada — base em Kerssiburg),
+  o **DOM** (Dom, Oliveira, Luan; chama o Phantom), a **máfia casmirenha** (deixa o Igor ficar em Casmiron City).
 
 ## 5. O que isso pede de produção (levantamento, não começar)
 - Cenários: interior do **alojamento** do posto (porta, itens, janela); **porta-bunker** da sala do Igor; **sala secreta** com
@@ -95,3 +156,5 @@
 2. ~~Nicolas na sala do Igor~~ → RESOLVIDO: nunca esteve; são Gusta e Adryan.
 3. Quais outras falas antigas mudam por causa do grupo Dom (o diretor vai mandar)?
 4. Título novo da minissérie (a enviar).
+5. Grafia: no letreiro está **"Kerssiburg — Casmiron"**, no mapa está **"Kessinburgh"**. Qual vale?
+6. No alerta de Kerssiburg a missão é "**RESGATE** — Casmiron (capital)": é resgate do Igor/Nicolas? (anotado como está)
