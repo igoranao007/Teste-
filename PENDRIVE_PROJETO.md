@@ -254,7 +254,7 @@ decisão sobre Phantom/Metalis/Zangão/Oliveira, licenças dos pacotes "sem lice
 - `Motifect_combat_complete_v1_0.zip` (40 animações de luta, BVH+FBX), `Motifect_locomotion_complete_v1_0.zip` (45 de locomoção),
   `motifect_ai_motion.zip` (plugin do Blender que gera animação por texto — precisa de conta/chave/créditos no motifect.io),
   `Universal_Animation_LibraryStandard.zip` (Quaternius, 43 animações, CC0, GLB com e sem root motion), `OFFICE_1.zip` (escritório),
-  `deadpool-character.zip`/`Malorian.zip` (base do Phantom e a pistola), logo A SILENT WAR, mapa de Barloth, capas Star Comics,
+  zip do modelo-base do Phantom e `Malorian.zip` (a pistola), logo A SILENT WAR, mapa de Barloth, capas Star Comics,
   porta-retrato, pose do Dom, escudo do Universitário, 3 vídeos pra tela do Corsa, documentos jurídicos do diretor.
 - Onde ficaram: animações em `material/modelos/` (copiar pra lá a partir do zip original) / referências em `material/producao/minisserie/referencia/`.
 
