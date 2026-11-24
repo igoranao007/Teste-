@@ -168,7 +168,7 @@
   **Oliveira mais "grosso"** (grave, pesado); **Luan com voz de adolescente**.
 - **Boca**: quando o **Oliveira** fala ele **mexe a boca** (mandíbula), e quando para fica de **boca fechada**. (Vale pra todos que falam.)
 - **Pesquisar e baixar pacotes**: itens, modelos, sons, músicas, efeitos (itch.io ou qualquer site), conferindo a licença. **MUITO IMPORTANTE.**
-- **Phantom**: o diretor quer o Phantom = Deadpool. **PENDENTE**: na produção da série não dá pra renderizar personagem famoso de terceiros
-  (Deadpool, e o mesmo vale pro Cartman do Zangão, o Sonic do Metalis e a cabeça do Godzilla do Oliveira) — proposta: visual próprio
-  mantendo papel, cores, armas e jeito de cada um. Aguardando decisão.
+- ~~Phantom = Deadpool / visual próprio pros quatro~~ → **DESCONSIDERADO (diretor, 24/11)**: essa nota não foi pedido do diretor.
+  **Phantom, Metalis, Zangão e Oliveira seguem com os modelos atuais do projeto**, sem pendência. Os arquivos continuam preservados
+  (versão nova só em arquivo novo) e os créditos CC BY dos modelos-base (Sketchfab) continuam nos créditos do episódio.
 - **AUTORIZADO COMEÇAR A PRODUÇÃO.**

@@ -205,7 +205,8 @@ esticaram > 2,2× → acessórios presos no osso.
 música, mixagem, créditos (incluir os créditos CC BY dos sons e o aviso de produção independente de `DIRETRIZES_PRODUCAO.md`), render final.
 
 **Pendências abertas com o diretor**: título novo da minissérie (se mudar de novo), falas antigas que mudam por causa do grupo Dom,
-decisão sobre Phantom/Metalis/Zangão/Oliveira, licenças dos pacotes "sem licença explícita".
+licenças dos pacotes "sem licença explícita".
+(Phantom/Metalis/Zangão/Oliveira: **sem pendência** — seguem com os modelos atuais, ver MINISSERIE_NOTAS §7.)
 
 ---
 
