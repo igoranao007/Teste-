@@ -11,7 +11,7 @@ informada → os derivados 3D (.blend/.glb e texturas assadas) ficam FORA do git
 3. Esqueleto do elenco (Simple PSX Character, mesmos nomes) com os ossos medidos nas articulações do modelo; pesos automáticos;
    limpeza (na pose A a mão encosta no coldre: tira peso de braço de |x| < 0,29 m abaixo de 1,05 m); braços levados da pose A pra
    pose T e aplicados como descanso; tira as faces que esticaram > 2,2× (pontes mão-coldre). Sem ossos de dedo.
-4. Duas MALORIAN nos coldres das coxas (presas nas coxas); uma Malorian solta exportada em `malorian.glb` pra pôr na mão nas cenas.
+4. Duas MALORIAN DENTRO dos coldres das coxas (medidos em vistas ortográficas: x 0,20–0,26, y -0,08–0,03, z 0,80–1,00): cano pra baixo, coronha saindo por cima e pra trás, 25 cm (`ARMA_COMP`, `COLDRE_X/Y/TOPO`), presas nas coxas; uma Malorian solta exportada em `malorian.glb` pra pôr na mão nas cenas.
 5. `VERSAO=amarela`: o vermelho do traje vira AMARELO FORTE (luz/sombra preservadas pela luminância); preto, couro e olhos ficam.
 
 ## Refazer (zips extraídos em qualquer pasta)

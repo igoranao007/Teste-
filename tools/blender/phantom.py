@@ -184,20 +184,24 @@ def importar_malorian():
 base = importar_malorian()
 # eixo do cano = maior dimensão (y no FBX); boca do cano pro lado -y; coronha embaixo (-z)
 Pm = np.array([tuple(v.co) for v in base.data.vertices]); comp = Pm[:, 1].max() - Pm[:, 1].min()
-ESC = 0.30 / comp                                                           # pistola de ~30 cm
+ESC = float(os.environ.get('ARMA_COMP', '0.25')) / comp                     # pistola de ~25 cm (cabe no coldre de 20 cm, coronha pra fora)
 base.data.transform(Matrix.Diagonal((ESC, ESC, ESC, 1)))
 base.data.transform(Matrix.Translation(-Vector(np.array([tuple(v.co) for v in base.data.vertices]).mean(0))))
 # arma solta (pra pôr na mão nas cenas): exportada separada
 arma = base.copy(); arma.data = base.data.copy(); arma.name = 'malorian'; bpy.context.scene.collection.objects.link(arma)
 for s, sfx in ((1, 'L'), (-1, 'R')):
     g = base.copy(); g.data = base.data.copy(); g.name = f'malorian_coldre_{sfx}'; bpy.context.scene.collection.objects.link(g)
-    # no coldre: cano pra baixo, coronha pra cima e pra trás, colada na lateral da coxa
-    R = Matrix.Rotation(math.radians(-90), 4, 'X') @ Matrix.Rotation(math.radians(180 if s > 0 else 0), 4, 'Z')
-    g.data.transform(R)
-    th = A.matrix_world @ A.data.bones[f'thigh.{sfx}'].head_local; sh = A.matrix_world @ A.data.bones[f'shin.{sfx}'].head_local
-    alvo = th.lerp(sh, 0.38); Pl = P[(np.abs(P[:, 2] - alvo.z) < 0.03) & (P[:, 0] * s > 0)]
-    xo = float(np.abs(Pl[:, 0]).max()) if len(Pl) else 0.27
-    g.data.transform(Matrix.Translation(Vector((s * (xo + 0.025), alvo.y + 0.01, alvo.z))))
+    # NO COLDRE (medido em vistas ortográficas: coldre x 0,20–0,26, y -0,08–0,03, z 0,80–1,00): cano pra BAIXO dentro do coldre, coronha saindo por cima e apontando pra TRÁS,
+    # face da arma pra fora da coxa. Modelo da Malorian: cano em -y, coronha em -z  ->  Rx(+90): -y vira -Z, -z vira +Y.
+    g.data.transform(Matrix.Rotation(math.radians(90), 4, 'X'))
+    if s < 0:                                                               # lado direito: espelha (a face com o nome fica pra fora)
+        g.data.transform(Matrix.Diagonal((-1, 1, 1, 1)))
+        _b = bmesh.new(); _b.from_mesh(g.data); bmesh.ops.reverse_faces(_b, faces=_b.faces); _b.to_mesh(g.data); _b.free()
+    Q = np.array([tuple(v.co) for v in g.data.vertices]); zt, zb = Q[:, 2].max(), Q[:, 2].min()
+    cano = Q[Q[:, 2] < zb + 0.55 * (zt - zb)]                                # parte de baixo = cano/ferrolho (o que entra no coldre)
+    COLDRE = Vector((s * float(os.environ.get('COLDRE_X', '0.233')), float(os.environ.get('COLDRE_Y', '-0.022')), float(os.environ.get('COLDRE_TOPO', '1.048'))))
+    g.data.transform(Matrix.Translation(Vector((COLDRE.x - float(cano[:, 0].mean()), COLDRE.y - float(cano[:, 1].mean()), COLDRE.z - float(zt)))))
+    Q = np.array([tuple(v.co) for v in g.data.vertices]); print('MALORIAN', sfx, 'x', Q[:, 0].min().round(3), Q[:, 0].max().round(3), 'y', Q[:, 1].min().round(3), Q[:, 1].max().round(3), 'z', Q[:, 2].min().round(3), Q[:, 2].max().round(3))
     vg = g.vertex_groups.new(name=f'thigh.{sfx}'); vg.add(list(range(len(g.data.vertices))), 1.0, 'REPLACE')
     m_ = g.modifiers.new('Armature', 'ARMATURE'); m_.object = A; g.parent = A; g.matrix_parent_inverse = A.matrix_world.inverted()
 bpy.data.objects.remove(base)
