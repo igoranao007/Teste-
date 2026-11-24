@@ -44,3 +44,12 @@ material/modelos/ual/
 *_anim_v2.glb
 *_anim_v2.log
 material/modelos/polyhaven/
+# prévias de cena (pesadas): ficam locais / vão pro diretor à parte
+entrega/ep1/*_previa.mp4
+# objetos PSX convertidos de pacotes SEM licença explícita (itch): só local; os do Poly Haven (CC0) vão pro git
+material/modelos/psx/psx_tv.glb
+material/modelos/psx/vending.glb
+material/modelos/psx/ar_condicionado.glb
+material/modelos/psx/portas_pack.glb
+material/modelos/psx/cama_psx.glb
+material/modelos/psx/beretta.glb
