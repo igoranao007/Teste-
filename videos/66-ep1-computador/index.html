@@ -27,7 +27,8 @@ window.SETUP = async () => {
   const falaV = await V.vozes(); const boca = TT => falaV('54', TT, 'igor');
   const term = K.terminal(), D = 4.5, B = [-.07, Y + .055, .49];                       // boca do videocassete (coordenada de frente pro computador)
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...rot(...p)); S.camera.lookAt(...rot(...a)); S.camera.updateProjectionMatrix(); };
-  S.update = TT => {
+  const LEG = E.legendas([[9.0, 12.6, 'IGOR', 'Preciso apagar imediatamente os experimentos que o Wallen fez.']]);   // prévia: falas novas/trocadas (as vozes vêm na etapa de áudio)
+  S.update = TT => { LEG(TT);
     const t = TT - D, ligada = TT >= 3.7 ? 1 : 0;
     F.telaCodigo(pc, TT, ligada); vcr.led(TT >= 3.2); I.girar(P.suave(-.4, .9, TT));
     const tremor = ligada * (.75 + .25 * Math.sin(TT * 23) * Math.sin(TT * 7));

@@ -39,7 +39,8 @@ window.SETUP = async () => {
   // de frente pro Igor, do lado do monitor (o monitor não tapa o rosto); perto 0–1 aproxima
   const camIgor = (perto = 0) => { const cab = I.cabeca.getWorldPosition(new THREE.Vector3()), longe = new THREE.Vector3(.95, 1.62, .62), perto2 = new THREE.Vector3(.68, 1.5, .44);   // eixo do olhar dele (de frente, por cima do monitor)
     S.camera.fov = P.lerp(40, 34, perto); S.camera.position.copy(longe.lerp(perto2, perto)); S.camera.lookAt(cab.x, cab.y - .02, cab.z); };
-  S.update = t => {
+  const LEG = E.legendas([[0.5, 3.0, 'IGOR', 'Como, caralho, isso aconteceu? Como?!'], [5.3, 8.6, 'DOM', 'Finalmente... depois de tanto tempo, nos encontramos.'], [8.6, 11.9, 'DOM', 'Dessa vez você não vai escapar, Igor.']]);   // prévia: falas novas/trocadas (as vozes vêm na etapa de áudio)
+  S.update = t => { LEG(t);
     const q = Math.round(t * 30), tremeLuz = .75 + .25 * Math.sin(t * 23) * Math.sin(t * 7.1);
     const vI = fala('58', t, 'igor'), vD = fala('58', t, 'dom');
     // IGOR: assustado, joga o corpo pra trás e balança a cabeça

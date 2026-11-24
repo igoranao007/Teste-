@@ -28,7 +28,8 @@ window.SETUP = async () => {
   const capa = P.caixa(.42, .012, .32, P.mat({ cor: '#7a6a44' }), { pos: [.32, Y + .02, .62] }); cena.add(capa);
   const porta = P.malha(new THREE.PlaneGeometry(1.1, 3.4, 2, 6), P.mat({ cor: '#7dffa0', opac: .16, aditivo: true, semLuz: true, lados: THREE.DoubleSide }), { pos: [-.7, .02, 3.6], rot: [-Math.PI / 2, 0, 0] }); cena.add(porta);
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
-  S.update = t => {
+  const LEG = E.legendas([[2.2, 3.6, 'IGOR', 'Trouxeram?'], [6.8, 10.4, 'IGOR', 'Todos eles têm potencial. Um potencial que não pode ser desperdiçado.'], [11.0, 12.9, 'IGOR', 'Então... o ARG-14.']]);   // prévia: falas novas/trocadas (as vozes vêm na etapa de áudio)
+  S.update = t => { LEG(t);
     sala.video(t + 14); V.luzSalaVerde(sala, t, S.camera); porta.scale.x = P.suave(0, .6, t);
     I.girar(1 - P.suave(1.0, 2.0, t));
     // Adryan (com a maleta) e Gusta entram (0,3–3,6) até a frente da mesa

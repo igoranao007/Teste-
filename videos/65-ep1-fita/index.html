@@ -24,7 +24,8 @@ window.SETUP = async () => {
   const MESA = new THREE.Vector3(-.3, Y, .46), V3 = (x, y, z) => new THREE.Vector3(x, y, z);
   mal.position.copy(MESA); mal.deitar(1); cena.updateMatrixWorld(true); const FR = fita.getWorldPosition(V3(0, 0, 0));
   const chi = F.chiadoVerde();
-  S.update = t => {
+  const LEG = E.legendas([[6.2, 8.4, 'IGOR', 'Então é isso. O ARG-14.']]);   // prévia: falas novas/trocadas (as vozes vêm na etapa de áudio)
+  S.update = t => { LEG(t);
     sala.video(t + 27); I.girar(0);
     Ad.pose('idle', t); Gu.pose('idle', t + .5); V.girar(Gu, 'spine.005', [1, 0, 0], .2 * P.suave(2, 3, t));
     const abre = P.suave(1.0, 2.0, t), maos = P.suave(.2, .8, t) * (1 - P.suave(2.1, 2.6, t)), pega = t >= 8.6, close = t >= 3.2 && t < 8.6;

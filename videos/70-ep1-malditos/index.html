@@ -29,7 +29,8 @@ window.SETUP = async () => {
     for (let i = 0; i < W * H / 3; i++) { const v = 90 + r() * 165; x.fillStyle = `rgb(${v | 0},${(v * .84) | 0},${(v * .1) | 0})`; x.fillRect(Math.floor(r() * W), Math.floor(r() * H), 1, 1); } pc.tex.needsUpdate = true; };
   const sir = F.camada('background:radial-gradient(circle at 50% 45%, rgba(255,20,10,0) 35%, rgba(255,20,10,.85) 100%)');
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
-  S.update = t => {
+  const LEG = E.legendas([[0.5, 2.3, 'IGOR', 'Malditos, eles me acharam!']]);   // prévia: falas novas/trocadas (as vozes vêm na etapa de áudio)
+  S.update = t => { LEG(t);
     const gira = (Math.sin(t * 9.5) + 1) / 2;
     P.luz({ keyDir: [Math.cos(t * 4.7), .4, Math.sin(t * 4.7)], keyCor: '#' + new THREE.Color('#ff2a14').multiplyScalar(.35 + .9 * gira).getHexString(), fillDir: [...rot(0, .3, -1)], fillCor: '#4a3a08', amb: '#' + new THREE.Color('#1a0604').lerp(new THREE.Color('#4a2418'), P.suave(4, 6, t)).getHexString() });
     sir.style.opacity = (.12 + .32 * gira).toFixed(2); monitor(t);

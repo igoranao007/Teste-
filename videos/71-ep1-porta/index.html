@@ -33,7 +33,8 @@ window.SETUP = async () => {
   const monitor = t => { const x = pc.ctx, W = pc.cv.width, H = pc.cv.height, r = P.rng(Math.floor(t * 30) + 9);
     for (let i = 0; i < W * H / 3; i++) { const v = 90 + r() * 165; x.fillStyle = `rgb(${v | 0},${(v * .84) | 0},${(v * .1) | 0})`; x.fillRect(Math.floor(r() * W), Math.floor(r() * H), 1, 1); } pc.tex.needsUpdate = true; };
   const sir = F.camada('background:radial-gradient(circle at 50% 45%, rgba(255,20,10,0) 35%, rgba(255,20,10,.85) 100%)');
-  S.update = t => {
+  const LEG = E.legendas([[0.8, 2.6, 'IGOR', 'Fecha essa porta imediatamente!'], [2.8, 4.9, 'ADRYAN', 'Mas é o Nicolas, ele tá só!'], [5.2, 8.6, 'IGOR', 'Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.'], [10.4, 14.5, 'GUSTA', 'Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer.']]);   // prévia: falas novas/trocadas (as vozes vêm na etapa de áudio)
+  S.update = t => { LEG(t);
     const gira = (Math.sin(t * 9.5) + 1) / 2, verde = P.suave(19.8, 21.6, t), alerta = P.suave(17.8, 18.0, t);
     const vermelho = new THREE.Color('#ff2a14').multiplyScalar((.35 + .9 * gira) * (1 - .7 * verde) * (1 + .4 * alerta));
     P.luz({ keyDir: [Math.cos(t * 4.7), .4, Math.sin(t * 4.7)], keyCor: '#' + vermelho.getHexString(), fillDir: [-.4, .3, 1], fillCor: '#' + new THREE.Color('#4a3a08').lerp(new THREE.Color('#39ff6a'), verde).getHexString(),
