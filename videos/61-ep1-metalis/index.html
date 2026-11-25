@@ -1,0 +1,130 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 (reformulado) · CENA 61 · O METALIS (continua a 60). O Adryan, fora do carro com a pedrinha na mão, encara o escuro:
+     o METALIS aparece lá, ACENANDO, e vem chegando ("Ô, Adryan! Meu parceiro!"). O Adryan larga a pedra. A conversa da moedinha é a
+     MESMA de sempre (falas do v4), agora os dois de pé, frente a frente. No fim o Adryan dá a moeda, volta pro carro, entra, liga e vai;
+     o Metalis grita "Boa viagem!", acena, e a câmera fica com ele: os faróis passam no rosto e os olhos acendem.
+     ?cam=x,y,z,ax,ay,az,fov força uma câmera (inspeção). -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:42}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E from '../../lib/ep1.js';
+import * as E4 from '../../lib/elenco4.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 42, perto: 14, longe: 70, luz: { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillCor: '#1c5a30' } });
+  const C = await V.montarPosto(S), { D, Fr, Me } = C, fala = await V.vozes('ep1');
+  const AL = await E.alojamento(C); AL.porta(0); Fr.obj.visible = false;                  // o frentista já está lá dentro
+  const AdF = await E4.ator('adryan'); S.scene.add(AdF.obj);
+  const pedra = await E.prop('rock_09', { altura: .04 }); S.scene.add(pedra);
+  const moeda = V.dinheiro('moeda'); S.scene.add(moeda);
+  const olhos = V.olhosMetalis(Me);
+  const q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
+  const v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const angLerp = (a, b, u) => { let d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return a + d * u; };
+  const env = (t, a, b, c, d) => P.suave(a, b, t) * (1 - P.suave(c, d, t));
+  const frente = r => v3(Math.sin(r), 0, Math.cos(r)), direita = r => v3(-Math.cos(r), 0, Math.sin(r));
+  // posições (as mesmas do fim da cena 60)
+  const AD = [-1.0, -1.8], AD_PORTA = [.62, -1.5], ESCURO = [8.6, -5.4];
+  const ME_INI = [5.6, -5.7], ME_PERTO = [.12, -2.25];                                       // sai do escuro, passa por fora do pilar e da ilha, para na frente dele
+  const rAdMe = () => Math.atan2(Me.obj.position.x - AD[0], Me.obj.position.z - AD[1]);
+  const R_ME_AD = Math.atan2(AD[0] - ME_PERTO[0], AD[1] - ME_PERTO[1]), R_AD_ME = Math.atan2(ME_PERTO[0] - AD[0], ME_PERTO[1] - AD[1]);
+  const R_ESC = Math.atan2(ESCURO[0] - AD[0], ESCURO[1] - AD[1]);
+  const R_PORTA = Math.atan2(AD_PORTA[0] - AD[0], AD_PORTA[1] - AD[1]);
+  S.update = t => {
+    Me.obj.visible = true;
+    // ── carro: parado, porta aberta; o Adryan entra (32,9), fecha (33,3–33,7), liga (34,0) e sai (34,6–39,5)
+    const sai = P.clamp((t - 34.6) / 4.9); C.naCurva(C.saida, sai ** 1.8, 0); if (t < 34.6) { D.car.position.set(0, .02, 0); D.car.rotation.y = Math.PI / 2; }
+    D.car.abrirPorta(1 - P.suave(33.3, 33.7, t)); D.car.janela(0);
+    const dentro = t >= 32.9; D.Ad.obj.visible = dentro; AdF.obj.visible = !dentro;
+    D.atualizar(t, { giro: t > 34.4 ? .3 * P.suave(34.6, 35.8, t) : 0, falaAd: 0, janela: 0, olhaAd: 0, olhaNi: .3 * P.suave(33.4, 33.9, t) });
+    const vA = fala('61', t, 'adryan'), vM = fala('61', t, 'metalis');
+    // ── METALIS: acena no escuro (0–2,2) · vem chegando (1,8–9,8) · conversa (9,8–) · "Boa viagem!" acenando pro carro (34,8–36,6) · os olhos acendem (39–)
+    let anda = false;
+    if (t < 9.8) { anda = V.caminhar(Me, ME_INI, ME_PERTO, t, 1.8, 9.8, { de: Math.atan2(AD[0] - ME_INI[0], AD[1] - ME_INI[1]), ease: .12 });
+      if (!anda) { Me.obj.rotation.y = Math.atan2(AD[0] - ME_INI[0], AD[1] - ME_INI[1]); Me.pose('idle', t, 'wave', env(t, -1, 0, 1.6, 2.0), t + .4); }
+    } else {
+      Me.obj.position.set(ME_PERTO[0], 0, ME_PERTO[1]);
+      const c = D.car.position, rCarro = Math.atan2(c.x - ME_PERTO[0], c.z - ME_PERTO[1]);
+      const rChega = Math.atan2(ME_PERTO[0] - ME_INI[0], ME_PERTO[1] - ME_INI[1]);
+      Me.obj.rotation.y = t < 32.0 ? angLerp(rChega, R_ME_AD, P.suave(9.8, 10.4, t)) : angLerp(R_ME_AD, rCarro, P.suave(32.0, 33.0, t));
+      Me.pose('idle', t, 'talk', .45 * fala.peso('61', t, 'metalis'), t);
+      const aceno = env(t, 34.8, 35.2, 36.3, 36.7); if (aceno > 0) Me.pose('idle', t, 'wave', aceno, t - 34.8);
+    }
+    Me.obj.updateMatrixWorld(true);
+    // mão direita do Metalis: pede (palma pra cima) · dá de ombros · pega a moeda · olha · guarda · comemora
+    const rMe = Me.obj.rotation.y, fM = frente(rMe), dM = direita(rMe), OMB = Me.osso('RightArm').getWorldPosition(v3());
+    const em = (f, d, y) => OMB.clone().addScaledVector(fM, f).addScaledVector(dM, d).add(v3(0, y, 0));
+    const T_MOEDA = 25.85;                                                                      // a moeda passa de mão
+    const alvos = [
+      [env(t, 3.0, 3.4, 4.6, 5.0), em(.18, .2, .34)],                                          // "Ô, Adryan!" (braço pra cima, chamando)
+      [env(t, 10.4, 11.1, 13.4, 14.1), em(.26, .06, -.12 + .02 * Math.sin(t * 3))],             // "vai me deixar na mão?"
+      [env(t, 20.6, 21.3, 23.0, 23.7), em(.14, .24 + .02 * Math.sin(t * 2.2), -.04)],           // "é a vida..."
+      [env(t, 25.2, 25.75, 25.85, 26.2), AdF.osso('hand.L').getWorldPosition(v3())],            // pega a moeda
+      [env(t, 25.9, 26.35, 26.6, 27.3), em(.22, .02, -.16)],                                    // olha a moeda
+      [env(t, 26.7, 27.35, 27.45, 28.0), Me.obj.position.clone().addScaledVector(dM, .16).addScaledVector(fM, .03).add(v3(0, .36, 0))],   // bolso
+      [env(t, 27.7, 28.4, 29.4, 30.0), em(.08, .12, .32)]];                                     // "sabia que podia contar contigo!"
+    let K = 0, soma = 0; const alvoM = v3(0, 0, 0); for (const [k, a] of alvos) if (k > 0) { K = Math.max(K, k); soma += k; alvoM.addScaledVector(a, k); }
+    if (K > 0) V.ik2(Me, 'RightArm', 'RightForeArm', 'RightHand', alvoM.multiplyScalar(1 / soma), dM.clone().add(v3(0, -.4, 0)).addScaledVector(fM, -.3).toArray(), K);
+    V.falarOsso(Me, 'Head', vM, t, 1.2);
+    const olhaMoeda = env(t, 25.95, 26.35, 26.65, 27.0); if (olhaMoeda > 0) V.girar(Me, 'Head', [1, 0, 0], .35 * olhaMoeda);
+    if (t > 9.8) V.girar(Me, 'Head', [1, 0, 0], -.12);                                         // ele é baixinho: olha pra cima, pro Adryan
+    // ── ADRYAN (de pé): encara o escuro com a pedra na mão (0–2) · vira pro Metalis (2,2–3,0) · larga a pedra (8,6) · conversa ·
+    //    pega a moeda no bolso e dá (24,6–25,9) · "Vai cuidar da tua vida" (30,2) · volta pro carro (31,0–32,9)
+    if (!dentro) {
+      if (t < 31.0) { AdF.obj.position.set(AD[0], 0, AD[1]);
+        AdF.obj.rotation.y = t < 9.6 ? angLerp(R_ESC, rAdMe(), P.suave(2.2, 3.0, t)) : R_AD_ME;
+        AdF.pose(t < 1.2 ? 'm_idle_looking_around' : 'idle', t, 'talk', .5 * fala.peso('61', t, 'adryan'), t); }
+      else if (!V.caminhar(AdF, AD, AD_PORTA, t, 31.0, 32.7, { de: R_AD_ME })) { AdF.obj.rotation.y = angLerp(R_PORTA, R_PORTA - .9, P.suave(32.6, 32.9, t)); AdF.pose('idle', t); }
+      AdF.obj.updateMatrixWorld(true);
+      V.falarOsso(AdF, 'spine.005', vA, t, 1);
+      if (t < 31.0 && t > 9.6) V.girar(AdF, 'spine.005', [1, 0, 0], .16);                    // olha pra baixo, pro Metalis
+      const r = AdF.obj.rotation.y;
+      // pedra: na mão direita até largar (8,6), cai no chão
+      if (t < 8.6) { const h = AdF.osso('hand.R'), m = AdF.osso('f_middle.01.R'); pedra.position.copy(h.getWorldPosition(v3())).lerp(m.getWorldPosition(v3()), .8); pedra.rotation.set(.4, r, 0); pedra.visible = true; }
+      else { const u = P.clamp((t - 8.6) / .35), p0 = AdF.obj.position.clone().addScaledVector(frente(R_AD_ME), .22).addScaledVector(direita(R_AD_ME), -.2);
+        pedra.position.set(p0.x, P.lerp(.85, .03, u * u), p0.z); pedra.visible = true; }
+      // moeda: bolso esquerdo (24,6–25,0) → estende a mão (25,0–25,85) → passa pro Metalis
+      const bolso = env(t, 24.4, 24.7, 24.75, 25.0), estende = env(t, 24.95, 25.5, 25.95, 26.5);
+      if (bolso > 0) V.pegar(AdF, 'L', AdF.obj.position.clone().addScaledVector(direita(r), -.2).add(v3(0, .95, 0)), v3(0, -1, 0), frente(r), direita(r).multiplyScalar(-1).add(v3(0, -1, 0)), bolso, .6);
+      if (estende > 0) V.pegar(AdF, 'L', Me.osso('RightHand').getWorldPosition(v3()).add(v3(0, .05, 0)).lerp(AdF.obj.position.clone().add(v3(0, 1.0, 0)).addScaledVector(frente(r), .45), .35),
+        frente(r).add(v3(0, -.2, 0)).normalize(), v3(0, 1, 0), direita(r).multiplyScalar(-1).add(v3(0, -.8, 0)), estende, .5);
+    }
+    moeda.visible = t > 24.75 && t < 27.45;
+    if (t < T_MOEDA) moeda.naMao(AdF, 'L', 1.1); else { const h = Me.osso('RightHand').getWorldPosition(v3()); moeda.position.copy(h).add(v3(0, .02, .02)); moeda.rotation.set(.6, 0, 0); moeda.scale.setScalar(1.3); }
+    // olhos amarelos: quando ele encara o carro indo embora
+    const brilho = P.suave(38.9, 39.6, t); olhos.acender(brilho + (brilho > .9 ? .06 * Math.sin(t * 9) : 0), S.camera);
+    // faróis no rosto dele quando o carro manobra pra sair
+    const far = P.suave(35.0, 35.8, t) * (1 - P.suave(36.9, 38.1, t));
+    const base = { keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: '#2c4232', fillDir: [-.1, .2, -1], fillCor: '#1c5a30' };
+    if (far > 0) P.luz({ ...base, keyDir: [1, .25, .2], keyCor: '#' + new THREE.Color('#b9d8c2').lerp(new THREE.Color('#ffd23a'), far).multiplyScalar(1 + far * .6).getHexString() });
+    else P.luz(base);
+    // ── câmeras
+    const mp = Me.obj.position, ap = AdF.obj.position, ROSTO_M = [mp.x, 1.03, mp.z], ROSTO_A = [ap.x, 1.6, ap.z];
+    const sobreOmbro = (de, para, lado, alt, recuo) => { const d = v3(para[0] - de.x, 0, para[2] - de.z).normalize(), l = v3(d.z, 0, -d.x);
+      return [de.x - d.x * recuo + l.x * lado, alt, de.z - d.z * recuo + l.z * lado]; };
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
+    else if (t < 2.2) cam([-1.7, 1.7, -1.05], [ME_INI[0], 1.0, ME_INI[1]], 34);                                     // por trás do Adryan: lá no escuro, alguém acenando
+    else if (t < 4.6) cam([-.6, 1.0, -2.95], [mp.x, .95, mp.z], 36);                                                // o Metalis vem chegando, chamando (de lado, o carro em primeiro plano)
+    else if (t < 7.4) cam([-2.2, 1.45, -.35], [P.lerp(ap.x, mp.x, .55), 1.15, P.lerp(ap.z, mp.z, .55)], 40);       // os dois no quadro, o carro do lado
+    else if (t < 10.2) cam(sobreOmbro(mp, ROSTO_A, -1.0, 1.68, 1.5), ROSTO_A, 32);                                 // Adryan: "Ah, não... Metalis." (larga a pedra)
+    else if (t < 14.7) cam(sobreOmbro(ap, ROSTO_M, 1.15, 1.6, 1.9), ROSTO_M, 30);                                   // Metalis pedindo (por cima do ombro do Adryan)
+    else if (t < 20.4) cam(sobreOmbro(mp, ROSTO_A, -1.0, 1.68, 1.5), ROSTO_A, 30);                                 // Adryan
+    else if (t < 24.4) cam(sobreOmbro(ap, ROSTO_M, 1.15, 1.6, 1.9), ROSTO_M, 28);                                   // "é a vida..."
+    else if (t < 27.6) { const M = ap.clone().lerp(mp, .5), d = mp.clone().sub(ap).setY(0).normalize(), n = v3(d.z, 0, -d.x);   // de lado, os dois: a moeda passando
+      if (n.z > 0) n.negate(); cam([M.x + n.x * 1.7, 1.15, M.z + n.z * 1.7], [M.x, 1.0, M.z], 40); }
+    else if (t < 30.2) cam(sobreOmbro(ap, ROSTO_M, -1.15, 1.6, 1.9), ROSTO_M, 30);                                  // Metalis feliz
+    else if (t < 32.9) cam([2.4, 1.35, -3.6], [P.lerp(ap.x, .3, P.suave(30.5, 32.9, t)), 1.15, -1.7], 40);           // "Vai cuidar da tua vida" e volta pro carro
+    else if (t < 34.6) cam([3.5, 1.3, -.35], [.3, 1.05, -.35], 40);                                                 // fecha a porta, liga o carro
+    else if (t < 37.0) cam([2.1, 1.15, -4.4], ROSTO_M, 44);                                                         // o carro sai; "Boa viagem!"; faróis no rosto
+    else { const u = P.suave(37.0, 42, t), r = Me.obj.rotation.y, f = frente(r), l = direita(r);
+      cam([mp.x + f.x * P.lerp(1.5, 1.0, u) + l.x * P.lerp(.55, .25, u), .9, mp.z + f.z * P.lerp(1.5, 1.0, u) + l.z * P.lerp(.55, .25, u)], ROSTO_M, P.lerp(40, 32, u)); }   // fica com ele: os olhos acendem
+    C.halos(S.camera);
+  };
+};
+</script></body></html>

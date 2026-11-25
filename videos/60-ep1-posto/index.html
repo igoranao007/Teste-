@@ -1,10 +1,10 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- EPISÓDIO 1 (reformulado) · CENA 60 · POSTO. Até o pagamento é IGUAL ao plano 43 do v4 (aprovado; o 43 fica intacto).
-     Depois: o frentista vai até o ALOJAMENTO (lib/ep1.js), abre a porta, entra, a porta bate e ele senta lá dentro (visto pela janela).
-     Enquanto isso uma PEDRINHA vem do escuro (o Metalis, ainda sem aparecer) e bate no teto do carro: o Adryan se assusta, olha pra cima,
-     abre a porta, sai, olha o teto, vai até a traseira, acha a pedra no chão e encara o escuro de onde ela veio (continua na cena 61).
+<!-- EPISÓDIO 1 (reformulado) · CENA 60 · POSTO — GERADA por tools/gerar_cena60.py a partir do plano 43 do v4 (aprovado, intacto):
+     até 24,4 s é idêntica. Depois (rev. 2): o frentista vai pro alojamento (um plano só) e entra lá no fundo ENQUANTO a pedrinha vem do
+     escuro e bate no teto do carro; a porta dele bate fora de quadro. O Adryan se assusta, abre a porta, sai olhando o teto, vai até a
+     traseira, AGACHA e pega a pedra, levanta olhando pra ela e encara o escuro de onde ela veio (continua na cena 61).
      ?cam=x,y,z,ax,ay,az,fov força uma câmera (inspeção). -->
-<script>VIDEO={w:1920,h:1080,fps:30,dur:40}</script>
+<script>VIDEO={w:1920,h:1080,fps:30,dur:39}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
 <div id="stage"></div>
@@ -24,10 +24,12 @@ window.SETUP = async () => {
   // ── EP1 ──
   const AL = await E.alojamento(C), q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
   const AdF = await E4.ator('adryan'); S.scene.add(AdF.obj); AdF.obj.visible = false;          // Adryan DE PÉ, fora do carro
-  const pedra = await E.prop('rock_09', { altura: .09 }); S.scene.add(pedra); pedra.visible = false;
-  const PEDRA = [v3(8.6, 1.2, -5.4), v3(-.1, 1.47, -.05), v3(-1.55, .035, -1.35)];          // mão do Metalis no escuro → teto do carro → chão atrás da porta
+  const pedra = await E.prop('rock_09', { altura: .04 }); S.scene.add(pedra); pedra.visible = false;
+  const PEDRA = [v3(8.6, 1.2, -5.4), v3(-.1, 1.47, -.05), v3(-1.52, .04, -1.82)];          // mão do Metalis no escuro → teto do carro → chão atrás da porta
   const FORA = [AL.fora[0], AL.fora[2]], DENTRO = [AL.dentro[0], AL.dentro[2]], MESA = [AL.mesa[0], AL.mesa[2]];
-  const AD_PORTA = [.62, -1.5], AD_TRAS = [-1.05, -1.75];
+  const AD_PORTA = [.62, -1.5], AD_TRAS = [-1.0, -1.8], ROT_TRAS = Math.atan2(AD_TRAS[0] - AD_PORTA[0], AD_TRAS[1] - AD_PORTA[1]);
+  const ESCURO = Math.atan2(PEDRA[0].x - AD_TRAS[0], PEDRA[0].z - AD_TRAS[1]);
+  const T_AG = 32.8, T_SOBE = 34.5, RISE = 1.15;                                              // agacha (32,8–33,9) · pega (33,5–34,2) · levanta (34,5–35,65)
   const notas = V.dinheiro('notas'); S.scene.add(notas);
   const CAP = v3(-1.85, .88, -.95);                                  // boca do tanque (tampa traseira, lado do motorista)
   const ROT_BOMBA = Math.atan2(bico.suporte.x - PB[0], bico.suporte.z - PB[1]), ROT_CARRO = 0;
@@ -67,14 +69,13 @@ window.SETUP = async () => {
     else if (t < 20.85) { anda = V.caminhar(Fr, TAMPA, PB, t, 19.25, 20.05, { de: ROT_CARRO - .9 }); if (!anda) { const rTP = Math.atan2(PB[0] - TAMPA[0], PB[1] - TAMPA[1]);   /* vira ~50° parado depois de fechar a portinhola, e anda */
       Fr.obj.rotation.y = t < 19.25 ? ROT_CARRO - .9 * P.suave(18.98, 19.28, t) : angLerp(rTP, ROT_BOMBA, P.suave(20.05, 20.25, t)) - .8 * P.suave(20.5, 20.85, t); Fr.pose('idle', t); } }
     else if (t < 24.4) { anda = V.caminhar(Fr, PB, JANELA, t, 20.85, 23.0, { de: ROT_BOMBA - .8 }); if (!anda) { Fr.obj.rotation.y = angLerp(Math.atan2(JANELA[0] - PB[0], JANELA[1] - PB[1]), 0, P.suave(23.0, 23.3, t)); Fr.pose('idle', t); } }
-    // EP1 — ALOJAMENTO: janela → porta (24,4–28,0) · vira pra porta, mão na maçaneta, abre (28,0–29,1) · entra (29,1–30,2)
-    //       · a porta bate (30,3–30,6) · lá dentro anda até a mesa (31,0–33,0) e senta (33,0–)
-    else if (t < 28.0) { anda = V.caminhar(Fr, JANELA, FORA, t, 24.4, 28.0, { de: 0 }); }
-    else if (t < 29.1) { Fr.obj.position.set(FORA[0], 0, FORA[1]); Fr.obj.rotation.y = angLerp(Math.atan2(FORA[0] - JANELA[0], FORA[1] - JANELA[1]), Math.PI, P.suave(28.0, 28.4, t)); Fr.pose('idle', t); }
-    else if (t < 31.0) { anda = V.caminhar(Fr, FORA, DENTRO, t, 29.1, 30.2, { de: Math.PI }); if (!anda) { Fr.obj.rotation.y = Math.PI; Fr.pose('idle', t); } }
-    else if (t < 33.0) { anda = V.caminhar(Fr, DENTRO, MESA, t, 31.0, 33.0, { de: Math.PI }); }
-    else { Fr.obj.position.set(MESA[0], 0, MESA[1]); Fr.obj.rotation.y = angLerp(Math.atan2(MESA[0] - DENTRO[0], MESA[1] - DENTRO[1]), .1, P.suave(33.0, 33.4, t));
-      const k = t - 33.0, d = Fr.dur('u_Sitting_Enter'); Fr.pose(k < d ? 'u_Sitting_Enter' : 'u_Sitting_Idle_Loop', k < d ? k : k - d); }
+    // EP1 — ALOJAMENTO: janela → porta (24,4–27,4) · vira, mão na maçaneta, abre (27,4–28,0) · entra (28,0–28,9) · a porta bate (29,0)
+    //       · lá dentro vai até a mesa e senta (fora de quadro)
+    else if (t < 27.4) { anda = V.caminhar(Fr, JANELA, FORA, t, 24.4, 27.4, { de: 0 }); }
+    else if (t < 28.0) { Fr.obj.position.set(FORA[0], 0, FORA[1]); Fr.obj.rotation.y = angLerp(Math.atan2(FORA[0] - JANELA[0], FORA[1] - JANELA[1]), Math.PI, P.suave(27.4, 27.7, t)); Fr.pose('idle', t); }
+    else if (t < 29.3) { anda = V.caminhar(Fr, FORA, DENTRO, t, 28.0, 28.9, { de: Math.PI }); if (!anda) { Fr.obj.rotation.y = Math.PI; Fr.pose('idle', t); } }
+    else if (t < 31.3) { anda = V.caminhar(Fr, DENTRO, MESA, t, 29.3, 31.3, { de: Math.PI }); }
+    else { Fr.obj.position.set(MESA[0], 0, MESA[1]); Fr.obj.rotation.y = .1; const k = t - 31.3, d = Fr.dur('u_Sitting_Enter'); Fr.pose(k < d ? 'u_Sitting_Enter' : 'u_Sitting_Idle_Loop', k < d ? k : k - d); }
     Fr.obj.updateMatrixWorld(true);
     const curva = P.suave(14.5, 15.0, t) * (1 - P.suave(18.6, 19.0, t));                       // inclina o tronco pra alcançar a traseira
     if (curva > 0) { V.girar(Fr, 'spine.002', [1, 0, 0], .28 * curva); V.girar(Fr, 'spine.003', [1, 0, 0], .14 * curva); Fr.obj.updateMatrixWorld(true); }
@@ -124,35 +125,51 @@ window.SETUP = async () => {
     notas.visible = t > 20.2 && t < 23.75;
     if (t < 23.42) notas.naMao(D.Ad, 'L', .9); else notas.naMao(Fr, 'R', 1);
     Me.obj.visible = false;
-    // ── EP1: porta do alojamento · pedrinha · Adryan sai do carro ──
+    // ── EP1: porta do alojamento · pedrinha · Adryan sai e investiga ──
     AL.atualizar(t);
-    AL.porta(P.suave(28.45, 29.05, t) * (1 - P.suave(30.3, 30.6, t) ** 2));                   // abre devagar; FECHA com força (bate)
-    const maca = P.suave(28.15, 28.45, t) * (1 - P.suave(29.0, 29.3, t));
-    if (maca > 0 && t < 29.5) { const r = Fr.obj.rotation.y; V.pegar(Fr, 'R', AL.macaneta(), frente(r).add(v3(0, -.3, 0)).normalize(), v3(0, 1, 0), direita(r).multiplyScalar(.8).add(v3(0, -.6, 0)), maca, .8); }
-    // pedra: sai do escuro (31,0) → bate no teto (31,6) → quica e cai atrás da porta do motorista (32,15)
-    pedra.visible = t > 31.0;
-    if (pedra.visible) { const [a, b, c] = PEDRA; let p;
-      if (t < 31.6) { const u = (t - 31.0) / .6; p = a.clone().lerp(b, u); p.y += Math.sin(Math.PI * u) * 1.5; }
-      else if (t < 32.15) { const u = (t - 31.6) / .55; p = b.clone().lerp(c, u); p.y = P.lerp(b.y, c.y, u * u) + Math.sin(Math.PI * u) * .3; }
+    AL.porta(P.suave(27.6, 28.1, t) * (1 - P.suave(28.85, 29.1, t) ** 2));                     // abre; FECHA com força (bate às 29,0)
+    const maca = P.suave(27.45, 27.65, t) * (1 - P.suave(28.05, 28.3, t));
+    if (maca > 0 && t < 28.4) { const r = Fr.obj.rotation.y; V.pegar(Fr, 'R', AL.macaneta(), frente(r).add(v3(0, -.3, 0)).normalize(), v3(0, 1, 0), direita(r).multiplyScalar(.8).add(v3(0, -.6, 0)), maca, .8); }
+    // pedra: sai do escuro (27,9) → bate no teto (28,5) → quica e cai atrás da porta do motorista (29,05) → na mão do Adryan (34,0)
+    pedra.visible = t > 27.9;
+    const naMao = t >= 34.0;
+    if (pedra.visible && !naMao) { const [a, b, c] = PEDRA; let p;
+      if (t < 28.5) { const u = (t - 27.9) / .6; p = a.clone().lerp(b, u); p.y += Math.sin(Math.PI * u) * 1.5; }
+      else if (t < 29.05) { const u = (t - 28.5) / .55; p = b.clone().lerp(c, u); p.y = P.lerp(b.y, c.y, u * u) + Math.sin(Math.PI * u) * .3; }
       else p = c;
-      pedra.position.copy(p); if (t < 32.15) pedra.rotation.set(t * 9, t * 7, 0); }
-    // Adryan no carro: susto com a pancada (31,6) — encolhe, olha pro teto, olha em volta; abre a porta (33,3–34,0)
-    const susto = P.suave(31.62, 31.8, t) * (1 - P.suave(32.9, 33.3, t)), volta = Math.sin(Math.max(0, t - 32.1) * 2.4) * P.suave(32.1, 32.4, t) * (1 - P.suave(32.9, 33.2, t));
-    if (t < 34.0) { V.girar(D.Ad, 'spine.005', [1, 0, 0], -.42 * susto); V.girar(D.Ad, 'spine.005', [0, 1, 0], .55 * volta); V.girar(D.Ad, 'spine.003', [1, 0, 0], .1 * P.suave(31.62, 31.72, t) * (1 - P.suave(31.8, 32.1, t))); }
-    car.abrirPorta(P.suave(33.3, 34.0, t));
-    const fora2 = t >= 34.0; D.Ad.obj.visible = !fora2; AdF.obj.visible = fora2;
+      pedra.position.copy(p); if (t < 29.05) pedra.rotation.set(t * 9, t * 7, 0); }
+    // Adryan no carro: susto com a pancada (28,5) — encolhe, olha pro teto, olha em volta; abre a porta (30,3–31,0)
+    const susto = P.suave(28.52, 28.7, t) * (1 - P.suave(29.9, 30.3, t)), volta = Math.sin(Math.max(0, t - 29.1) * 2.4) * P.suave(29.1, 29.4, t) * (1 - P.suave(29.9, 30.2, t));
+    if (t < 31.0) { V.girar(D.Ad, 'spine.005', [1, 0, 0], -.42 * susto); V.girar(D.Ad, 'spine.005', [0, 1, 0], .55 * volta); V.girar(D.Ad, 'spine.003', [1, 0, 0], .1 * P.suave(28.52, 28.62, t) * (1 - P.suave(28.7, 29.0, t))); }
+    car.abrirPorta(P.suave(30.3, 31.0, t));
+    const fora2 = t >= 30.95; D.Ad.obj.visible = !fora2; AdF.obj.visible = fora2;
     if (fora2) {
-      const olhaTeto = Math.atan2(-AD_PORTA[0], -AD_PORTA[1]) + .4, escuro = Math.atan2(PEDRA[0].x - AD_TRAS[0], PEDRA[0].z - AD_TRAS[1]);
-      if (t < 35.4) { AdF.obj.position.set(AD_PORTA[0], 0, AD_PORTA[1]); AdF.obj.rotation.y = olhaTeto; AdF.pose('u_Idle_Loop', t - 34.0); }
-      else if (!V.caminhar(AdF, AD_PORTA, AD_TRAS, t, 35.4, 37.0, { de: olhaTeto, vel: .8 })) {
-        const rTras = Math.atan2(AD_TRAS[0] - AD_PORTA[0], AD_TRAS[1] - AD_PORTA[1]);
-        AdF.obj.rotation.y = angLerp(rTras, escuro, P.suave(38.0, 38.7, t)); AdF.pose(t < 38.0 ? 'u_Idle_Loop' : 'm_idle_looking_around', t - 37.0); }
+      let cab = 0;
+      if (t < 32.8) {                                                                           // sai andando pra traseira, olhando o teto
+        if (!V.caminhar(AdF, AD_PORTA, AD_TRAS, t, 30.95, 32.8, { de: ROT_TRAS - .5 })) AdF.pose('idle', t);
+        cab = -.42 * P.suave(30.95, 31.3, t) * (1 - P.suave(32.1, 32.6, t)) + .35 * P.suave(32.3, 32.8, t);   // olha pra cima → acha a pedra no chão
+      } else if (t < 36.7) {                                                                    // agacha, pega, levanta olhando pra pedra
+        AdF.obj.position.set(AD_TRAS[0], 0, AD_TRAS[1]); AdF.obj.rotation.y = ROT_TRAS;
+        const k = t < T_SOBE ? RISE * (1 - P.suave(T_AG, T_AG + 1.1, t)) : Math.min(RISE, t - T_SOBE);
+        AdF.pose('m_crouch_rise_up', k, 'idle', P.suave(T_SOBE + RISE - .2, T_SOBE + RISE + .3, t), t);
+        cab = .45 * (1 - P.suave(36.3, 36.7, t));
+      } else {                                                                                  // vira pro escuro de onde veio a pedra
+        AdF.obj.position.set(AD_TRAS[0], 0, AD_TRAS[1]); AdF.obj.rotation.y = angLerp(ROT_TRAS, ESCURO, P.suave(36.7, 37.5, t));
+        AdF.pose('m_idle_looking_around', t - 36.7, 'idle', 1 - P.suave(36.8, 37.6, t), t);
+      }
       AdF.obj.updateMatrixWorld(true);
-      const cab = (t < 35.4 ? P.suave(34.0, 34.5, t) * -.5 : 0) + P.suave(37.0, 37.3, t) * (1 - P.suave(37.8, 38.1, t)) * .55;   // olha o teto · olha a pedra no chão
-      V.girar(AdF, 'spine.005', [1, 0, 0], cab);
+      if (cab) V.girar(AdF, 'spine.005', [1, 0, 0], cab);
+      const r = AdF.obj.rotation.y;
+      // mão direita: desce até a pedra (33,4–34,0), fecha nela; depois traz pra frente do peito pra olhar (35,4–36,5)
+      const alcanca = P.suave(33.35, 33.95, t) * (1 - P.suave(34.3, 34.8, t)), olha = P.suave(35.3, 35.9, t) * (1 - P.suave(36.4, 37.0, t));
+      if (alcanca > 0) V.pegar(AdF, 'R', PEDRA[2].clone().add(v3(0, .03, 0)), v3(0, -1, 0).add(frente(r).multiplyScalar(.6)).normalize(), frente(r), direita(r).multiplyScalar(.6).add(v3(0, -.2, 0)), alcanca, .9);
+      if (olha > 0) { const peito = AdF.obj.position.clone().add(v3(0, 1.18, 0)).addScaledVector(frente(r), .3).addScaledVector(direita(r), .04);
+        V.pegar(AdF, 'R', peito, frente(r).add(v3(0, .3, 0)).normalize(), v3(0, 1, 0), direita(r).add(v3(0, -.8, 0)), olha, .9); }
+      if (naMao) { AdF.obj.updateMatrixWorld(true); const h = AdF.osso('hand.R'), m = AdF.osso('f_middle.01.R');
+        pedra.position.copy(h.getWorldPosition(v3())).lerp(m.getWorldPosition(v3()), .8); pedra.rotation.set(.4, r, 0); }
     }
     // câmeras (nas tomadas pela janela, mais luz dentro do carro)
-    const janela = (t >= 15.4 && t < 17.4) || (t >= 18.6 && t < 20.0) || (t >= 20.9 && t < 24.4) || (t >= 31.75 && t < 33.3);
+    const janela = (t >= 15.4 && t < 17.4) || (t >= 18.6 && t < 20.0) || (t >= 20.9 && t < 24.4);
     P.luz({ keyDir: [.2, .9, .4], keyCor: '#b9d8c2', amb: janela ? '#5f8068' : '#2c4232', fillDir: [-.1, .2, -1], fillCor: janela ? '#6fae82' : '#1c5a30' });
     if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
     else if (t < 5) cam([14, 6, 13], [P.lerp(-10, 0, ch), .8, P.lerp(7, -1, ch)], 40);
@@ -166,14 +183,14 @@ window.SETUP = async () => {
     else if (t < 20.9) cam([-1.15, 1.55, -1.25], [-2.75, .95, -2.45], 46);                                   // pendura o bico de volta
     else if (t < 22.4) cam([1.7, 1.3, -1.75], [.3, 1.0, -1.15], 36);                                       // Adryan prepara a grana; o frentista vem da bomba
     else if (t < 24.4) cam([1.9, 1.5, -2.6], [.35, 1.0, -.9], 40);                                          // de lado: a grana passa de mão em mão na janela                                       // a grana passando pela janela
-    else if (t < 28.0) cam([4.6, 1.9, 2.6], [P.lerp(1.6, 2.0, P.suave(24.4, 28, t)), 1.05, -6.4], 44);        // o frentista vai até o alojamento
-    else if (t < 30.9) cam([3.05, 1.65, -4.7], [2.0, 1.2, -7.3], 48);                                         // abre a porta, entra, a porta bate
-    else if (t < 31.75) cam([-1.35, 1.8, .95], [4.2, 1.25, -3.0], 50);                                        // do teto do carro, olhando o escuro: a pedrinha vem e bate no teto
-    else if (t < 33.3) cam([.15, 1.12, -1.55], [.28, 1.1, -.3], 40);                                          // Adryan se assusta, olha pra cima e em volta
-    else if (t < 34.0) cam([1.9, 1.4, -3.3], [.35, 1.0, -1.0], 46);                                           // a porta do carro abre
-    else if (t < 37.0) { const a = AdF.obj.position; cam([P.lerp(2.6, 1.0, P.suave(34.0, 37.0, t)), 1.6, -4.3], [a.x, 1.2, a.z], 40); }   // fora: olha o teto, vai pra traseira
-    else if (t < 38.2) cam([-2.75, .42, -3.35], [-1.25, .62, -1.5], 44);                                      // rente ao chão: a pedra e o Adryan olhando pra ela
-    else { const a = AdF.obj.position; cam([a.x - 1.2, 1.65, a.z + 1.1], [PEDRA[0].x * .45, 1.1, PEDRA[0].z * .5], 44); }   // por trás dele: o escuro de onde veio a pedra
+    else if (t < 26.4) cam([4.6, 1.9, 2.6], [P.lerp(1.6, 2.0, P.suave(24.4, 26.4, t)), 1.05, -6.4], 44);        // o frentista vai pro alojamento
+    else if (t < 28.75) cam([-1.35, 1.8, .95], [4.2, 1.25, -3.0], 50);                                        // do teto: ele entra lá no fundo; a pedra vem do escuro e bate
+    else if (t < 30.3) cam([.1, 1.1, -1.4], [.3, 1.3, -.25], 44);                                          // Adryan se assusta (a porta do alojamento bate fora de quadro)
+    else if (t < 31.0) cam([1.9, 1.4, -3.3], [.35, 1.0, -1.0], 46);                                           // a porta do carro abre
+    else if (t < 32.8) { const a = AdF.obj.position; cam([P.lerp(1.6, .4, P.suave(31.0, 32.8, t)), 1.55, -4.0], [a.x, 1.35, a.z], 42); }   // sai olhando o teto, vai pra traseira
+    else if (t < 35.3) cam([-2.75, .55, -1.15], [-1.25, .5, -1.9], 46);                                        // rente ao chão: agacha e pega a pedra
+    else if (t < 36.8) cam([-2.55, 1.5, -2.7], [-1.0, 1.3, -1.8], 42);                                    // de frente: olha a pedra na mão
+    else { const a = AdF.obj.position; cam([a.x - 1.1, 1.65, a.z + 1.1], [PEDRA[0].x * .45, 1.1, PEDRA[0].z * .5], 44); }   // por trás dele: o escuro de onde ela veio
     C.halos(S.camera);
     window.C = C; window.dbgNaN = () => { const out = []; for (const [n, A] of [['ad', C.D.Ad], ['ni', C.D.Ni], ['fr', C.Fr]]) A.obj.traverse(o => { if (o.isBone && !isFinite(o.quaternion.x + o.quaternion.w + o.position.x)) out.push(n + ':' + o.name); }); return out; };
     window.dbgCam = () => { const r = new THREE.Raycaster(); r.setFromCamera(new THREE.Vector2(0, 0), S.camera); const h = r.intersectObjects(S.scene.children, true)[0]; return [S.camera.position.toArray(), h ? [h.object.name, h.distance, h.object.parent?.name] : null]; };

@@ -1,0 +1,57 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 (reformulado) · CENA 62 · NICOLAS SOZINHO (versão nova do plano 49, que fica intacto). Nicolas do lado de fora perto
+     do carro; a mata; um ruído. Ele se vira devagar e, ENQUANTO vira, leva a mão direita pras COSTAS: por trás, a mão fecha na coronha
+     de uma pistola presa na cintura (só a sugestão da arma). Os dois olhos amarelos entre as árvores; close no rosto, tenso, firme;
+     volta pra mata: os olhos continuam lá. Corte seco. ?cam=x,y,z,ax,ay,az,fov (inspeção) -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:9}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as F from '../../lib/filme.js';
+import * as V from '../../lib/v4.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = F.noite({ fov: 40, perto: 6, longe: 40, luz: { keyDir: [.3, .7, .7], keyCor: '#9fc4ab', amb: '#2b4636', fillCor: '#24703c' } }), cena = S.scene;
+  await V.montarCabana(S);
+  const car = await F.carro(); car.scale.setScalar(1.25); car.position.set(0, .02, 8.6); car.rotation.y = Math.PI; car.luzes(0); cena.add(car);
+  const Ni = await E4.ator('nicolas'); cena.add(Ni.obj); Ni.obj.position.set(1.55, 0, 9.4); Ni.obj.rotation.y = Math.PI;
+  // os olhos na mata são do METALIS: ele parado no escuro entre as árvores, só a íris amarela acesa (mesmos olhos do posto)
+  const Me = await E4.ator('metalis'); cena.add(Me.obj); Me.obj.position.set(8.5, 0, 13.5); Me.obj.rotation.y = Math.atan2(1.55 - 8.5, 9.4 - 13.5);
+  Me.pose('idle', 0); const olhos = V.olhosMetalis(Me, { soIris: true });
+  for (const ml of Me.malhas) if (![].concat(ml.material).some(m => /olho/.test(m.name))) ml.visible = false;   // corpo some: no escuro só a íris aparece
+  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
+  const OLHO = new THREE.Vector3(8.5, 1.0, 13.5), v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  // pistola (Poly Haven 'service_pistol', CC0) enfiada na cintura, atrás, do lado direito: cano pra baixo, coronha pra cima
+  const arma = E.pistola(); cena.add(arma);
+  const base = (X, Y) => { const Z = new THREE.Vector3().crossVectors(X, Y).normalize(); const y = new THREE.Vector3().crossVectors(Z, X).normalize(); return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(X.clone().normalize(), y, Z)); };
+  const q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
+  S.update = t => {
+    Ni.pose('idle', t * .6);
+    const vira = P.suave(2.2, 3.8, t); Ni.obj.rotation.y = Math.PI - 1.15 * vira;                // vira devagar pros olhos
+    Ni.obj.updateMatrixWorld(true);
+    // a arma na cintura (segue o quadril): atrás, à direita da coluna
+    const r = Ni.obj.rotation.y, f = v3(Math.sin(r), 0, Math.cos(r)), d = v3(-Math.cos(r), 0, Math.sin(r));
+    const quadril = Ni.osso('spine').getWorldPosition(v3());
+    const cint = quadril.clone().addScaledVector(f, -.15).addScaledVector(d, .06).add(v3(0, .04, 0));   // cós da calça, nas costas
+    arma.position.copy(cint); arma.quaternion.copy(base(v3(0, -1, 0).addScaledVector(f, .12), f));       // cano pra dentro da calça, coronha pra fora (pra trás)
+    // a mão direita vai pras costas e fecha na coronha (2,5–3,4) e fica lá
+    const mao = P.suave(2.5, 3.4, t);
+    arma.updateMatrixWorld(true); const coronha = arma.localToWorld(v3(-.012, -.06, 0));                // meio da coronha (que sai pra trás)
+    if (mao > 0) V.pegar(Ni, 'R', coronha.clone().add(v3(0, .025, 0)), v3(0, -1, 0).addScaledVector(f, .3).normalize(), f, d.clone().multiplyScalar(.8).addScaledVector(f, -.5), mao, .95);
+    if (t > 4.4) V.girar(Ni, 'spine.005', [1, 0, 0], .06 * Math.sin(t * 23) * .3);              // tremendo de leve
+    const pis = Math.floor(t * 30) === 195;                                                      // uma piscada
+    Me.pose('idle', t * .4); olhos.acender(pis ? 0 : P.suave(2.6, 3.2, t), S.camera);
+    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
+    else if (t < 2.2) cam([-1.2, 1.55, 6.0], [1.5, 1.1, 9.6], 42);                                // Nicolas sozinho perto do carro
+    else if (t < 3.5) cam([3.4, 1.3, 7.2], [1.5, 1.3, 9.4], 38);                                  // vira — e a mão vai pras costas
+    else if (t < 4.8) { const c = cint.clone().addScaledVector(d, .85).addScaledVector(f, -.25).add(v3(0, .08, 0)); cam(c.toArray(), [cint.x, cint.y + .04, cint.z], 42); }   // de lado, na cintura: a mão na coronha
+    else if (t < 5.9) cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], 20);                       // por cima do ombro: os olhos na mata
+    else if (t < 7.4) { const u = P.suave(5.9, 7.4, t); cam([P.lerp(2.9, 2.6, u), 1.48, P.lerp(10.7, 10.45, u)], [1.55, 1.42, 9.4], P.lerp(30, 22, u)); }   // close no rosto
+    else { const u = P.suave(7.4, 9, t); cam([2.4, 1.45, 10.4], [OLHO.x, OLHO.y, OLHO.z], P.lerp(16, 6.5, u)); }                                    // de volta: continuam lá
+  };
+};
+</script></body></html>

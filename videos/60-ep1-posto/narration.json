@@ -17,27 +17,33 @@
   },
   {
    "file": "audio/voz/ep1/mix/60_03.wav",
-   "start": 28.5,
+   "start": 27.6,
    "dur": 0.45,
-   "ganho": -14
+   "ganho": -16
   },
   {
    "file": "audio/voz/ep1/mix/60_04.wav",
-   "start": 30.45,
+   "start": 29.0,
    "dur": 0.42,
-   "ganho": -4
+   "ganho": -7
   },
   {
    "file": "audio/voz/ep1/mix/60_05.wav",
-   "start": 31.6,
+   "start": 28.5,
    "dur": 0.84,
    "ganho": 0
   },
   {
    "file": "audio/voz/ep1/mix/60_06.wav",
-   "start": 32.1,
+   "start": 29.05,
    "dur": 0.33,
-   "ganho": -14
+   "ganho": -15
+  },
+  {
+   "file": "audio/voz/ep1/mix/60_07.wav",
+   "start": 33.95,
+   "dur": 0.27,
+   "ganho": -22
   }
  ]
 }

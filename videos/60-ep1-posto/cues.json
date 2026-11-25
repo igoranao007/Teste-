@@ -1,5 +1,5 @@
 {
- "dur": 40,
+ "dur": 39,
  "bpm": 120,
  "fps": 30,
  "music": {
@@ -21,7 +21,7 @@
   {
    "type": "lampada",
    "t": 0,
-   "d": 40,
+   "d": 39,
    "rede": 60,
    "pisca": 0,
    "gain": -12
@@ -29,7 +29,7 @@
   {
    "type": "grilos",
    "t": 0,
-   "d": 40,
+   "d": 39,
    "gain": -8
   },
   {
@@ -203,7 +203,7 @@
   },
   {
    "type": "pisada",
-   "t": 25.006,
+   "t": 24.905,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 14,
@@ -212,7 +212,7 @@
   },
   {
    "type": "pisada",
-   "t": 25.427,
+   "t": 25.255,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 15,
@@ -221,7 +221,7 @@
   },
   {
    "type": "pisada",
-   "t": 25.818,
+   "t": 25.582,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 16,
@@ -230,7 +230,7 @@
   },
   {
    "type": "pisada",
-   "t": 26.237,
+   "t": 25.931,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 17,
@@ -239,7 +239,7 @@
   },
   {
    "type": "pisada",
-   "t": 26.628,
+   "t": 26.257,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 18,
@@ -248,7 +248,7 @@
   },
   {
    "type": "pisada",
-   "t": 27.047,
+   "t": 26.606,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 19,
@@ -257,7 +257,7 @@
   },
   {
    "type": "pisada",
-   "t": 27.445,
+   "t": 26.938,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 20,
@@ -266,91 +266,91 @@
   },
   {
    "type": "pisada",
-   "t": 29.375,
+   "t": 28.225,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 21,
-   "gain": -6.7,
+   "gain": -8.7,
    "pan": -0.06
   },
   {
    "type": "pisada",
-   "t": 29.636,
+   "t": 28.438,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 22,
-   "gain": -5.2,
+   "gain": -7.2,
    "pan": 0.06
   },
   {
    "type": "pisada",
-   "t": 29.879,
+   "t": 28.637,
    "sup": "concreto",
    "peso": 1.0,
    "seed": 23,
-   "gain": -6.7,
+   "gain": -8.7,
    "pan": -0.06
   },
   {
    "type": "pisada",
-   "t": 31.391,
+   "t": 29.691,
    "sup": "madeira",
    "peso": 1.0,
    "seed": 24,
-   "gain": -20.7,
+   "gain": -24.7,
    "pan": -0.06
   },
   {
    "type": "pisada",
-   "t": 31.703,
+   "t": 30.003,
    "sup": "madeira",
    "peso": 1.0,
    "seed": 25,
-   "gain": -19.2,
+   "gain": -23.2,
    "pan": 0.06
   },
   {
    "type": "pisada",
-   "t": 31.994,
+   "t": 30.294,
    "sup": "madeira",
    "peso": 1.0,
    "seed": 26,
-   "gain": -20.7,
+   "gain": -24.7,
    "pan": -0.06
   },
   {
    "type": "pisada",
-   "t": 32.305,
+   "t": 30.605,
    "sup": "madeira",
    "peso": 1.0,
    "seed": 27,
-   "gain": -19.2,
+   "gain": -23.2,
    "pan": 0.06
   },
   {
    "type": "pisada",
-   "t": 32.596,
+   "t": 30.896,
    "sup": "madeira",
    "peso": 1.0,
    "seed": 28,
-   "gain": -20.7,
+   "gain": -24.7,
    "pan": -0.06
   },
   {
    "type": "swoosh",
-   "t": 31.25,
+   "t": 28.15,
    "gain": -20
   },
   {
    "type": "drone",
-   "t": 31.6,
-   "d": 8.4,
+   "t": 28.5,
+   "d": 10.5,
    "root": 29,
    "gain": -6
   },
   {
    "type": "sobe",
-   "t": 37.6,
+   "t": 36.6,
    "d": 2.4,
    "root": 29,
    "sem": 3,
@@ -358,25 +358,25 @@
   },
   {
    "type": "carro_abre",
-   "t": 33.3,
+   "t": 30.3,
    "gain": -4
   },
   {
    "type": "pisada",
-   "t": 35.908,
+   "t": 31.547,
    "sup": "concreto",
    "peso": 0.9,
    "seed": 29,
-   "gain": -0.7000000000000002,
+   "gain": -1.7000000000000002,
    "pan": -0.06
   },
   {
    "type": "pisada",
-   "t": 36.445,
+   "t": 32.184,
    "sup": "concreto",
    "peso": 0.9,
    "seed": 30,
-   "gain": 0.7999999999999998,
+   "gain": -0.20000000000000018,
    "pan": 0.06
   }
  ]
