@@ -13,21 +13,24 @@ import * as F from '../../lib/filme.js';
 import * as V from '../../lib/v4.js';
 import * as E4 from '../../lib/elenco4.js';
 import * as T from '../../lib/tgp.js';
+import * as E from '../../lib/ep1.js';
+import * as BK from '../../lib/bunker.js';
 const { THREE } = P;
 window.SETUP = async () => {
   const S = P.palco({ fov: 40, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
   const sala = await V.salaIgor4(cena), { I, Y, lamp, est } = sala, fala = await V.vozes('ep1'); S.camera.near = .03; S.camera.updateProjectionMatrix();
+  await E.computadorNovo(sala); BK.arrumarSala(cena, sala);                                // a MESMA sala arrumada das cenas 64–68 (nada flutuando)
   const q = new URLSearchParams(location.search), camQ = q.get('cam')?.split(',').map(Number);
   const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj); T.poses(Ad.modelo);
   const mal = T.maleta(); cena.add(mal);
   const MESA = new THREE.Vector3(-.3, Y, .46), v3 = (x, y, z) => new THREE.Vector3(x, y, z);
   // as 4 fichas, deitadas na mesa uma por cima da outra
   const NOMES = ['piolho', 'roraima', 'jv', 'phantom'], fichas = [];
-  for (const [i, n] of NOMES.entries()) { const tx = await V.pastaFicha(n); const f = P.malha(new THREE.PlaneGeometry(.4, .3), P.mat({ mapa: tx }), { pos: [.32, Y + .004 + i * .002, .62], rot: [-Math.PI / 2, 0, -.08 + i * .05] }); cena.add(f); fichas.push(f); }
-  const capa = P.caixa(.42, .012, .32, P.mat({ cor: '#7a6a44' }), { pos: [.32, Y + .02, .62] }); cena.add(capa);
+  for (const [i, n] of NOMES.entries()) { const tx = await V.pastaFicha(n); const f = P.malha(new THREE.PlaneGeometry(.4, .3), P.mat({ mapa: tx }), { pos: [BK.GEO.FICHAS[0], Y + .004 + i * .002, BK.GEO.FICHAS[1]], rot: [-Math.PI / 2, 0, -.08 + i * .05] }); cena.add(f); fichas.push(f); }
+  const capa = BK.pastaFichas(cena, Y);
   const porta = P.malha(new THREE.PlaneGeometry(1.1, 3.4, 2, 6), P.mat({ cor: '#7dffa0', opac: .16, aditivo: true, semLuz: true, lados: THREE.DoubleSide }), { pos: [-.7, .02, 3.6], rot: [-Math.PI / 2, 0, 0] }); cena.add(porta);
   const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
-  const AD_FIM = [-.12, 1.32], GU_FIM = [-.95, 1.62], MAL_MESA = new THREE.Vector3(-.05, Y, .52);
+  const AD_FIM = [-.12, 1.32], GU_FIM = [-.95, 1.62], MAL_MESA = new THREE.Vector3(-.45, Y, .6);
   const ALCA = () => mal.localToWorld(v3(0, mal.alca, 0));                                   // alça (no alto da maleta em pé)
   S.update = t => {
     sala.video(t + 14); V.luzSalaVerde(sala, t, S.camera); porta.scale.x = P.suave(0, .6, t);
@@ -48,7 +51,7 @@ window.SETUP = async () => {
     const m = { inclina: .02 * Math.sin(t * 1.1) + .12 * pega * (1 - pousa) };
     const kR = P.suave(4.3, 4.95, t) * (1 - P.suave(5.9, 6.5, t));
     if (kR > 0) { m.R = ALCA().toArray(); m.kR = kR; m.poloR = [-.6, -.6, -.2]; }
-    if (aberto) { m.L = [.32 + .1 * Math.sin(t * 3), Y + .07, .5]; m.kL = P.suave(5.6, 6.35, t) * (1 - P.suave(10.7, 11.3, t)); m.plana = true; m.pegada = { L: { dedos: [0, -.5, 1], indice: [-1, 0, 0] } }; }
+    if (aberto) { m.L = [BK.GEO.FICHAS[0] + .1 * Math.sin(t * 3), Y + .07, BK.GEO.FICHAS[1] - .12]; m.kL = P.suave(5.6, 6.35, t) * (1 - P.suave(10.7, 11.3, t)); m.plana = true; m.pegada = { L: { dedos: [0, -.5, 1], indice: [-1, 0, 0] } }; }
     const v = fala('63', t, 'igor'); I.pose(t, m); I.animar(t, { boca: v, pisca: (t % 4.1) > 3.95 ? 1 : 0 });
     const praEles = P.suave(1.2, 2.0, t) * (1 - P.suave(5.3, 5.9, t)), praMesa = P.suave(5.6, 6.2, t) * (1 - P.suave(11.0, 11.4, t)), praAd = P.suave(11.0, 11.4, t);
     I.cabeca.rotation.y += .1 * praEles; I.cabeca.rotation.x += -.12 * praEles + .5 * praMesa - .1 * praAd;
@@ -59,7 +62,7 @@ window.SETUP = async () => {
     if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
     else if (t < 3.8) cam(olho.toArray(), rostoIgor.clone().lerp(v3(0, .9, .3), .3).toArray(), 52);                  // POV: entrando; o Igor vira: "Trouxeram?"
     else if (t < 6.0) cam(olho.toArray(), ALTO.clone().lerp(rostoIgor, .55).toArray(), 60);                          // POV: a maleta na mão; o Igor pega
-    else if (t < 11.0) { const f = fichas[qual].position; cam([f.x + .02, Y + .62, f.z + .12], [f.x, Y, f.z], 40); }   // as pastas, uma por uma
+    else if (t < 11.0) { const f = fichas[qual].position; cam(olho.toArray(), [f.x, Y, f.z], P.lerp(60, 30, P.suave(6.0, 6.8, t))); }   // POV: o Adryan baixa o olhar pras fichas, uma por uma (MANUAL: nada 'de cima')
     else cam(olho.toArray(), rostoIgor.clone().lerp(MAL_MESA, .35).toArray(), 46);                                  // POV: o Igor olha a maleta: "Então... o ARG-14."
   };
 };

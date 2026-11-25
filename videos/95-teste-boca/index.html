@@ -1,0 +1,18 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- teste: boca PS1 (lib/ep1.js bocaPS1) — ?p=gusta&dy=0.06&dz=0.1&larg=0.045&v=0..1 -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:2}</script>
+<script src="../../lib/boot.js"></script></head><body><div id="stage"></div>
+<script type="module">
+import * as P from '../../lib/ps1.js';
+import * as E4 from '../../lib/elenco4.js';
+import * as E from '../../lib/ep1.js';
+const { THREE } = P;
+window.SETUP = async () => {
+  const q = new URLSearchParams(location.search), n = k => +(q.get(k));
+  const S = P.palco({ fov: 24, cam: [0, 1.6, 1.2], alvo: [0, 1.6, 0], fundo: '#1a1a1c', luz: { keyDir: [-.4, .7, .8], keyCor: '#f2efe6', fillDir: [.8, .2, .3], fillCor: '#6a7078', amb: '#626a66' } });
+  const A = await E4.ator(q.get('p') || 'gusta'); S.scene.add(A.obj); A.pose('idle', 0);
+  const b = E.bocaPS1(A, { dy: n('dy') || .06, dz: n('dz') || .1, larg: n('larg') || .045 }); b.falar(n('v'));
+  const cab = A.osso('spine.005').getWorldPosition(new THREE.Vector3());
+  S.update = t => { A.pose('idle', 0); b.falar(n('v')); S.camera.position.set(cab.x + (n('lado') || 0), cab.y + .08, cab.z + .55); S.camera.lookAt(cab.x, cab.y + .07, cab.z); S.camera.updateProjectionMatrix(); };
+};
+</script></body></html>

@@ -201,3 +201,13 @@ secreta** · 69 Kessinburgh · 70 base do Dom · 71 casa do Phantom (fim).
   Auditoria das cenas 60–68: `entrega/ep1/AUDITORIA_EP1_60-68.md` (67 e 68 refeitas na v2).
 - **PERGUNTA EM ABERTO**: o manual mostra, como exemplo, a KATANA AMARELA atravessando a porta-bunker (Phantom sem aparecer) e o Adryan e o Gusta
   se jogando no chão. Isso entra na história do ep. 1? (não produzir antes da resposta: a história não muda sem autorização)
+- **Boca sincronizada: DISPENSADA pelo diretor (25/11)** ("ignora boca, esquece pelo menos isso"). A peça `bocaPS1` fica em lib/ep1.js sem uso.
+- **KATANA AMARELA: APROVADA pelo diretor (25/11)** — entra logo depois de trancarem a porta (cena 68), o atacante não aparece.
+  (a "PERGUNTA EM ABERTO" acima foi respondida: SIM.)
+- **Objetos flutuando / sem sentido (diretor, 25/11: "tipo um copo d'água no Japão")** — corrigido na sala do bunker (63–68), que agora é
+  UMA sala montada igual em todas as cenas (`lib/bunker.js` → `arrumarSala`): copo e celular no tampo, porta-retrato e luminária fora da
+  maleta, pastas em cima do arquivo, livros e fichários na prateleira de verdade, gabinete no chão, computador novo também na 63/64 (antes
+  o antigo boiava). QA automático: `node tools/qa_flutuando.mjs <cena> <t>` (raios pra baixo + objetos do tampo que se atravessam).
+- **Cena 68 v3 (25/11)**: toda em POV do Adryan, continuidade da 67, porta fechada com as mãos (Gusta puxa, Adryan bate), volante, botão
+  (o Igor contorna a cadeira caída), PANCADA → KATANA → esquiva em 3 tempos → no chão respirando. 30 s. Plano em
+  `entrega/ep1/PLANO_SEQUENCIA_BUNKER.md`. 63 e 64: os planos "de cima" (fichas, fita) viraram POV do Adryan.

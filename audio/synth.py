@@ -407,6 +407,28 @@ def fx_porta_madeira(d=.9):                 # porta de madeira fechando: baque s
     t = tt(d); baque = osc('sin', 85 * (1 + .4 * np.exp(-t / .02)), d) * np.exp(-t / .14) + .4 * bp(noise(d), 120, 700) * np.exp(-t / .03)
     chac = bp(noise(d), 900, 3000) * np.exp(-np.clip(t - .03, 0, None) / .04) * .2
     return sat(baque + chac, 1.4)
+def fx_respira(d=4.0, ritmo=1.6, forte=1.0):   # respiração ofegante (no chão, depois do susto): sopros de ruído filtrado, inspira/expira, desacelerando
+    t = tt(d); x = np.zeros(len(t)); tb, k = 0.0, 0
+    while tb < d - .2:
+        per = (1 / ritmo) * (1 + .35 * tb / d); ins, exp_ = per * .42, per * .5
+        for (a, dur, lo, hi, g) in ((tb, ins, 700, 2600, .55), (tb + ins, exp_, 400, 1700, .8)):
+            n = N(dur); i = N(a); j = min(len(x), i + n); u = np.linspace(0, 1, n)[:j - i]
+            x[i:j] += bp(noise(dur), lo, hi)[:j - i] * np.sin(np.pi * u) ** 1.5 * g * forte * (1 - .4 * tb / d)
+        tb += per; k += 1
+    return x * _janela(t, d, .05, .4)
+def fx_lamina(d=1.6):                       # LÂMINA atravessando a porta de aço: estalo + rasgo metálico + o "cantar" do aço
+    t = tt(d); est = sat(bp(noise(d), 1500, 9000) * np.exp(-t / .006) * 3, 2)
+    rasgo = bp(noise(d), 2500, 7000) * np.exp(-t / .09) * (.6 + .4 * np.sin(2 * np.pi * 61 * t))
+    canta = sum(osc('sin', f, d) * np.exp(-t / dd) * g for f, dd, g in ((2730, .5, .5), (4310, .35, .3), (6120, .22, .2), (1480, .7, .25)))
+    return est + rasgo * .7 + canta * .6 + .5 * osc('sin', 70 * (1 + .6 * np.exp(-t / .02)), d) * np.exp(-t / .12)
+def fx_vibra(d=1.4, f=19.0):                # a lâmina VIBRANDO cravada (zumbido que morre)
+    t = tt(d); return (osc('sin', 1480, d) * .4 + osc('sin', 2730, d) * .25) * (.5 + .5 * np.sin(2 * np.pi * f * t)) * np.exp(-t / .45)
+def fx_baque_corpo(d=.8):                   # corpo caindo no chão (roupa + baque surdo)
+    t = tt(d); return sat(osc('sin', 62 * (1 + .5 * np.exp(-t / .02)), d) * np.exp(-t / .16) + .5 * bp(noise(d), 150, 900) * np.exp(-t / .05) + .25 * bp(noise(d), 1500, 5000) * np.exp(-t / .03), 1.5)
+SFX.update({
+ 'respira': (lambda p: fx_respira(p.get('d', 4.0), p.get('ritmo', 1.6), p.get('forte', 1.0)), -20, False), 'lamina': (lambda p: fx_lamina(), -3, True),
+ 'vibra': (lambda p: fx_vibra(p.get('d', 1.4)), -16, False), 'baque_corpo': (lambda p: fx_baque_corpo(), -7, False),
+})
 SFX.update({
  'motor': (lambda p: fx_motor(p.get('d', 6.0), p.get('abafado', 0), p.get('rpm', 1.0)), -17, False), 'pneus': (lambda p: fx_pneus(p.get('d', 6.0)), -24, True),
  'grilos': (lambda p: fx_grilos(p.get('d', 6.0)), -27, True), 'passo': (lambda p: fx_passo(), -14, False), 'pisada': (lambda p: fx_pisada(p), -17, False), 'radio': (lambda p: fx_radio(p.get('d', 6.0)), -32, False),

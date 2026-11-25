@@ -1,11 +1,15 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- EPISÓDIO 1 (reformulado) · CENA 68 · A PORTA-BUNKER (continua a 67; a sirene vermelha ainda toca). POV do ADRYAN: o Igor, de pé,
-     se arruma e aponta a porta: "Fecha essa porta imediatamente!" · Adryan: "Mas é o Nicolas, ele tá só!" · Igor: "Ele vai ficar bem.
-     O Nicolas conhece os procedimentos de sobrevivência." · o Adryan não aceita e vai pra porta; o GUSTA segura ele pelos ombros:
-     "Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer." · os dois FECHAM a porta-bunker juntos e TRANCAM (volante e trincos)
-     · ao mesmo tempo o Igor aperta o BOTÃO VERMELHO: alerta, e a estante desliza: a SALA SECRETA, tomada pela luz verde das telas.
-     Corte sincronizado pra Kessinburgh (cena 69). ?cam=x,y,z,ax,ay,az,fov (inspeção) -->
-<script>VIDEO={w:1920,h:1080,fps:30,dur:23}</script>
+<!-- EPISÓDIO 1 (reformulado) · CENA 68 · A PORTA-BUNKER E A KATANA — versão 3, TODA no POV do ADRYAN (MANUAL DE DIREÇÃO; plano em
+     entrega/ep1/PLANO_SEQUENCIA_BUNKER.md). Continua a 67 sem pular ninguém: o Adryan em GEO.RECUO, o Igor de pé em GEO.IG_PE, o Gusta
+     perto da porta, a cadeira caída, a maleta aberta na mesa, a sirene vermelha.
+     Igor aponta a porta: "Fecha essa porta imediatamente!" (o Adryan olha a porta e volta) · Adryan: "Mas é o Nicolas, ele tá só!" ·
+     Igor: "Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência." · o Adryan vai pra porta; o GUSTA entra na frente e
+     segura os ombros dele: "Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer." · o Gusta puxa a folha de aço, o Adryan pega o
+     puxador e BATE a porta; gira o VOLANTE (trincos) · vira: o Igor aperta o BOTÃO VERMELHO, a estante desliza, luz verde · PANCADA na
+     porta: ele vira · a KATANA AMARELA atravessa a porta a ~40 cm da cabeça dele (o atacante NÃO aparece) · o Adryan se joga no chão em
+     3 tempos (susto → cedência → impacto), o Gusta cai pro outro lado · no chão, respirando, a lâmina cravada na porta, sirene abafada.
+     Corte seco pra Kessinburgh. ?cam=x,y,z,ax,ay,az,fov (inspeção) -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:30}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
 <div id="stage"></div>
@@ -14,97 +18,166 @@ import * as P from '../../lib/ps1.js';
 import * as F from '../../lib/filme.js';
 import * as V from '../../lib/v4.js';
 import * as T from '../../lib/tgp.js';
-import * as E4 from '../../lib/elenco4.js';
 import * as E from '../../lib/ep1.js';
+import * as BK from '../../lib/bunker.js';
 const { THREE } = P;
 window.SETUP = async () => {
-  const S = P.palco({ fov: 40, cam: [0, 1.5, 3], alvo: [0, 1.0, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 4, longe: 14 }, luz: F.LUZ_SALA }), cena = S.scene;
-  S.camera.near = .03;
-  const sala = await V.salaIgor4(cena), { I, Y, pc, rot, ANG, cadeira } = sala, fala = await V.vozes('ep1');
-  await E.computadorNovo(sala);
+  const S = P.palco({ fov: 50, cam: [0, 1.6, 1.6], alvo: [0, 1.0, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 4, longe: 14 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const B = await BK.montar(S), { sala, I, Y, pc, Ad, Gu, GEO } = B, { lamp } = sala, fala = await V.vozes('ep1');
   const q0 = new URLSearchParams(location.search), camQ = q0.get('cam')?.split(',').map(Number);
   const v3 = (x, y, z) => new THREE.Vector3(x, y, z), env = (t, a, b, c, d) => P.suave(a, b, t) * (1 - P.suave(c, d, t));
+  const ang = (x0, z0, x1, z1) => Math.atan2(x1 - x0, z1 - z0), angLerp = (a, b, u) => { let d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return a + d * u; };
   const frente = r => v3(Math.sin(r), 0, Math.cos(r)), direita = r => v3(-Math.cos(r), 0, Math.sin(r));
-  const cam = (p, a, fov) => { S.camera.fov = fov; S.camera.position.set(...p); S.camera.lookAt(...a); S.camera.updateProjectionMatrix(); };
-  const angLerp = (a, b, u) => { let d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; return a + d * u; };
-  // a cadeira continua caída (cena 67) e o Igor sentado some: agora ele está de pé
-  I.girar(1); const f0 = frente(ANG), d0 = direita(ANG); const tomba = new THREE.Group(); tomba.position.copy(f0.clone().multiplyScalar(-.32)); cena.add(tomba);
-  cena.updateMatrixWorld(true); tomba.attach(cadeira); tomba.quaternion.setFromAxisAngle(d0, 1.42); I.obj.visible = false;
+  // ── continuidade da 67: cadeira caída, o Igor sentado some (agora é o corpo animado, de pé), maleta aberta na mesa
+  B.tombar(1.42); I.obj.visible = false; B.usarTerminal(false);
+  const mal = T.maleta(); cena.add(mal); mal.position.set(GEO.MALETA[0], Y, GEO.MALETA[1]); mal.deitar(1); mal.abrir(1.85); mal.brilho(1);
+  sala.vcr?.led?.(1);
   const Ig = await T.igor({ anim: true }); cena.add(Ig.obj);
-  const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj); T.poses(Ad.modelo); T.poses(Gu.modelo);
-  const porta = E.portaBunker(cena, { x: -.7, z: 3.6 });
-  const luminaria = new THREE.Group(); luminaria.position.set(-.7, 2.42, 3.33); cena.add(luminaria);                 // luminária de grade sobre a porta
+  // ── a porta-bunker (aberta), a luminária de grade em cima, o botão vermelho, a sala secreta atrás da estante da direita
+  const porta = E.portaBunker(cena, { x: GEO.PORTA[0], z: GEO.PORTA[1] });
+  const luminaria = new THREE.Group(); luminaria.position.set(GEO.PORTA[0], 2.42, GEO.PORTA[1] - .27); cena.add(luminaria);
   luminaria.add(P.caixa(.32, .1, .14, P.mat({ cor: '#2b312e' })), P.caixa(.26, .06, .08, P.mat({ cor: '#ffe9b8', semLuz: true }), { pos: [0, -.05, -.02] }));
-  const cone = P.malha(new THREE.ConeGeometry(.9, 2.3, 8, 1, true), P.mat({ cor: '#ffe2a8', opac: .06, aditivo: true, semLuz: true, lados: THREE.DoubleSide }), { pos: [-.7, 1.25, 3.2] }); cena.add(cone);
-  const botao = E.botaoVermelho(); botao.position.set(-.48, Y, .2); botao.rotation.y = .4; cena.add(botao);
+  const botao = E.botaoVermelho(); botao.position.set(GEO.BOTAO[0], Y, GEO.BOTAO[1]); botao.rotation.y = .4; cena.add(botao);
   const itens = cena.children.filter(o => o.position.x > .8 && o.position.x < 2.4 && Math.abs(o.position.z + 1.43) < .03);
   const secreta = E.salaSecreta(cena, itens);
-  // posições
-  const IG = [-1.0, .15], R_IG = .35, AD0 = [-.12, 1.32], GU0 = [-.95, 1.62];
-  const AD_PORTA = [-.5, 2.55], GU_ATRAS = [-.62, 2.05], AD_FECHA = [-.55, 3.05], GU_FECHA = [-1.0, 2.95];
-  // alarme no monitor (continua da cena 67): vermelho + ALERTA
+  // ── a KATANA AMARELA (só a lâmina entra na sala: o atacante fica do lado de fora). Eixo da lâmina = −z local.
+  const kat = new THREE.Group(); kat.name = 'katana'; cena.add(kat);
+  const lam = new THREE.Group(); kat.add(lam);
+  lam.add(P.caixa(.007, .046, .62, P.mat({ cor: '#d9b21a', semLuz: true }), { pos: [0, 0, -.31] }));                     // a folha (aço AMARELO, brilha na penumbra)
+  lam.add(P.caixa(.004, .006, .6, P.mat({ cor: '#fff3a8', semLuz: true }), { pos: [0, -.016, -.3] }));                  // o fio, brilhando
+  const ponta = P.caixa(.007, .04, .07, P.mat({ cor: '#d9b21a', semLuz: true }), { pos: [0, -.006, -.645] }); ponta.rotation.x = .45; lam.add(ponta);
+  const FURO = v3(GEO.PORTA[0] - .25, 1.62, GEO.PORTA[1] - .1);                                     // onde atravessa (face de dentro da folha), ~40 cm à direita da cabeça
+  kat.position.copy(FURO); kat.rotation.set(.08, -.12, .95); kat.visible = false;                  // inclinada: o fio pra baixo-direita, a face pra sala
+  // faíscas no furo
+  const fais = []; for (let i = 0; i < 14; i++) { const m = P.caixa(.012, .012, .012, P.mat({ cor: '#ffd86a', semLuz: true, aditivo: true })); m.visible = false; cena.add(m); const r = P.rng(i * 13 + 5);
+    fais.push({ m, v: v3((r() - .5) * 1.6, r() * 1.2 - .1, -(.6 + r() * 1.2)) }); }
+  // ── posições (metros, mundo) — mesma geografia da sequência
+  const IG0 = GEO.IG_PE, AD0 = GEO.RECUO, GU0 = GEO.GU_FRENTE;
+  const AD_BARRADO = [-.42, 1.78], GU_BARRA = [-.48, 2.33];                                       // o Gusta entra na frente e segura
+  const GU_PUXA = [-.8, 2.3], GU_DEPOIS = [-1.02, 2.42], AD_PORTA = [-.12, 2.97], AD_VOLANTE = [-.55, 2.85];                 // fora do giro da folha (raio 1,15 m da dobradiça)
+  const IG_BOTAO = [-.74, -.04], CAM_IG = [[IG0[0], IG0[1]], [-1.02, -.42], IG_BOTAO];             // o Igor contorna a cadeira caída até o botão
+  const R_IG0 = ang(IG0[0], IG0[1], AD0[0], AD0[1]);
+  const igorAtor = { obj: Ig.obj, passada: 1.25, pose: (c, k) => Ig.corpo.clip(c === 'walk' ? 'u_Walk_Loop' : 'u_Idle_Loop', k), dur: c => Ig.corpo.dur(c === 'walk' ? 'u_Walk_Loop' : 'u_Idle_Loop') };
+  // monitor: ALERTA vermelho (o DOM saiu da tela quando a sirene disparou)
   const monitor = t => { const x = pc.ctx, W = pc.cv.width, H = pc.cv.height, on = Math.floor(t * 3) % 2 === 0; x.fillStyle = on ? '#5a0804' : '#120201'; x.fillRect(0, 0, W, H);
     if (on) { x.fillStyle = '#ff2a12'; x.fillRect(W * .1, H * .38, W * .8, H * .24); x.fillStyle = '#1a0200'; x.font = `bold ${Math.floor(H * .14)}px monospace`; x.textAlign = 'center'; x.fillText('ALERTA', W / 2, H * .55); }
     pc.tex.needsUpdate = true; };
+  // porta: o Gusta PUXA a folha (19,0–19,6), ela embala (19,6–20,0), o Adryan pega o puxador e BATE (20,0–20,4)
+  const kPorta = t => t < 19 ? 0 : t < 19.6 ? .25 * P.suave(19, 19.6, t) : t < 20 ? .25 + .35 * (t - 19.6) / .4 : Math.min(1, .6 + .4 * ((t - 20) / .4) ** 1.6);
+  const T_KAT = 24.3, T_CAI = 25.35; window.__68 = { Gu, Ad, Ig };
+  // virar o olhar entre dois alvos OPOSTOS (Igor atrás ↔ porta na frente) pelo ÂNGULO, não pela reta entre eles (a reta passa pela própria cabeça)
+  const olharGira = (pos, A, Bv, k, lado = 0) => { let a = ang(pos.x, pos.z, A.x, A.z), b = ang(pos.x, pos.z, Bv.x, Bv.z); let d = ((b - a + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+    if (lado > 0 && d < 0) d += Math.PI * 2; if (lado < 0 && d > 0) d -= Math.PI * 2; const r = a + d * k;
+    const dist = P.lerp(Math.hypot(A.x - pos.x, A.z - pos.z), Math.hypot(Bv.x - pos.x, Bv.z - pos.z), k);
+    return { alvo: v3(pos.x + Math.sin(r) * dist, P.lerp(A.y, Bv.y, k), pos.z + Math.cos(r) * dist), r }; };
+  let E0 = null;                                                                                     // o olho no instante da katana (de onde ele se joga)
   S.update = t => {
     monitor(t);
-    const vI = fala('68', t, 'igor'), vA = fala('68', t, 'adryan'), vG = fala('68', t, 'gusta');
-    // ── IGOR (de pé): se arruma (0–.6), APONTA a porta gritando (0,6–3,0), fala com o Adryan (5,3–9,4), vai até o botão (16,6–17,4) e APERTA (17,6)
-    Ig.obj.position.set(IG[0], 0, IG[1]); Ig.obj.rotation.y = R_IG + .25 * P.suave(16.6, 17.2, t);
-    Ig.corpo.clip('u_Idle_Loop', t); Ig.obj.updateMatrixWorld(true);
-    const aponta = env(t, .55, .9, 2.8, 3.3), aperta = env(t, 16.9, 17.5, 18.4, 18.9), puxa = env(t, -1, 0, .3, .6);
+    const vI = fala('68', t, 'igor'), vG = fala('68', t, 'gusta');
+    // ═══ IGOR (de pé, corpo animado) ═══
+    let rIg = R_IG0;
+    if (t < 15.0) { Ig.obj.position.set(IG0[0], 0, IG0[1]); Ig.corpo.clip('u_Idle_Loop', t); }
+    else if (BK.caminharPor(igorAtor, CAM_IG, t, 15.0, 17.6)) rIg = Ig.obj.rotation.y;
+    else { Ig.obj.position.set(IG_BOTAO[0], 0, IG_BOTAO[1]); Ig.corpo.clip(t > T_KAT + .1 ? 'm_idle_alert' : 'u_Idle_Loop', t);
+      rIg = angLerp(ang(IG_BOTAO[0], IG_BOTAO[1], GEO.BOTAO[0], GEO.BOTAO[1]), ang(IG_BOTAO[0], IG_BOTAO[1], GEO.PORTA[0], GEO.PORTA[1]), P.suave(T_KAT + .15, T_KAT + .7, t)); }
+    if (t < 15.0) rIg = R_IG0 + .25 * env(t, 11.6, 12.2, 14.5, 15);                                   // acompanha o Adryan indo pra porta
+    if (t < 15.0 || t > 17.6) Ig.obj.rotation.y = rIg;
+    Ig.obj.updateMatrixWorld(true);
+    const aponta = env(t, .55, .9, 2.9, 3.4), aperta = env(t, 22.55, 22.95, 23.5, 23.9), puxa = env(t, 6.8, 7.1, 7.6, 8.0);
     if (aponta > 0) { const o = Ig.corpo.osso('upper_arm.R').getWorldPosition(v3()), alvo = o.clone().add(porta.dentro(0).sub(o).setY(0).normalize().multiplyScalar(.55)).add(v3(0, .12, 0));
       Ig.corpo.alcancar('R', alvo.toArray(), [-.5, -.8, .2], .02); }
-    if (puxa > 0) Ig.corpo.alcancar('L', Ig.obj.position.clone().add(v3(0, 1.0, 0)).addScaledVector(frente(R_IG), .18).toArray(), [.6, -.6, 0], .02);   // ajeita o moletom
-    if (aperta > 0) { botao.updateMatrixWorld(true); const b = botao.topo().add(v3(0, .03 * (1 - P.suave(17.45, 17.6, t)) - .015 * env(t, 17.55, 17.62, 17.8, 18.0), 0)); Ig.corpo.alcancar('R', b.toArray(), [-.6, -.7, -.2], .02); }
-    botao.apertar(env(t, 17.55, 17.62, 17.8, 18.0));
+    if (puxa > 0) Ig.corpo.alcancar('L', Ig.obj.position.clone().add(v3(0, 1.0, 0)).addScaledVector(frente(rIg), .18).toArray(), [.6, -.6, 0], .02);   // ajeita o moletom
+    if (aperta > 0) { botao.updateMatrixWorld(true); const b = botao.topo().add(v3(0, .03 * (1 - P.suave(22.9, 23.0, t)) - .015 * env(t, 23.0, 23.05, 23.25, 23.4), 0)); Ig.corpo.alcancar('R', b.toArray(), [-.6, -.7, -.2], .02); }
+    botao.apertar(env(t, 23.0, 23.05, 23.25, 23.4));
     Ig.assentar(); Ig.animar(t, { boca: vI, pisca: (t % 3.4) > 3.25 ? 1 : 0 });
-    // ── ADRYAN: escuta (0–2,8), protesta (2,9), escuta, NÃO aceita e vai pra porta (9,6–10,9), o Gusta segura; vira pro Gusta (11,6–12,2),
-    //    vão juntos fechar (15,0–17,5): mãos na folha; depois gira o volante (17,9–19,3); vira pra sala secreta (20,2–21,0)
-    let rA;
-    if (t < 9.6) { Ad.obj.position.set(AD0[0], 0, AD0[1]); rA = Math.atan2(IG[0] - AD0[0], IG[1] - AD0[1]); Ad.obj.rotation.y = rA; Ad.pose('idle', t, 'talk', .5 * fala.peso('68', t, 'adryan'), t); }
-    else if (t < 15.0) { const anda = V.caminhar(Ad, AD0, AD_PORTA, t, 9.6, 10.9, { de: Math.atan2(IG[0] - AD0[0], IG[1] - AD0[1]) });
-      if (!anda) { Ad.obj.rotation.y = angLerp(Math.atan2(AD_PORTA[0] - AD0[0], AD_PORTA[1] - AD0[1]), Math.atan2(GU_ATRAS[0] - AD_PORTA[0], GU_ATRAS[1] - AD_PORTA[1]), P.suave(11.6, 12.3, t)); Ad.pose('idle', t); } }
-    else if (t < 20.2) { if (!V.caminhar(Ad, AD_PORTA, AD_FECHA, t, 15.0, 16.0, { de: Math.atan2(GU_ATRAS[0] - AD_PORTA[0], GU_ATRAS[1] - AD_PORTA[1]) })) { Ad.obj.rotation.y = 0; Ad.pose('idle', t); } }
-    else { Ad.obj.position.set(AD_FECHA[0], 0, AD_FECHA[1]); Ad.obj.rotation.y = angLerp(0, Math.atan2(1.42 - AD_FECHA[0], -1.7 - AD_FECHA[1]), P.suave(20.2, 21.0, t)); Ad.pose('idle', t); }
-    Ad.obj.updateMatrixWorld(true);
-    // ── GUSTA: vem por trás (9,9–10,7) e segura o Adryan PELOS OMBROS (10,6–14,9), fala; vão fechar (15,0–16,0): empurra a folha; vira pra sala secreta
-    let rG;
-    if (t < 9.9) { Gu.obj.position.set(GU0[0], 0, GU0[1]); Gu.obj.rotation.y = Math.atan2(IG[0] - GU0[0], IG[1] - GU0[1]) + .2; Gu.pose('idle', t + .7); }
-    else if (t < 15.0) { if (!V.caminhar(Gu, GU0, GU_ATRAS, t, 9.9, 10.7, { de: Math.atan2(IG[0] - GU0[0], IG[1] - GU0[1]) + .2 })) {
-        Gu.obj.rotation.y = Math.atan2(AD_PORTA[0] - GU_ATRAS[0], AD_PORTA[1] - GU_ATRAS[1]); Gu.pose('idle', t, 'talk', .4 * fala.peso('68', t, 'gusta'), t); } }
-    else if (t < 20.2) { if (!V.caminhar(Gu, GU_ATRAS, GU_FECHA, t, 15.0, 16.0, { de: Math.atan2(AD_PORTA[0] - GU_ATRAS[0], AD_PORTA[1] - GU_ATRAS[1]) })) { Gu.obj.rotation.y = .2; Gu.pose('idle', t); } }
-    else { Gu.obj.position.set(GU_FECHA[0], 0, GU_FECHA[1]); Gu.obj.rotation.y = angLerp(.2, Math.atan2(1.42 - GU_FECHA[0], -1.7 - GU_FECHA[1]), P.suave(20.4, 21.2, t)); Gu.pose('idle', t); }
+    if (t < 15) { const rI = Ig.cabeca; rI.rotation.x += -.08; }
+    // ═══ GUSTA ═══
+    const segura = env(t, 13.05, 13.3, 17.9, 18.15);
+    if (t < 12.2) { Gu.obj.position.set(GU0[0], 0, GU0[1]); Gu.obj.rotation.y = ang(GU0[0], GU0[1], IG0[0], IG0[1]) + .2; Gu.pose(t < 1.5 ? 'm_idle_alert' : 'idle', t + .7); }
+    else if (BK.caminharPor(Gu, [GU0, [-.72, 2.02], GU_BARRA], t, 12.2, 13.1)) { /* entra na frente do Adryan */ }
+    else if (t < 18.0) { Gu.obj.position.set(GU_BARRA[0], 0, GU_BARRA[1]); Gu.obj.rotation.y = ang(GU_BARRA[0], GU_BARRA[1], AD_BARRADO[0], AD_BARRADO[1]); Gu.pose('idle', t, 'talk', .4 * fala.peso('68', t, 'gusta'), t); }
+    else if (BK.caminharPor(Gu, [GU_BARRA, [-.68, 2.22], GU_PUXA], t, 18.0, 18.8)) { }
+    else if (t > 20.5 && t < 21.1 && BK.caminharPor(Gu, [GU_PUXA, GU_DEPOIS], t, 20.5, 21.1)) { }
+    else if (t < 20.5) { Gu.obj.position.set(GU_PUXA[0], 0, GU_PUXA[1]); Gu.obj.rotation.y = angLerp(ang(GU_PUXA[0], GU_PUXA[1], -1.0, 2.5), ang(GU_PUXA[0], GU_PUXA[1], GEO.PORTA[0], GEO.PORTA[1]) - .3, P.suave(19.7, 20.3, t)); Gu.pose('idle', t + 3); }
+    else if (t < T_KAT + .05) { Gu.obj.position.set(GU_DEPOIS[0], 0, GU_DEPOIS[1]); Gu.obj.rotation.y = angLerp(ang(GU_DEPOIS[0], GU_DEPOIS[1], GEO.PORTA[0], GEO.PORTA[1]), ang(GU_DEPOIS[0], GU_DEPOIS[1], IG_BOTAO[0], IG_BOTAO[1]), env(t, 22.8, 23.3, 23.75, 24.1)); Gu.pose('idle', t + 3); }
+    else { Gu.obj.position.set(GU_DEPOIS[0], 0, GU_DEPOIS[1]); Gu.obj.rotation.y = ang(GU_DEPOIS[0], GU_DEPOIS[1], GEO.PORTA[0], GEO.PORTA[1]) + .35;   // se JOGA pra trás (longe da lâmina, pro lado do arquivo)
+      const d = Gu.dur('u_Death01'); Gu.pose('u_Death01', Math.min(d - .02, .15 + (t - T_KAT - .05) * 1.1)); }   // tranco pra trás e cai de costas no carpete
     Gu.obj.updateMatrixWorld(true);
+    // ═══ ADRYAN (POV) ═══
+    let olharPara;
+    const rostoI = Ig.cabeca.getWorldPosition(v3()), rostoG = Gu.osso('spine.005').getWorldPosition(v3()).add(v3(0, .12, 0)), PORTA_C = v3(GEO.PORTA[0], 1.35, GEO.PORTA[1] - .12);
+    if (t < 11.8) {                                                                                  // ouve o Igor; olha a porta que ele aponta e volta
+      Ad.obj.position.set(AD0[0], 0, AD0[1]); Ad.pose('idle', t + 30);
+      const kp = env(t, 1.35, 1.85, 2.6, 3.1), aIg = ang(AD0[0], AD0[1], IG0[0], IG0[1]), aPt = ang(AD0[0], AD0[1], GEO.PORTA[0], GEO.PORTA[1]);
+      const o = olharGira(Ad.obj.position, rostoI.clone().add(v3(0, -.04, 0)), PORTA_C, kp, -1);
+      Ad.obj.rotation.y = angLerp(aIg, o.r, .65); olharPara = o.alvo;
+    } else if (t < 18.0) {                                                                           // vai pra porta: o Gusta entra na frente e segura
+      if (t < 13.2) BK.caminharPor(Ad, [AD0, AD_BARRADO], t, 11.8, 13.2); else { Ad.obj.position.set(AD_BARRADO[0], 0, AD_BARRADO[1]); Ad.pose('idle', t + 30); }
+      const tranco = env(t, 13.1, 13.22, 13.35, 13.7); Ad.obj.position.z -= .06 * tranco;
+      Ad.obj.rotation.y = angLerp(Ad.obj.rotation.y, ang(AD_BARRADO[0], AD_BARRADO[1], GU_BARRA[0], GU_BARRA[1]), P.suave(12.9, 13.3, t));
+      olharPara = PORTA_C.clone().lerp(rostoG, P.suave(12.5, 13.1, t));
+    } else if (t < 20.6) {                                                                           // vão fechar: o Adryan contorna o giro da folha e pega o puxador
+      if (!BK.caminharPor(Ad, [AD_BARRADO, [.05, 2.25], AD_PORTA], t, 18.0, 19.2)) { Ad.obj.position.set(AD_PORTA[0], 0, AD_PORTA[1]); Ad.pose('idle', t + 30);
+        Ad.obj.rotation.y = angLerp(ang(.05, 2.25, AD_PORTA[0], AD_PORTA[1]), ang(AD_PORTA[0], AD_PORTA[1], -.4, 3.4), P.suave(19.2, 19.6, t)); }
+      porta.folha.updateMatrixWorld(true);
+      olharPara = t < 19.6 ? PORTA_C.clone().lerp(porta.folha.localToWorld(v3(.5, 0, 0)), P.suave(18.6, 19.3, t) * .6) : PORTA_C.clone().lerp(porta.puxador(), .12);
+    } else if (t < 22.6) {                                                                           // um passo pro volante; gira (trancas)
+      if (!BK.caminharPor(Ad, [AD_PORTA, AD_VOLANTE], t, 20.6, 21.1)) { Ad.obj.position.set(AD_VOLANTE[0], 0, AD_VOLANTE[1]); Ad.pose('idle', t + 30); Ad.obj.rotation.y = angLerp(Ad.obj.rotation.y, 0, P.suave(20.9, 21.15, t)); }
+      olharPara = porta.volanteW().add(v3(0, .05, 0));
+    } else {                                                                                         // vira pro Igor (o botão, a estante) · a PANCADA: volta pra porta · a katana
+      Ad.obj.position.set(AD_VOLANTE[0], 0, AD_VOLANTE[1]); Ad.pose('idle', t + 30);
+      const kI = env(t, 22.6, 23.0, 23.75, 24.12), alvoIg = rostoI.clone().lerp(botao.topo(), .45).lerp(v3(1.42, 1.3, -1.6), P.suave(23.1, 23.6, t) * .35);
+      const o = olharGira(Ad.obj.position, PORTA_C, alvoIg, kI, 1);                                // gira pela DIREITA (longe do Gusta)
+      Ad.obj.rotation.y = o.r * .85; olharPara = o.alvo;
+      if (t >= T_KAT) olharPara = FURO.clone().add(v3(0, 0, -.25));
+    }
+    Ad.obj.updateMatrixWorld(true);
     // mãos do Gusta nos OMBROS do Adryan
-    const segura = env(t, 10.5, 10.85, 14.6, 15.0);
     if (segura > 0) for (const s of ['L', 'R']) { const om = Ad.osso('upper_arm.' + s).getWorldPosition(v3()).add(v3(0, .05, 0)), rG2 = Gu.obj.rotation.y;
       V.pegar(Gu, s, om, frente(rG2).add(v3(0, -.5, 0)).normalize(), v3(0, 1, 0), direita(rG2).multiplyScalar(s === 'L' ? -1 : 1).add(v3(0, -.6, 0)), segura, .6); }
-    // ── a PORTA: fecha (16,0–17,45, com peso) e TRANCA (17,9–19,3)
-    const fecha = P.clamp((t - 16.0) / 1.45); porta.fechar(fecha * fecha * (3 - 2 * fecha)); porta.trancar(P.suave(17.9, 19.3, t));
+    // ═══ A PORTA: o Gusta puxa · o Adryan BATE · o volante tranca ═══
+    const kp = kPorta(t), bate = t > 20.4 ? .02 * Math.exp(-(t - 20.4) * 9) * Math.sin((t - 20.4) * 70) : 0;
+    porta.fechar(kp); porta.dob.rotation.y += bate; porta.trancar(P.suave(21.2, 22.55, t));
+    const pancada = (t > 23.7 ? Math.exp(-(t - 23.7) * 12) * Math.sin((t - 23.7) * 80) : 0) + (t > T_KAT ? .6 * Math.exp(-(t - T_KAT) * 10) * Math.sin((t - T_KAT) * 95) : 0);
+    porta.folha.position.z = .012 * pancada;
     porta.grupo.updateMatrixWorld(true);
-    const empurra = env(t, 15.7, 16.0, 17.5, 17.8), gira = env(t, 17.75, 17.95, 19.3, 19.6);
-    if (empurra > 0) { const pz = porta.puxador(); V.pegar(Ad, 'R', pz, v3(0, 0, 1), v3(0, 1, 0), [.7, -.5, 0], empurra, .2); V.pegar(Gu, 'R', porta.folha.localToWorld(v3(-.1, .2, -.16)), v3(0, 0, 1), v3(0, 1, 0), [.7, -.5, 0], empurra, .2); }
+    const puxaG = env(t, 18.75, 19.0, 19.55, 19.75), empurraA = env(t, 19.75, 20.0, 20.4, 20.6), gira = env(t, 21.05, 21.2, 22.5, 22.65);
+    if (puxaG > 0) V.pegar(Gu, 'R', porta.folha.localToWorld(v3(.55, .0, .1)), v3(-1, 0, 0), v3(0, 1, 0), [.7, -.5, 0], puxaG, .8);
+    if (empurraA > 0) { const pz = porta.puxador(); V.pegar(Ad, 'R', pz, v3(0, 0, 1), v3(0, 1, 0), [.7, -.5, 0], empurraA, .7);
+      V.pegar(Ad, 'L', porta.folha.localToWorld(v3(.3, .25, -.11)), v3(0, 0, 1), v3(0, 1, 0), [-.7, -.5, 0], empurraA, .2); }
     if (gira > 0) { const w = porta.volanteW(), a = porta.volante.rotation.z; for (const [s, ph] of [['R', 0], ['L', Math.PI]]) V.pegar(Ad, s, w.clone().add(v3(Math.cos(a + ph) * .2, Math.sin(a + ph) * .2, -.02)), v3(0, 0, 1), v3(0, 1, 0), [s === 'R' ? .7 : -.7, -.5, 0], gira, .9); }
-    V.falarOsso && Ad.osso('spine.005') && V.falar(Ad, vA, t); V.falar(Gu, vG, t);
-    // ── SALA SECRETA: a estante desliza (19,0–21,0) e a luz verde invade
-    const abre = P.suave(19.0, 21.0, t), verde = P.suave(19.2, 21.5, t); secreta.abrir(abre); secreta.atualizar(t, verde);
-    // luz: sirene vermelha (da cena 67) → o verde da sala secreta vence
-    const pis = .5 + .5 * Math.sin(t * 9.4), red = new THREE.Color('#ff2a12').multiplyScalar(.3 + .8 * pis * (1 - verde * .7)), grn = new THREE.Color('#39ff6a').multiplyScalar(1.4 * verde);
-    P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + red.getHexString(), fillDir: [.15, .55, -1], fillCor: '#' + new THREE.Color('#6a4a2a').lerp(grn, verde).getHexString(), amb: '#' + new THREE.Color('#3e0d08').lerp(new THREE.Color('#0f3a1c'), verde).getHexString() });
-    // ── câmeras (POV do Adryan = logo à frente do rosto dele)
-    const olhoA = Ad.osso('spine.005').getWorldPosition(v3()).add(v3(0, .08, 0)).addScaledVector(frente(Ad.obj.rotation.y), .13);
-    const rostoI = Ig.cabeca.getWorldPosition(v3()), rostoA = Ad.osso('spine.005').getWorldPosition(v3()).add(v3(0, .1, 0)), rostoG = Gu.osso('spine.005').getWorldPosition(v3()).add(v3(0, .1, 0));
-    if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
-    else if (t < 2.85) cam(olhoA.toArray(), rostoI.clone().add(v3(0, -.1, 0)).toArray(), 50);                         // POV: o Igor aponta a porta: "Fecha essa porta imediatamente!"
-    else if (t < 5.25) cam(olhoA.toArray(), rostoI.clone().add(v3(0, -.05, 0)).toArray(), 46);                       // POV (manual: sem corte pra fora no meio do diálogo): ouvimos o Adryan, o Igor reage
-    else if (t < 9.6) cam(olhoA.toArray(), rostoI.toArray(), 42);                                                     // POV: "Ele vai ficar bem..."
-    else if (t < 11.0) cam([.75, 1.55, 2.3], [P.lerp(Ad.obj.position.x, -.6, .5), 1.3, Ad.obj.position.z], 46);     // ele vai pra porta; o Gusta vem por trás
-    else if (t < 15.0) cam([.55, 1.55, 3.05], [rostoG.x * .65 + rostoA.x * .35, 1.5, rostoG.z * .65 + rostoA.z * .35], 38);   // o Gusta segurando o Adryan pelos ombros (rosto do Gusta à vista)
-    else if (t < 17.55) cam([.85, 1.45, 2.05], [-.85, 1.05, 3.35], 50);                                               // fecham a porta juntos (a folha e o vão no quadro, com a luz da porta)
-    else if (t < 18.35) { const b = botao.topo(); cam([b.x + .25, b.y + .3, b.z + .3], b.toArray(), 40); }           // o BOTÃO VERMELHO
-    else if (t < 19.6) { const w = porta.volanteW(); cam([w.x + .55, w.y + .15, w.z - .75], w.toArray(), 42); }      // tranca: o volante girando
-    else cam([.2, 1.75, 2.8], [1.6, 1.25, -1.9], 46);                                                                  // a estante desliza: a sala secreta, verde
+    V.falar(Gu, vG, t);
+    // ═══ KATANA: atravessa (24,30–24,42), vibra, fica cravada ═══
+    kat.visible = t >= T_KAT;
+    if (kat.visible) { const s = P.clamp((t - T_KAT) / .12), sai = .4 * (1 - (1 - s) ** 3);   // sai 40 cm da porta (não chega no rosto)
+      lam.position.z = .62 - sai - .12;                                                                // a base fica dentro da folha de aço
+      lam.rotation.y = .03 * Math.exp(-(t - T_KAT) * 3) * Math.sin((t - T_KAT) * 120); lam.rotation.x = .02 * Math.exp(-(t - T_KAT) * 3) * Math.sin((t - T_KAT) * 97 + 1); }
+    for (const [i, f] of fais.entries()) { const u = t - T_KAT - i * .006; f.m.visible = u > 0 && u < .45;
+      if (f.m.visible) f.m.position.copy(FURO).addScaledVector(f.v, u).add(v3(0, -4.9 * u * u, 0)); }
+    // ═══ SALA SECRETA: a estante desliza (23,1–25,1) e a luz verde invade ═══
+    const abre = P.suave(23.1, 25.1, t), verde = P.suave(23.3, 25.6, t); secreta.abrir(abre); secreta.atualizar(t, verde);
+    mal.pulsar(t); lamp.visible = true;
+    // luz: sirene vermelha girando + o verde da sala secreta (no chão a sirene fica abafada, a luz continua)
+    const pis = .5 + .5 * Math.sin(t * 9.4), red = new THREE.Color('#ff2a12').multiplyScalar(.35 + .85 * pis * (1 - verde * .45)), grn = new THREE.Color('#39ff6a').multiplyScalar(1.1 * verde);
+    P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + red.getHexString(), fillDir: [.15, .55, -1], fillCor: '#' + new THREE.Color('#8a3a1c').lerp(grn, verde * .7).getHexString(), amb: '#' + new THREE.Color('#5c1a10').lerp(new THREE.Color('#0f3a1c'), verde * .6).getHexString() });
+    // ═══ CÂMERA = olhos do Adryan ═══
+    if (camQ) { S.camera.fov = camQ[6]; S.camera.position.set(...camQ.slice(0, 3)); S.camera.lookAt(...camQ.slice(3, 6)); S.camera.up.set(0, 1, 0); S.camera.updateProjectionMatrix(); return; }
+    if (t < T_KAT) { Ad.obj.visible = true; S.camera.up.set(0, 1, 0);
+      const fov = t < 11.8 ? 48 : t < 18 ? 50 : t < 21 ? 60 : t < 22.6 ? 54 : 50;
+      B.pov(t, olharPara, { fov }); E0 = null; return; }
+    // ── ESQUIVA EM 3 TEMPOS: susto (tranco pra trás) → cedência (joelhos, o olhar cai) → impacto (chão); a câmera é o corpo caindo
+    Ad.obj.visible = false;
+    if (!E0) { Ad.obj.visible = true; Ad.obj.position.set(AD_VOLANTE[0], 0, AD_VOLANTE[1]); Ad.obj.rotation.y = ang(AD_VOLANTE[0], AD_VOLANTE[1], PORTA_C.x, PORTA_C.z); Ad.pose('idle', T_KAT + 30); E0 = B.olho(); Ad.obj.visible = false; }
+    const LAM = FURO.clone().add(v3(0, -.02, -.28)), K1 = E0.clone().add(v3(.02, .02, -.15)), K2 = v3(-.3, .95, 2.55), K3 = v3(-.12, .3, 2.2);
+    const s1 = P.suave(T_KAT, T_KAT + .22, t), s2 = P.suave(T_KAT + .24, 25.15, t), s3 = P.clamp((t - 25.15) / .2);
+    const pos = E0.clone().lerp(K1, s1).lerp(K2, s2 * s2).lerp(K3, s3 * s3);
+    const impacto = t > T_CAI ? Math.exp(-(t - T_CAI) * 9) * Math.sin((t - T_CAI) * 60) : 0, resp = t > T_CAI ? Math.sin((t - T_CAI) * 2 * Math.PI * 1.55) * (1 - .3 * P.suave(T_CAI, 30, t)) : 0;
+    pos.y += .03 * impacto + .012 * resp;
+    const alvo = LAM.clone().lerp(v3(-.55, .25, 2.95), .55 * env(t, T_KAT + .3, 24.85, 25.25, 25.9));   // na cedência o olhar despenca pro chão e volta pra lâmina
+    alvo.y += .02 * resp; alvo.x += .01 * Math.sin(t * .9) * P.suave(26, 27, t);
+    const roll = .22 * s2 * (1 - .4 * s3) + .02 * impacto;                                            // o corpo deitado de lado: o horizonte inclina
+    S.camera.position.copy(pos); S.camera.up.set(Math.sin(roll), Math.cos(roll), 0); S.camera.lookAt(alvo);
+    S.camera.fov = 50 + 8 * s1 * (1 - s3) + 6 * s3; S.camera.updateProjectionMatrix();
   };
 };
 </script></body></html>

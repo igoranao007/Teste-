@@ -46,7 +46,7 @@ class Cena:
         env = [round(min(1, (e / mx) ** .6 * 1.15) if e / mx > .08 else 0, 2) for e in env]
         self.voz.append({'t': t, 'env': env, 'quem': quem, 'texto': texto})
         self.segs.append({'file': out, 'start': round(t, 3), 'dur': round(len(v) / sr, 2)})
-    def sirene(self, t0, dur, ganho=-6, abaixa=-10):
+    def sirene(self, t0, dur, ganho=-6, abaixa=-10, abafar=None):
         """SIRENE que ABAIXA sozinha durante as falas (manual: diálogo sempre à frente; a sirene sustenta a tensão sem cobrir a fala).
         Chamar DEPOIS de todas as falas da cena."""
         sr = 48000; base = sirene(max(dur, 12.0)); _, x = wavfile.read(base); x = x[:int(sr * dur)].astype(np.float64)
@@ -56,6 +56,9 @@ class Cena:
             ia, ib = max(0, int(a * sr)), min(len(x), int(b * sr))
             if ib > 0 and ia < len(x): g[ia:ib] = 10 ** (abaixa / 20)
         k = np.ones(int(sr * .15)) / int(sr * .15); g = np.convolve(g, k, mode='same')        # rampas suaves (sem "bombear")
+        if abafar is not None:                                                                # depois do susto: a sirene fica ABAFADA (ouvido zunindo, no chão)
+            from scipy import signal as _sg; ia = max(0, int((abafar - t0) * sr)); y = _sg.sosfilt(_sg.butter(2, 650, 'lowpass', fs=sr, output='sos'), x)
+            m = np.clip((np.arange(len(x)) - ia) / (sr * .25), 0, 1); x = x * (1 - m) + y * m * .55
         out = f'audio/voz/ep1/mix/{self.nome[:2]}_sirene.wav'; wavfile.write(out, sr, (x * g).astype(np.int16))
         self.segs.append({'file': out, 'start': round(t0, 3), 'dur': round(len(x) / sr, 2), 'ganho': ganho})
     def gravar(self):
@@ -176,6 +179,7 @@ def cena65():
     c.cue('drone', 0, d=16, root=31, gain=-6); c.cue('cut', 2.65, gain=-7); c.cue('turbina', 2.7, d=1.3, gain=-9); c.cue('ui_blip', 3.2); c.cue('lamp_click', 3.7, gain=2); c.cue('rede', 3.7, d=12, gain=-6)
     t = 0.0
     while t < 4: c.cue('type', 4.5 + t, gain=3); t += .13 + (np.sin(t * 37) + 1) * .05
+    c.passos(.8, 4.6, 1.69, 'adryan', 'carpete', gain=-4)                                   # POV: o Adryan dá a volta pela mesa até o ponto A
     c.cue('click', 12.4, gain=4)                                                           # o clique do mouse
     for t in (12.8, 13.6, 14.4): c.cue('ui_blip', t)
     c.cue('chiado', 13, d=3, gain=-3)
@@ -204,26 +208,35 @@ def cena67():
     c.cue('braam', 13.5, d=3.6, root=29, gain=-4); c.cue('heart', 15.6, gain=-4); c.cue('heart', 16.4, gain=-4)
     f = escolhida('igor', 'i70')
     if f: c.fala(f, 16.6, 'igor', 'Malditos! Eles me acharam!')
+    c.passos(13.85, 15.25, 1.27, 'adryan', 'carpete', gain=-5)                              # recua pro meio da sala com a sirene
     c.sirene(13.5, 7.5, ganho=-6)                                                          # SIRENE (abaixa sob as falas)
     c.gravar(); return c
 
-# ═══ 68 · A PORTA-BUNKER, O BOTÃO E A SALA SECRETA ═══
+# ═══ 68 · A PORTA-BUNKER, O BOTÃO, A SALA SECRETA E A KATANA (POV do Adryan) ═══
 def cena68():
-    c = Cena('68-ep1-porta', 23)
-    for t, quem, id_, txt in ((.6, 'igor', 'i71c', 'Fecha essa porta imediatamente!'), (2.9, 'adryan', 'a71', 'Mas é o Nicolas, ele tá só!'),
-                              (5.3, 'igor', 'i71b', 'Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.'),
-                              (10.9, 'gusta', 'g71', 'Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer.')):
+    c = Cena('68-ep1-porta', 30)
+    for t, quem, id_, txt in ((.6, 'igor', 'i71c', 'Fecha essa porta imediatamente!'), (4.1, 'adryan', 'a71', 'Mas é o Nicolas, ele tá só!'),
+                              (7.0, 'igor', 'i71b', 'Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.'),
+                              (13.6, 'gusta', 'g71', 'Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer.')):
         f = (escolhida(quem, 'i71a') if id_ == 'i71c' else None) or escolhida(quem, id_)
         if f: c.fala(f, t, quem, txt)
-    c.passos(9.6, 10.9, 1.25, 'adryan', 'carpete', gain=-2); c.passos(9.9, 10.7, .6, 'gusta', 'carpete', gain=-3)
-    c.passos(15.0, 16.0, .5, 'adryan', 'carpete', gain=-4); c.passos(15.0, 16.0, .9, 'gusta', 'carpete', gain=-5)
-    c.som(OGA + 'slam_04.ogg', 17.45, ganho=2); c.cue('estrondo', 17.45, d=.8, gain=-4)  # a porta de aço BATE
-    c.som(OGA + 'tools_02.ogg', 17.95, ganho=-6); c.som(OGA + 'machine_02.ogg', 18.2, ganho=-10); c.som(OGA + 'key_open_01.ogg', 19.25, ganho=-2)   # volante girando · trincos
-    c.cue('click', 17.6, gain=6); c.som(SCI + 'retro_beep_03.ogg', 17.65, ganho=-4)       # o BOTÃO
-    for k in range(6): c.som(SCI + 'beep_02.ogg', 17.9 + k * .55, ganho=-12)              # alerta
-    c.som(SCI + 'teleport_02.ogg', 19.0, ganho=-6); c.cue('sobe', 19.0, d=4, root=31, sem=5, gain=-4)   # a estante desliza, a sala secreta
-    c.som(SCI + 'loop_machine_02.ogg', 19.6, ganho=-14)
-    c.sirene(0, 23, ganho=-8)                                                              # a sirene continua (abaixa sob as falas)
+    c.passos(11.8, 13.2, .55, 'adryan', 'carpete', gain=-2); c.passos(12.2, 13.1, .75, 'gusta', 'carpete', gain=-3)    # vai pra porta; o Gusta entra na frente
+    c.cue('hit_soft', 13.15, gain=-8)                                                         # o tranco: as mãos do Gusta nos ombros
+    c.passos(18.0, 19.2, 1.3, 'adryan', 'carpete', gain=-3); c.passos(18.0, 18.8, .35, 'gusta', 'carpete', gain=-4)
+    c.som(OGA + 'metal_07.ogg', 19.0, ganho=-10); c.cue('range', 19.05, d=1.3, gain=-2)       # a folha de aço começa a girar (rangido)
+    c.som(OGA + 'slam_04.ogg', 20.4, ganho=2); c.cue('estrondo', 20.4, d=.8, gain=-4)         # a porta BATE
+    c.passos(20.6, 21.1, .4, 'adryan', 'carpete', gain=-5)
+    c.som(OGA + 'tools_02.ogg', 21.2, ganho=-6); c.som(OGA + 'machine_02.ogg', 21.4, ganho=-10); c.som(OGA + 'key_open_01.ogg', 22.55, ganho=-2)   # volante · trincos
+    c.cue('click', 23.0, gain=6); c.som(SCI + 'retro_beep_03.ogg', 23.05, ganho=-4)          # o BOTÃO
+    for k in range(4): c.som(SCI + 'beep_02.ogg', 23.3 + k * .55, ganho=-12)                # alerta
+    c.som(SCI + 'teleport_02.ogg', 23.1, ganho=-6); c.cue('sobe', 23.1, d=2.6, root=31, sem=5, gain=-6)   # a estante desliza
+    c.som(OGA + 'slam_06.ogg', 23.7, ganho=0); c.som(OGA + 'metal_03.ogg', 23.72, ganho=-2); c.cue('estrondo', 23.7, d=.7, gain=-5)   # PANCADA do lado de fora
+    c.cue('lamina', 24.3); c.cue('vibra', 24.42, d=1.6); c.cue('braam', 24.3, d=3.6, root=29, gain=-3)                                # a KATANA atravessa
+    c.cue('whoosh_in', 24.45, gain=-4)                                                        # o Adryan se joga (cedência)
+    c.cue('baque_corpo', 25.2, gain=-2); c.cue('baque_corpo', 25.35, gain=0)                  # o Gusta e o Adryan no chão
+    c.cue('respira', 25.5, d=4.4, ritmo=1.7, forte=1.0); c.cue('heart', 26.1, gain=-6); c.cue('heart', 26.9, gain=-7); c.cue('heart', 27.8, gain=-8)
+    c.som(SCI + 'loop_machine_02.ogg', 25.2, ganho=-16)                                       # as telas da sala secreta
+    c.sirene(0, 30, ganho=-8, abafar=25.35)                                                   # a sirene continua (abaixa nas falas; ABAFADA no chão)
     c.gravar(); return c
 
 CENAS = {'60': cena60, '61': cena61, '62': cena62, '63': cena63, '64': cena64, '65': cena65, '66': cena66, '67': cena67, '68': cena68}

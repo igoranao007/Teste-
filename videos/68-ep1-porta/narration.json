@@ -7,101 +7,107 @@
   },
   {
    "file": "audio/voz/ep1/mix/68_01.wav",
-   "start": 2.9,
+   "start": 4.1,
    "dur": 2.6
   },
   {
    "file": "audio/voz/ep1/mix/68_02.wav",
-   "start": 5.3,
+   "start": 7.0,
    "dur": 4.64
   },
   {
    "file": "audio/voz/ep1/mix/68_03.wav",
-   "start": 10.9,
+   "start": 13.6,
    "dur": 4.32
   },
   {
    "file": "audio/voz/ep1/mix/68_04.wav",
-   "start": 17.45,
+   "start": 19.0,
+   "dur": 0.74,
+   "ganho": -10
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_05.wav",
+   "start": 20.4,
    "dur": 0.3,
    "ganho": 2
   },
   {
-   "file": "audio/voz/ep1/mix/68_05.wav",
-   "start": 17.95,
+   "file": "audio/voz/ep1/mix/68_06.wav",
+   "start": 21.2,
    "dur": 0.55,
    "ganho": -6
   },
   {
-   "file": "audio/voz/ep1/mix/68_06.wav",
-   "start": 18.2,
+   "file": "audio/voz/ep1/mix/68_07.wav",
+   "start": 21.4,
    "dur": 0.53,
    "ganho": -10
   },
   {
-   "file": "audio/voz/ep1/mix/68_07.wav",
-   "start": 19.25,
+   "file": "audio/voz/ep1/mix/68_08.wav",
+   "start": 22.55,
    "dur": 0.43,
    "ganho": -2
   },
   {
-   "file": "audio/voz/ep1/mix/68_08.wav",
-   "start": 17.65,
+   "file": "audio/voz/ep1/mix/68_09.wav",
+   "start": 23.05,
    "dur": 0.53,
    "ganho": -4
   },
   {
-   "file": "audio/voz/ep1/mix/68_09.wav",
-   "start": 17.9,
-   "dur": 0.41,
-   "ganho": -12
-  },
-  {
    "file": "audio/voz/ep1/mix/68_10.wav",
-   "start": 18.45,
+   "start": 23.3,
    "dur": 0.41,
    "ganho": -12
   },
   {
    "file": "audio/voz/ep1/mix/68_11.wav",
-   "start": 19.0,
+   "start": 23.85,
    "dur": 0.41,
    "ganho": -12
   },
   {
    "file": "audio/voz/ep1/mix/68_12.wav",
-   "start": 19.55,
+   "start": 24.4,
    "dur": 0.41,
    "ganho": -12
   },
   {
    "file": "audio/voz/ep1/mix/68_13.wav",
-   "start": 20.1,
+   "start": 24.95,
    "dur": 0.41,
    "ganho": -12
   },
   {
    "file": "audio/voz/ep1/mix/68_14.wav",
-   "start": 20.65,
-   "dur": 0.41,
-   "ganho": -12
-  },
-  {
-   "file": "audio/voz/ep1/mix/68_15.wav",
-   "start": 19.0,
+   "start": 23.1,
    "dur": 1.74,
    "ganho": -6
   },
   {
+   "file": "audio/voz/ep1/mix/68_15.wav",
+   "start": 23.7,
+   "dur": 0.45,
+   "ganho": 0
+  },
+  {
    "file": "audio/voz/ep1/mix/68_16.wav",
-   "start": 19.6,
+   "start": 23.72,
+   "dur": 0.35,
+   "ganho": -2
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_17.wav",
+   "start": 25.2,
    "dur": 3.2,
-   "ganho": -14
+   "ganho": -16
   },
   {
    "file": "audio/voz/ep1/mix/68_sirene.wav",
    "start": 0,
-   "dur": 23.0,
+   "dur": 30.0,
    "ganho": -8
   }
  ]

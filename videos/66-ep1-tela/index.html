@@ -1,41 +1,54 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<!-- EPISÓDIO 1 (reformulado) · CENA 66 · ARG-14 (versão nova do plano 55, que fica intacto): tela cheia, ARG-14 digitado, menu INICIAR/SAIR, cursor;
-     a mão do Igor aperta Enter; CARREGANDO... com a barra de blocos. (O antigo "Projeto Mogg" agora se chama ARG-14.) -->
+<!-- EPISÓDIO 1 (reformulado) · CENA 66 · ARG-14 — POV DO ADRYAN (versão 2, pelo MANUAL DE DIREÇÃO; o plano 55 do v4 fica intacto).
+     Do mesmo lugar da cena 65 (lib/bunker.js GEO.A, ao lado do ombro direito do Igor), o Adryan se inclina pra tela: "ARG-14" digitado,
+     menu INICIAR/SAIR, cursor (tudo DENTRO do monitor); olha pra mão do Igor apertando ENTER no teclado novo; CARREGANDO... com a barra.
+     ?cam=x,y,z,ax,ay,az,fov (inspeção) -->
 <script>VIDEO={w:1920,h:1080,fps:30,dur:9}</script>
 <script src="../../lib/boot.js"></script>
 <style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
 <div id="stage"></div>
 <script type="module">
 import * as P from "../../lib/ps1.js";
-import * as A from "../../lib/arh.js";
 import * as F from "../../lib/filme.js";
 import * as T from "../../lib/tgp.js";
 import * as K from "../../lib/terminal.js";
-import * as EP from "../../lib/ep1.js";
+import * as V from "../../lib/v4.js";
+import * as BK from "../../lib/bunker.js";
 const { THREE } = P;
 window.SETUP = async () => {
-  const S = P.palco({ fov: 34, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 2.4, longe: 8 }, luz: { ...F.LUZ_SALA, keyDir: [0, .5, 1], keyCor: '#7dffa0', amb: '#1a3022' } }), cena = S.scene;
-  const sala = await F.salaIgor(cena), { I, c, Y, pc, vcr, rot } = sala; vcr.led(1); I.girar(1);
-  await EP.computadorNovo(sala);                                                           // computador novo (OFFICE, com mouse)
-  pc.teclado.visible = true; pc.teclado.children.forEach(k => { k.visible = k === pc.enter; }); pc.enter.visible = true; pc.teclado.position.y = -.095;   // a tecla Enter fica por cima do teclado novo
-  const E = new THREE.Vector3(); cena.updateMatrixWorld(true); pc.enter.getWorldPosition(E); const dd = (x, y, z) => { const r = rot(x, 0, z); return [E.x + r[0], E.y + y, E.z + r[2]]; };
-  const term = K.terminal();
-  
+  const S = P.palco({ fov: 52, cam: [0, 1.6, 1.6], alvo: [0, 1.0, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 3.5, longe: 12 }, luz: F.LUZ_SALA }), cena = S.scene;
+  const B = await BK.montar(S), { sala, I, Y, pc, rot, Ad, Gu, term, GEO } = B, { vcr, lamp } = sala;
+  const q0 = new URLSearchParams(location.search), camQ = q0.get('cam')?.split(',').map(Number);
+  const mal = T.maleta(); cena.add(mal); mal.position.set(GEO.MALETA[0], Y, GEO.MALETA[1]); mal.deitar(1); mal.abrir(1.85); mal.brilho(1);
+  const v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  Gu.obj.position.set(GEO.GU_FRENTE[0], 0, GEO.GU_FRENTE[1]); Gu.obj.rotation.y = Math.atan2(-GEO.GU_FRENTE[0], -GEO.GU_FRENTE[1]);
+  I.girar(1); vcr.led(1); B.usarTerminal(true);
   S.update = t => {
-    const mao = t >= 3.0 && t < 3.8; term.el.style.opacity = mao ? 0 : 1;
-    if (mao) {
-      const u = t - 3.0, desce = P.suave(.2, .4, u) * (1 - P.suave(.5, .7, u));
-      F.telaCodigo(pc, t); I.pose(t, { R: dd(0, .05 - desce * .03, -.02), poloR: rot(-.9, .1, -.4), pegada: { R: { dedos: rot(0, -.6, 1), indice: rot(1, 0, 0) } } });   // aperta o Enter de palma pra baixo I.animar(t);
-      pc.enter.position.y = .038 - desce * .008;
-      S.camera.position.set(...dd(-.03, .46, .1)); S.camera.lookAt(...dd(0, 0, -.04));
-    } else {
-      I.pose(t, { inclina: .02 * Math.sin(t * 1.1), R: dd(0, .05 + .006 * Math.sin(t * 1.7) * P.suave(3.8, 4.4, t), -.02), poloR: rot(-.9, .1, -.4), pegada: { R: { dedos: rot(0, -.6, 1), indice: rot(1, 0, 0) } } });   /* a mão fica no teclado, respirando */   // atrás do terminal o Igor continua respirando
-      term.limpar();
-      if (t < 3.0) { term.txt(F.digitado('ARG-14', t, .3, 22), 240, 58, 40, K.VERDE, { alinhar: 'center', peso: 800 });
-        if (t > 1.0) { term.txt('> INICIAR', 190, 150, 18, K.CLARO); if (Math.floor(t * 3) % 2) term.caixa(296, 152, 10, 16, K.CLARO); } if (t > 1.2) term.txt('  SAIR', 190, 178, 18, '#1f9a45'); }
-      else K.carregando(term, P.clamp((t - 3.8) / 5.2 * .46), t, 'ARG-14');
-      term.pixelar(); term.sinal(Math.round(t * 30), .03);
-    }
+    // ── TELA (dentro do monitor): ARG-14 digitado (0–1,6) · menu (1,0–) · ENTER (3,4) · CARREGANDO (3,8–)
+    term.limpar();
+    if (t < 3.4) { term.txt(F.digitado('ARG-14', t, .3, 22), 240, 58, 40, K.VERDE, { alinhar: 'center', peso: 800 });
+      if (t > 1.0) { term.txt('> INICIAR', 190, 150, 18, K.CLARO); if (Math.floor(t * 3) % 2) term.caixa(296, 152, 10, 16, K.CLARO); } if (t > 1.2) term.txt('  SAIR', 190, 178, 18, '#1f9a45'); }
+    else K.carregando(term, P.clamp((t - 3.8) / 5.2 * .46), t, 'ARG-14');
+    term.pixelar(); B.telaAtualizar();
+    // ── IGOR: digita ARG-14 (0–1,6), espera (1,6–2,9), a direita vai pro ENTER e aperta (3,4), volta
+    const m = {}, tk = s => Math.max(0, Math.sin(t * 19 + s)) * .016 * (t < 1.6 ? 1 : 0);
+    pc.updateMatrixWorld(true); const ENTER = pc.localToWorld(v3(-.2, -.058 - .01 * P.suave(3.3, 3.4, t) * (1 - P.suave(3.5, 3.65, t)), -.33));
+    const R1 = rot(-.1 + Math.sin(t * 5.1) * .03 * (t < 1.6 ? 1 : 0), Y + .075 + tk(0), .2), kE = P.suave(2.9, 3.3, t) * (1 - P.suave(4.0, 4.6, t));
+    m.R = R1.map((v, i) => P.lerp(v, [ENTER.x, ENTER.y + .035, ENTER.z][i], kE)); m.L = rot(.1 + Math.sin(t * 4.3 + 1) * .03 * (t < 1.6 ? 1 : 0), Y + .075 + tk(2), .2);
+    m.poloR = rot(-.9, -.3, -.2); m.poloL = rot(.9, -.3, -.2); m.plana = true; m.extra = .04;
+    m.pegada = { R: { dedos: rot(0, -.6, 1), indice: rot(1, 0, 0) }, L: { dedos: rot(0, -.45, 1), indice: rot(-1, 0, 0) } };
+    I.pose(t, m); I.animar(t, { boca: 0, pisca: (t % 4.1) > 3.95 ? 1 : 0 }); I.cabeca.rotation.x += .1;
+    mal.pulsar(t); Gu.pose('idle', t + 2);
+    // ── ADRYAN (POV) no ponto A: se inclina pra tela; olha a mão no ENTER (2,9–3,9); volta pra tela (CARREGANDO)
+    Ad.obj.position.set(GEO.A[0], 0, GEO.A[1]); Ad.pose('idle', t + 16);
+    const TELA = pc.localToWorld(v3(0, .25, 0)); B.virarPara(TELA); Ad.obj.updateMatrixWorld(true);
+    const kMao = P.suave(2.8, 3.2, t) * (1 - P.suave(3.8, 4.3, t)), inclina = P.suave(0, 1.2, t);
+    V.girar(Ad, 'spine.002', [1, 0, 0], .04 * inclina); Ad.obj.updateMatrixWorld(true);                 // o tronco vai pra frente (inclina pra ler)
+    const tremor = .75 + .25 * Math.sin(t * 23) * Math.sin(t * 7);
+    P.luz({ ...F.LUZ_SALA, keyDir: rot(0, .1, 1), keyCor: '#' + new THREE.Color('#39ff6a').multiplyScalar(tremor).getHexString(), fillDir: rot(-.6, .6, -.4), fillCor: '#16321f', amb: '#12241a' });
+    lamp.visible = true;
+    if (camQ) { S.camera.fov = camQ[6]; S.camera.position.set(...camQ.slice(0, 3)); S.camera.lookAt(...camQ.slice(3, 6)); S.camera.updateProjectionMatrix(); }
+    else B.pov(t, TELA.clone().lerp(ENTER, .65 * kMao), { fov: P.lerp(46, 22, inclina) * (1 - kMao) + 50 * kMao });
   };
 };
 </script></body></html>
