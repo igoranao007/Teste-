@@ -140,7 +140,81 @@ def cena63():
     if f: c.fala(f, 11.4, 'igor', 'Então... o ARG-14.')
     c.gravar(); return c
 
-CENAS = {'60': cena60, '61': cena61, '62': cena62, '63': cena63}
+SCI = 'material/modelos/oga/sci-fi-sfx/'                                                   # 50 CC0 sci-fi SFX (OpenGameArt, CC0)
+def sirene(dur=12.0):
+    """SIRENE de bunker sintetizada (duas notas alternando + um pouco de distorção de alto-falante): audio/voz/ep1/mix/sirene.wav"""
+    out = 'audio/voz/ep1/mix/sirene.wav'
+    if os.path.exists(out): return out
+    sr = 48000; t = np.arange(int(sr * dur)) / sr; f = np.where((t * 1.6) % 1 < .5, 660, 520) * (1 + .01 * np.sin(2 * np.pi * 5 * t))
+    ph = 2 * np.pi * np.cumsum(f) / sr; x = np.sign(np.sin(ph)) * .5 + .5 * np.sin(ph * 2)
+    x = np.tanh(2.5 * x) * .5; x[:int(sr * .05)] *= np.linspace(0, 1, int(sr * .05))
+    wavfile.write(out, sr, (x * 32767 * .7).astype(np.int16)); return out
+
+# ═══ 64 · A FITA (POV) ═══ (som do plano 53 do v4)
+def cena64():
+    c = Cena('64-ep1-fita', 12)
+    c.cue('drone', 0, d=12, root=31, gain=-6); c.cue('click', 1.2, gain=5); c.cue('click', 1.55, gain=5); c.cue('whoosh_slow', 1.8, gain=-10); c.cue('chiado', 3, d=6, gain=-6); c.cue('paper', 9.6, gain=4)
+    f = escolhida('igor', 'i64')
+    if f: c.fala(f, 6.2, 'igor', 'Então é isso. O ARG-14.')
+    c.gravar(); return c
+
+# ═══ 65 · O COMPUTADOR NOVO ═══ (som do plano 54 do v4 + o clique do mouse + a fala nova)
+def cena65():
+    c = Cena('65-ep1-computador', 16)
+    c.cue('drone', 0, d=16, root=31, gain=-6); c.cue('cut', 2.65, gain=-7); c.cue('turbina', 2.7, d=1.3, gain=-9); c.cue('ui_blip', 3.2); c.cue('lamp_click', 3.7, gain=2); c.cue('rede', 3.7, d=12, gain=-6)
+    t = 0.0
+    while t < 4: c.cue('type', 4.5 + t, gain=3); t += .13 + (np.sin(t * 37) + 1) * .05
+    c.cue('click', 12.4, gain=4)                                                           # o clique do mouse
+    for t in (12.8, 13.6, 14.4): c.cue('ui_blip', t)
+    c.cue('chiado', 13, d=3, gain=-3)
+    f = escolhida('igor', 'i66')
+    if f: c.fala(f, 9.0, 'igor', 'Preciso apagar imediatamente os experimentos que o Wallen fez.')
+    c.gravar(); return c
+
+# ═══ 66 · TELA ARG-14 ═══ (som do plano 55 do v4)
+def cena66():
+    c = Cena('66-ep1-tela', 9)
+    c.cue('ui_blip', .3); c.cue('ui_blip', 1.2); c.cue('click', 3.4, gain=6); c.cue('ui_blip', 3.85); c.cue('chiado', 0, d=9, gain=-4)
+    for k in range(20): c.cue('tick', 4 + k * .24)
+    c.gravar(); return c
+
+# ═══ 67 · O DOM, A QUEDA E A SIRENE ═══
+def cena67():
+    c = Cena('67-ep1-dom', 21)
+    c.cue('chiado', 0, d=4.5, gain=-6)
+    for k in range(11): c.cue('ui_blip', .1 + k * .33, gain=-4)
+    c.cue('whoosh_slow', 3.9, gain=-2); c.cue('chiado', 4.5, d=7.8, gain=-1); c.cue('sobe', 4.5, d=8, root=27, sem=3, gain=-4); c.cue('braam', 4.6, d=3.6, root=33, gain=-6)
+    c.fala('audio/voz/v5/cortadas/igor_p15a.wav', .5, 'igor', 'Como, caralho, isso aconteceu? Como?!')
+    c.fala('audio/voz/v5/cortadas/dom_p15.wav', 5.3, 'dom', 'Finalmente... depois de tanto tempo, nos encontramos. Dessa vez você não vai escapar, Igor.')
+    f = escolhida('igor', 'i69')
+    if f: c.fala(f, 12.35, 'igor', '(susto)')
+    c.som(OGA + 'wooden_02.ogg', 13.15, ganho=-2); c.som(OGA + 'metal_03.ogg', 13.2, ganho=-4); c.cue('estrondo', 13.2, d=.9, gain=-6)   # a cadeira e ele no chão
+    c.som(sirene(), 13.5, ganho=-6)                                                        # SIRENE
+    c.cue('braam', 13.5, d=3.6, root=29, gain=-4); c.cue('heart', 15.6, gain=-4); c.cue('heart', 16.4, gain=-4)
+    f = escolhida('igor', 'i70')
+    if f: c.fala(f, 16.6, 'igor', 'Malditos! Eles me acharam!')
+    c.gravar(); return c
+
+# ═══ 68 · A PORTA-BUNKER, O BOTÃO E A SALA SECRETA ═══
+def cena68():
+    c = Cena('68-ep1-porta', 23)
+    c.som(sirene(), 0, ganho=-10)
+    for t, quem, id_, txt in ((.6, 'igor', 'i71c', 'Fecha essa porta imediatamente!'), (2.9, 'adryan', 'a71', 'Mas é o Nicolas, ele tá só!'),
+                              (5.3, 'igor', 'i71b', 'Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.'),
+                              (10.9, 'gusta', 'g71', 'Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer.')):
+        f = escolhida(quem, id_) or (escolhida(quem, 'i71a') if id_ == 'i71c' else None)
+        if f: c.fala(f, t, quem, txt)
+    c.passos(9.6, 10.9, 1.25, 'adryan', 'carpete', gain=-2); c.passos(9.9, 10.7, .6, 'gusta', 'carpete', gain=-3)
+    c.passos(15.0, 16.0, .5, 'adryan', 'carpete', gain=-4); c.passos(15.0, 16.0, .9, 'gusta', 'carpete', gain=-5)
+    c.som(OGA + 'slam_04.ogg', 17.45, ganho=2); c.cue('estrondo', 17.45, d=.8, gain=-4)  # a porta de aço BATE
+    c.som(OGA + 'tools_02.ogg', 17.95, ganho=-6); c.som(OGA + 'machine_02.ogg', 18.2, ganho=-10); c.som(OGA + 'key_open_01.ogg', 19.25, ganho=-2)   # volante girando · trincos
+    c.cue('click', 17.6, gain=6); c.som(SCI + 'retro_beep_03.ogg', 17.65, ganho=-4)       # o BOTÃO
+    for k in range(6): c.som(SCI + 'beep_02.ogg', 17.9 + k * .55, ganho=-12)              # alerta
+    c.som(SCI + 'teleport_02.ogg', 19.0, ganho=-6); c.cue('sobe', 19.0, d=4, root=31, sem=5, gain=-4)   # a estante desliza, a sala secreta
+    c.som(SCI + 'loop_machine_02.ogg', 19.6, ganho=-14)
+    c.gravar(); return c
+
+CENAS = {'60': cena60, '61': cena61, '62': cena62, '63': cena63, '64': cena64, '65': cena65, '66': cena66, '67': cena67, '68': cena68}
 if __name__ == '__main__':
     pre = sys.argv[1:]; voz = json.load(open('material/voz-ep1.json')) if os.path.exists('material/voz-ep1.json') else {}
     for k, fn in CENAS.items():

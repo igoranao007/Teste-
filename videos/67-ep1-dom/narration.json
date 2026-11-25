@@ -1,0 +1,42 @@
+{
+ "segments": [
+  {
+   "file": "audio/voz/ep1/mix/67_00.wav",
+   "start": 0.5,
+   "dur": 3.08
+  },
+  {
+   "file": "audio/voz/ep1/mix/67_01.wav",
+   "start": 5.3,
+   "dur": 5.37
+  },
+  {
+   "file": "audio/voz/ep1/mix/67_02.wav",
+   "start": 12.35,
+   "dur": 2.92
+  },
+  {
+   "file": "audio/voz/ep1/mix/67_03.wav",
+   "start": 13.15,
+   "dur": 0.4,
+   "ganho": -2
+  },
+  {
+   "file": "audio/voz/ep1/mix/67_04.wav",
+   "start": 13.2,
+   "dur": 0.35,
+   "ganho": -4
+  },
+  {
+   "file": "audio/voz/ep1/mix/67_05.wav",
+   "start": 13.5,
+   "dur": 12.0,
+   "ganho": -6
+  },
+  {
+   "file": "audio/voz/ep1/mix/67_06.wav",
+   "start": 16.6,
+   "dur": 2.16
+  }
+ ]
+}

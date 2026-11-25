@@ -1,0 +1,5 @@
+# tomada escolhida de cada fala nova do EP1 (conferida por transcrição: audio/voz/ep1/CONFERENCIA.txt)
+i66 2   # "Preciso apagar imediatamente os experimentos que o Wallen fez." — texto exato
+i67 1   # "Então... o ARG-14."
+i69 3   # susto (o modelo não grita: fica o "Ah..." de susto + o barulho da queda)
+i70 3   # "Malditos! Eles me acharam!" — texto exato, mais curta e urgente
