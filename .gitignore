@@ -39,3 +39,6 @@ entrega_local/
 # bibliotecas de animação (Quaternius UAL é CC0, mas pesada; Motifect não pode ser redistribuída)
 material/modelos/ual/
 material/modelos/motifect/
+# mixes de cena do EP1 (regeráveis: tools/som_ep1.py + audio/synth.py)
+audio/6*-ep1-*.wav
+audio/7*-ep1-*.wav
