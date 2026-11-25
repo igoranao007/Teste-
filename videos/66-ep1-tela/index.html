@@ -1,0 +1,41 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<!-- EPISÓDIO 1 (reformulado) · CENA 66 · ARG-14 (versão nova do plano 55, que fica intacto): tela cheia, ARG-14 digitado, menu INICIAR/SAIR, cursor;
+     a mão do Igor aperta Enter; CARREGANDO... com a barra de blocos. (O antigo "Projeto Mogg" agora se chama ARG-14.) -->
+<script>VIDEO={w:1920,h:1080,fps:30,dur:9}</script>
+<script src="../../lib/boot.js"></script>
+<style>#stage{background:#000;overflow:hidden}.layer{position:absolute;inset:0;width:100%;height:100%}</style></head><body>
+<div id="stage"></div>
+<script type="module">
+import * as P from "../../lib/ps1.js";
+import * as A from "../../lib/arh.js";
+import * as F from "../../lib/filme.js";
+import * as T from "../../lib/tgp.js";
+import * as K from "../../lib/terminal.js";
+import * as EP from "../../lib/ep1.js";
+const { THREE } = P;
+window.SETUP = async () => {
+  const S = P.palco({ fov: 34, cam: [0, 1, 1.75], alvo: [0, 1.02, 0], fundo: '#020604', nevoa: { cor: F.SOMBRA, perto: 2.4, longe: 8 }, luz: { ...F.LUZ_SALA, keyDir: [0, .5, 1], keyCor: '#7dffa0', amb: '#1a3022' } }), cena = S.scene;
+  const sala = await F.salaIgor(cena), { I, c, Y, pc, vcr, rot } = sala; vcr.led(1); I.girar(1);
+  await EP.computadorNovo(sala);                                                           // computador novo (OFFICE, com mouse)
+  pc.teclado.visible = true; pc.teclado.children.forEach(k => { k.visible = k === pc.enter; }); pc.enter.visible = true; pc.teclado.position.y = -.095;   // a tecla Enter fica por cima do teclado novo
+  const E = new THREE.Vector3(); cena.updateMatrixWorld(true); pc.enter.getWorldPosition(E); const dd = (x, y, z) => { const r = rot(x, 0, z); return [E.x + r[0], E.y + y, E.z + r[2]]; };
+  const term = K.terminal();
+  
+  S.update = t => {
+    const mao = t >= 3.0 && t < 3.8; term.el.style.opacity = mao ? 0 : 1;
+    if (mao) {
+      const u = t - 3.0, desce = P.suave(.2, .4, u) * (1 - P.suave(.5, .7, u));
+      F.telaCodigo(pc, t); I.pose(t, { R: dd(0, .05 - desce * .03, -.02), poloR: rot(-.9, .1, -.4), pegada: { R: { dedos: rot(0, -.6, 1), indice: rot(1, 0, 0) } } });   // aperta o Enter de palma pra baixo I.animar(t);
+      pc.enter.position.y = .038 - desce * .008;
+      S.camera.position.set(...dd(-.03, .46, .1)); S.camera.lookAt(...dd(0, 0, -.04));
+    } else {
+      I.pose(t, { inclina: .02 * Math.sin(t * 1.1), R: dd(0, .05 + .006 * Math.sin(t * 1.7) * P.suave(3.8, 4.4, t), -.02), poloR: rot(-.9, .1, -.4), pegada: { R: { dedos: rot(0, -.6, 1), indice: rot(1, 0, 0) } } });   /* a mão fica no teclado, respirando */   // atrás do terminal o Igor continua respirando
+      term.limpar();
+      if (t < 3.0) { term.txt(F.digitado('ARG-14', t, .3, 22), 240, 58, 40, K.VERDE, { alinhar: 'center', peso: 800 });
+        if (t > 1.0) { term.txt('> INICIAR', 190, 150, 18, K.CLARO); if (Math.floor(t * 3) % 2) term.caixa(296, 152, 10, 16, K.CLARO); } if (t > 1.2) term.txt('  SAIR', 190, 178, 18, '#1f9a45'); }
+      else K.carregando(term, P.clamp((t - 3.8) / 5.2 * .46), t, 'ARG-14');
+      term.pixelar(); term.sinal(Math.round(t * 30), .03);
+    }
+  };
+};
+</script></body></html>

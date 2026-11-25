@@ -184,3 +184,5 @@
   Pedido: **REFORMULAÇÃO GERAL** (visual E execução). Da versão da outra sessão **só se aproveita a parte do FRENTISTA**
   (ir até o alojamento, abrir a porta, entrar, a porta bater, sentar lá dentro) — o resto (bases, sala secreta, casa do Phantom,
   câmeras, montagem) é refeito do zero, com aprovação em imagem de cada cena e **voz com atuação junto de cada cena** (nada de legenda no lugar da voz).
+- **Aprovado (diretor, 25/11)**: cenas 60 (posto, rev. 2), 61 (Metalis) e 62 (Nicolas com a mão na arma). Fala do Igor sobre o Nicolas:
+  **"Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência."**

@@ -11,10 +11,12 @@ SO = [a for a in sys.argv[1:] if not a.startswith('--') and not a.isdigit()]
 FALAS = {
  'igor': [('i66', "Preciso apagar imediatamente os experimentos que o Wallen fez.", .6, .45, .75),
           ('i67', "Então... o ARG-14.", .55, .5, .7),
+          ('i64', "Então é isso. O ARG-14.", .6, .45, .7),
           ('i69', "Aaah!", .95, .3, .9),
           ('i70', "Malditos! Eles me acharam!", .9, .3, .85),
           ('i71a', "Fecha essa porta imediatamente!", .9, .3, .85),
-          ('i71b', "Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.", .6, .4, .75)],   # frase PROPOSTA (diretor confirma)
+          ('i71c', "Fécha essa porta! Imediatamente!", .85, .35, .8),        # mesma fala, grafia que ajuda a pronúncia do "Fecha" (o modelo falava "Deixa")
+          ('i71b', "Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.", .6, .4, .75)],   # frase aprovada pelo diretor (25/11)
  'adryan': [('a71', "Mas é o Nicolas, ele tá só!", .9, .3, .85)],
  'gusta': [('g71', "Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer.", .7, .35, .8),
            ('g10b', "Porque o ARG-14 é importante demais. Isso não pode ser comentado em qualquer lugar. Nem mesmo fora daqui.", .5, .5, .7)],

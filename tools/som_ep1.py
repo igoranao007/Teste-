@@ -115,7 +115,32 @@ def cena62():
     c.cue('boom', 8.8, gain=-8)
     c.gravar(); return c
 
-CENAS = {'60': cena60, '61': cena61, '62': cena62}
+def escolhida(quem, id_):
+    """a tomada escolhida (audio/voz/ep1/ESCOLHIDAS.txt: 'i67 2'), senão a 1ª que existir; None se ainda não foi gerada."""
+    esc = {}
+    if os.path.exists('audio/voz/ep1/ESCOLHIDAS.txt'):
+        for l in open('audio/voz/ep1/ESCOLHIDAS.txt'):
+            p = l.split('#')[0].split()
+            if len(p) == 2: esc[p[0]] = p[1]
+    for n in ([esc[id_]] if id_ in esc else []) + ['1', '2', '3', '4']:
+        f = f'audio/voz/ep1/{quem}/{id_}-{n}.wav'
+        if os.path.exists(f): return f
+    return None
+
+# ═══ 63 · A ENTREGA (POV do Adryan) ═══ (plano 52 do v4 em POV; "Então... o ARG-14" é fala nova)
+def cena63():
+    c = Cena('63-ep1-sala', 14)
+    c.cue('drone', 0, d=14, root=31, gain=-6); c.cue('range', .2, gain=-10)               # a porta abrindo
+    c.passos(.3, 3.6, 2.35, 'adryan', 'carpete', gain=-6); c.passos(.3, 3.6, 2.4, 'gusta', 'carpete', gain=-8, fase=.25)
+    c.cue('paper', 5.85, gain=-8)                                                          # a maleta na mesa
+    for t in (6.0, 7.25, 8.5, 9.75): c.cue('paper', t, gain=-6)                            # as pastas
+    c.fala(C4 + 'igor_p12a-3.wav', 2.2, 'igor', 'Trouxeram?')
+    c.fala(C4 + 'igor_p12b-1.wav', 7.2, 'igor', 'Todos eles têm potencial. Um potencial que não pode ser desperdiçado.')
+    f = escolhida('igor', 'i67')
+    if f: c.fala(f, 11.4, 'igor', 'Então... o ARG-14.')
+    c.gravar(); return c
+
+CENAS = {'60': cena60, '61': cena61, '62': cena62, '63': cena63}
 if __name__ == '__main__':
     pre = sys.argv[1:]; voz = json.load(open('material/voz-ep1.json')) if os.path.exists('material/voz-ep1.json') else {}
     for k, fn in CENAS.items():
