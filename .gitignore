@@ -42,3 +42,6 @@ material/modelos/motifect/
 # mixes de cena do EP1 (regeráveis: tools/som_ep1.py + audio/synth.py)
 audio/6*-ep1-*.wav
 audio/7*-ep1-*.wav
+
+# vozes livres (Piper, CC0): modelos .onnx são grandes — baixar de huggingface.co/rhasspy/piper-voices (ver MODEL_CARD_*.txt)
+material/vozes_livres/*.onnx
