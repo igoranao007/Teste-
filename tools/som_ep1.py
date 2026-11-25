@@ -46,6 +46,18 @@ class Cena:
         env = [round(min(1, (e / mx) ** .6 * 1.15) if e / mx > .08 else 0, 2) for e in env]
         self.voz.append({'t': t, 'env': env, 'quem': quem, 'texto': texto})
         self.segs.append({'file': out, 'start': round(t, 3), 'dur': round(len(v) / sr, 2)})
+    def sirene(self, t0, dur, ganho=-6, abaixa=-10):
+        """SIRENE que ABAIXA sozinha durante as falas (manual: diálogo sempre à frente; a sirene sustenta a tensão sem cobrir a fala).
+        Chamar DEPOIS de todas as falas da cena."""
+        sr = 48000; base = sirene(max(dur, 12.0)); _, x = wavfile.read(base); x = x[:int(sr * dur)].astype(np.float64)
+        g = np.ones(len(x))
+        for v in self.voz:
+            a, b = v['t'] - t0 - .2, v['t'] - t0 + len(v['env']) / 30 + .3
+            ia, ib = max(0, int(a * sr)), min(len(x), int(b * sr))
+            if ib > 0 and ia < len(x): g[ia:ib] = 10 ** (abaixa / 20)
+        k = np.ones(int(sr * .15)) / int(sr * .15); g = np.convolve(g, k, mode='same')        # rampas suaves (sem "bombear")
+        out = f'audio/voz/ep1/mix/{self.nome[:2]}_sirene.wav'; wavfile.write(out, sr, (x * g).astype(np.int16))
+        self.segs.append({'file': out, 'start': round(t0, 3), 'dur': round(len(x) / sr, 2), 'ganho': ganho})
     def gravar(self):
         d = f'videos/{self.nome}'
         json.dump({'dur': self.dur, 'bpm': 120, 'fps': 30, 'music': {'style': 'nenhum'}, 'cues': self.cues}, open(f'{d}/cues.json', 'w'), indent=1)
@@ -143,7 +155,7 @@ def cena63():
 SCI = 'material/modelos/oga/sci-fi-sfx/'                                                   # 50 CC0 sci-fi SFX (OpenGameArt, CC0)
 def sirene(dur=12.0):
     """SIRENE de bunker sintetizada (duas notas alternando + um pouco de distorção de alto-falante): audio/voz/ep1/mix/sirene.wav"""
-    out = 'audio/voz/ep1/mix/sirene.wav'
+    out = f'audio/voz/ep1/mix/sirene_{int(dur)}s.wav'
     if os.path.exists(out): return out
     sr = 48000; t = np.arange(int(sr * dur)) / sr; f = np.where((t * 1.6) % 1 < .5, 660, 520) * (1 + .01 * np.sin(2 * np.pi * 5 * t))
     ph = 2 * np.pi * np.cumsum(f) / sr; x = np.sign(np.sin(ph)) * .5 + .5 * np.sin(ph * 2)
@@ -189,16 +201,15 @@ def cena67():
     f = escolhida('igor', 'i69')
     if f: c.fala(f, 12.35, 'igor', '(susto)')
     c.som(OGA + 'wooden_02.ogg', 13.15, ganho=-2); c.som(OGA + 'metal_03.ogg', 13.2, ganho=-4); c.cue('estrondo', 13.2, d=.9, gain=-6)   # a cadeira e ele no chão
-    c.som(sirene(), 13.5, ganho=-6)                                                        # SIRENE
     c.cue('braam', 13.5, d=3.6, root=29, gain=-4); c.cue('heart', 15.6, gain=-4); c.cue('heart', 16.4, gain=-4)
     f = escolhida('igor', 'i70')
     if f: c.fala(f, 16.6, 'igor', 'Malditos! Eles me acharam!')
+    c.sirene(13.5, 7.5, ganho=-6)                                                          # SIRENE (abaixa sob as falas)
     c.gravar(); return c
 
 # ═══ 68 · A PORTA-BUNKER, O BOTÃO E A SALA SECRETA ═══
 def cena68():
     c = Cena('68-ep1-porta', 23)
-    c.som(sirene(), 0, ganho=-10)
     for t, quem, id_, txt in ((.6, 'igor', 'i71c', 'Fecha essa porta imediatamente!'), (2.9, 'adryan', 'a71', 'Mas é o Nicolas, ele tá só!'),
                               (5.3, 'igor', 'i71b', 'Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.'),
                               (10.9, 'gusta', 'g71', 'Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer.')):
@@ -212,6 +223,7 @@ def cena68():
     for k in range(6): c.som(SCI + 'beep_02.ogg', 17.9 + k * .55, ganho=-12)              # alerta
     c.som(SCI + 'teleport_02.ogg', 19.0, ganho=-6); c.cue('sobe', 19.0, d=4, root=31, sem=5, gain=-4)   # a estante desliza, a sala secreta
     c.som(SCI + 'loop_machine_02.ogg', 19.6, ganho=-14)
+    c.sirene(0, 23, ganho=-8)                                                              # a sirene continua (abaixa sob as falas)
     c.gravar(); return c
 
 CENAS = {'60': cena60, '61': cena61, '62': cena62, '63': cena63, '64': cena64, '65': cena65, '66': cena66, '67': cena67, '68': cena68}

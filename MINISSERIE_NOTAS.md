@@ -196,3 +196,8 @@ secreta** · 69 Kessinburgh · 70 base do Dom · 71 casa do Phantom (fim).
 - Vozes novas: Chatterbox local com atuação (`tools/falas_ep1.py`), cada tomada CONFERIDA por transcrição local (`tools/conferir_falas.py`
   → `audio/voz/ep1/CONFERENCIA.txt`), escolhidas em `audio/voz/ep1/ESCOLHIDAS.txt`. O modelo não grita: o susto do Igor é um "Ah..." + o som da queda.
 - Oliveira = voz livre **Cadu** (mais grave, 133 Hz) · Luan = **Faber** (166 Hz) — provisório até o diretor escolher.
+- **MANUAL DE DIREÇÃO (diretor, 25/11)**: `MANUAL_DIRECAO.md` (+ PDF em `material/producao/minisserie/`). Vale pra todas as cenas, passadas e
+  futuras: auditar → planejar → implementar → validar na renderização → relatar (APROVADO / COM PENDÊNCIAS / REPROVADO / NÃO VALIDADO).
+  Auditoria das cenas 60–68: `entrega/ep1/AUDITORIA_EP1_60-68.md` (67 e 68 refeitas na v2).
+- **PERGUNTA EM ABERTO**: o manual mostra, como exemplo, a KATANA AMARELA atravessando a porta-bunker (Phantom sem aparecer) e o Adryan e o Gusta
+  se jogando no chão. Isso entra na história do ep. 1? (não produzir antes da resposta: a história não muda sem autorização)

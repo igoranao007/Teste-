@@ -29,14 +29,14 @@
   },
   {
    "file": "audio/voz/ep1/mix/67_05.wav",
-   "start": 13.5,
-   "dur": 12.0,
-   "ganho": -6
-  },
-  {
-   "file": "audio/voz/ep1/mix/67_06.wav",
    "start": 16.6,
    "dur": 2.16
+  },
+  {
+   "file": "audio/voz/ep1/mix/67_sirene.wav",
+   "start": 13.5,
+   "dur": 7.5,
+   "ganho": -6
   }
  ]
 }

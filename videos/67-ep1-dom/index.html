@@ -43,17 +43,35 @@ window.SETUP = async () => {
   const camIgor = (perto = 0) => { const cab = I.cabeca.getWorldPosition(new THREE.Vector3()), longe = new THREE.Vector3(.95, 1.62, .62), perto2 = new THREE.Vector3(.68, 1.5, .44);   // eixo do olhar dele (de frente, por cima do monitor)
     S.camera.fov = P.lerp(40, 34, perto); S.camera.position.copy(longe.lerp(perto2, perto)); S.camera.lookAt(cab.x, cab.y - .02, cab.z); };
   const sirene = F.camada('background:#ff1a0a;mix-blend-mode:multiply'); sirene.style.opacity = 0;
+  // referências da QUEDA (antes de tombar): peito do Igor, frente (f) e lado (dir) dele
+  cena.updateMatrixWorld(true); const PEITO0 = I.corpo.osso('spine.003').getWorldPosition(new THREE.Vector3()), UP = new THREE.Vector3(0, 1, 0);
+  const noFrame = (a, b, c) => PEITO0.clone().addScaledVector(f, a).addScaledVector(dir, b).addScaledVector(UP, c);   // ponto no corpo dele (antes da queda)
+  const viaTomba = p => p.clone().sub(tomba.position).applyQuaternion(tomba.quaternion).add(tomba.position);         // o mesmo ponto depois de tombar
+  const mix3 = (A, B, u) => A.clone().lerp(B, P.clamp(u));
   S.update = t => {
     const q = Math.round(t * 30), tremeLuz = .75 + .25 * Math.sin(t * 23) * Math.sin(t * 7.1);
     const vI = fala('67', t, 'igor'), vD = fala('67', t, 'dom');
     const SIR = t >= 13.5, pisca = SIR ? (.5 + .5 * Math.sin(t * 9.4)) : 0;              // sirene: vermelho girando
     // IGOR: assustado, joga o corpo pra trás e balança a cabeça
-    I.pose(t, { inclina: -.1 * P.suave(.2, .8, t) + .02 * Math.sin(t * 1.3) + .04 * Math.sin(t * 7) * P.suave(.4, .7, t) * (1 - P.suave(1.6, 2.2, t)) });   /* susto: tranco pra trás e respiração */
+    // QUEDA EM 3 TEMPOS (manual do diretor): 1) SUSTO 12,3–12,65 · 2) CEDÊNCIA 12,65–13,2 (a cadeira tomba) · 3) IMPACTO e acomodação 13,2–13,9
+    //   + no chão (15,4–16,4): ainda deitado de costas na cadeira, força pra se erguer → corte na ação pro Igor de joelhos levantando
+    const T1 = P.suave(12.3, 12.5, t), T2 = P.suave(12.62, 12.9, t), T3 = P.suave(13.18, 13.3, t), luta = P.suave(15.5, 15.9, t);
+    const m = { inclina: -.1 * P.suave(.2, .8, t) + .02 * Math.sin(t * 1.3) + .04 * Math.sin(t * 7) * P.suave(.4, .7, t) * (1 - P.suave(1.6, 2.2, t)) - .18 * T1 * (1 - T3) + .12 * luta * Math.max(0, Math.sin((t - 15.5) * 5)) };
+    const susto0 = P.suave(.3, .7, t) * (1 - P.suave(1.8, 2.5, t));                                   // 1º susto com o LOCAL DESCOBERTO: mãos sobem um pouco
+    let kM = Math.max(susto0 * .6, T1), mR, mL;
+    if (kM > 0) { mR = noFrame(.26, .17, .2 + .06 * T1); mL = noFrame(.26, -.17, .2 + .06 * T1); }                      // mãos na frente do rosto, ombros encolhidos
+    if (T2 > 0) { mR = mix3(mR, noFrame(.48, .3, .22), T2); mL = mix3(mL, noFrame(.48, -.3, .22), T2); }                 // braços pra frente, procurando apoio
+    if (T2 > 0) { mR = viaTomba(mR); mL = viaTomba(mL); }
+    if (T3 > 0) { I.obj.updateMatrixWorld(true); const q2 = I.corpo.osso('spine').getWorldPosition(new THREE.Vector3());   // as mãos batem no chão dos lados
+      const chR = q2.clone().addScaledVector(dir, .36).addScaledVector(f, -.1), chL = q2.clone().addScaledVector(dir, -.36).addScaledVector(f, -.1); chR.y = chL.y = .07 + .05 * luta * Math.max(0, Math.sin((t - 15.5) * 5));
+      mR = mix3(mR, chR, T3); mL = mix3(mL, chL, T3); }
+    if (mR) { m.R = mR.toArray(); m.L = mL.toArray(); m.kR = m.kL = Math.max(kM, T2, T3) * (t < 15.4 || t < 16.4 ? 1 : 0); }
+    I.pose(t, m);
     I.animar(t, { boca: vI, pisca: (t % 3.3) > 3.15 ? 1 : 0 });
     I.cabeca.rotation.x += .05; I.cabeca.rotation.y += .14 * Math.sin(t * 8.5) * P.suave(1.2, 1.5, t) * (1 - P.suave(2.6, 3.0, t)) + .06 * Math.sin(t * 9) * P.suave(12.4, 12.6, t);
     monitorAmarelo(t);
-    const naTela = (t >= 4.5 && t < 12.3) || (t >= 13.5 && t < 15.4);
-    if (SIR && !naTela) P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + new THREE.Color('#ff2a12').multiplyScalar(.35 + .9 * pisca).getHexString(), fillDir: [...rot(0, .3, -1)], fillCor: '#4a1808', amb: '#2a0805' });
+    const naTela = (t >= 4.5 && t < 12.3) || (t >= 13.9 && t < 15.4);
+    if (SIR && !naTela) P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + new THREE.Color('#ff2a12').multiplyScalar(.35 + .9 * pisca).getHexString(), fillDir: [...rot(0, .3, -1)], fillCor: '#6a2a14', amb: '#4a140c' });   // vermelho, mas com o corpo legível
     else if (!naTela) {   // luz da sala: amarelo forte vindo do monitor, piscando
       P.luz({ keyDir: [...rot(0, .3, -1)], keyCor: '#' + new THREE.Color('#ffd23a').multiplyScalar(tremeLuz).getHexString(), fillDir: [0, .5, 1], fillCor: '#3a3008', amb: '#1c1704' });
       lamp && (lamp.visible = true);
@@ -61,14 +79,14 @@ window.SETUP = async () => {
     // DOM dentro da tela: PARADO (só a boca), pedido do diretor
     Dm.pose('idle', 0); DD.atualizar(t, { boca: vD, pisca: 0 });
     // a QUEDA (12,6–13,2): tomba pra trás com a cadeira, quica e fica
-    const qd = P.clamp((t - 12.6) / .6), ang = (qd * qd) * 1.42 - (t > 13.2 ? .05 * Math.exp(-(t - 13.2) * 9) * Math.sin((t - 13.2) * 40) : 0);
+    const qd = P.clamp((t - 12.62) / .58), ang = (qd * qd) * 1.42 - (t > 13.2 ? .06 * Math.exp(-(t - 13.2) * 7) * Math.abs(Math.sin((t - 13.2) * 22)) : 0) - .1 * luta * Math.max(0, Math.sin((t - 15.5) * 5));
     tomba.quaternion.setFromAxisAngle(dir, ang);
-    const noChao = t >= 15.4; I.obj.visible = !noChao; Ig.obj.visible = noChao;
-    if (noChao) { const k = (t - 15.4) * 1.55, d = Ig.corpo.dur('m_get_up');
+    const noChao = t >= 16.4; I.obj.visible = !noChao; Ig.obj.visible = noChao;
+    if (noChao) { const k = 2.3 + (t - 16.4) * 1.25, d = Ig.corpo.dur('m_get_up');                  // corte NA AÇÃO: entra já de joelhos, se levantando
       Ig.obj.position.copy(CHAO); Ig.obj.rotation.y = R_CHAO; Ig.corpo.clip(k < d ? 'm_get_up' : 'u_Idle_Loop', k < d ? k : k - d);
       Ig.assentar(); Ig.animar(t, { boca: vI, pisca: (t % 3.1) > 2.95 ? 1 : 0 }); }
     // câmeras + camadas
-    term.el.style.opacity = 0; preto.style.opacity = 0; sirene.style.opacity = SIR ? (.25 + .55 * pisca).toFixed(2) : 0;
+    term.el.style.opacity = 0; preto.style.opacity = 0; sirene.style.opacity = SIR ? ((naTela ? .6 : .25) + (naTela ? .35 : .55) * pisca).toFixed(2) : 0;   // na tela: vermelho sempre (sem voltar pro amarelo)
     if (camQ) { S.camera.fov = camQ[6]; S.camera.position.set(...camQ.slice(0, 3)); S.camera.lookAt(...camQ.slice(3, 6)); }
     else if (t < 3.9) camIgor(P.suave(2.2, 3.8, t) * .25);
     else if (t < 4.5) { const u = P.suave(3.9, 4.5, t), T0 = tela(), de = new THREE.Vector3(...rot(-.5, 1.5, -.55)); S.camera.position.copy(de.lerp(T0, u * .8)); S.camera.fov = P.lerp(42, 20, u); S.camera.lookAt(T0); }
@@ -76,10 +94,12 @@ window.SETUP = async () => {
       const u = (t - 4.5) / 7.8; S.camera.fov = P.lerp(36, 30, u); S.camera.position.set(.04 * Math.sin(t * .7), 1.63, -40 + P.lerp(1.15, .95, u)); S.camera.lookAt(0, 1.6, -40);
       term.limpar('#000'); term.sinal(q, .62 + .12 * Math.sin(t * 13)); term.amarelar(1, 1.3);
       term.el.style.opacity = (.68 + .1 * Math.sin(t * 2.3) + (P.rng(q)() < .08 ? .2 : 0) - .06 * P.suave(5, 6, t) * (1 - P.suave(10.8, 11.6, t))).toFixed(2);   // mais chiado: mal dá pra ver
-    } else if (t < 13.5) { const cab = I.cabeca.getWorldPosition(new THREE.Vector3()), de = new THREE.Vector3(...rot(-1.55, 1.2, -.2));   // de lado: o susto e a QUEDA com a cadeira
-      S.camera.fov = 44; S.camera.position.copy(de); S.camera.lookAt(P.lerp(cab.x, 0, .5), P.lerp(cab.y, .5, P.suave(12.6, 13.2, t)), P.lerp(cab.z, 0, .5)); }
+    } else if (t < 13.9 || (t >= 15.4 && t < 16.4)) {                                                  // DE LADO, perpendicular à queda: os 3 tempos inteiros no quadro
+      const base = f.clone().multiplyScalar(-.45), de = new THREE.Vector3(-2.15, 1.4, -.3);
+      const treme = (t > 13.2 && t < 13.5) ? .025 * Math.exp(-(t - 13.2) * 10) * Math.sin(t * 90) : 0;                 // tremor só no IMPACTO
+      S.camera.fov = 52; S.camera.position.copy(de).add(new THREE.Vector3(0, treme, 0)); S.camera.lookAt(base.x, P.lerp(.75, .35, P.suave(12.7, 13.3, t)), base.z); }
     else { Ig.obj.updateMatrixWorld(true); const h = Ig.corpo.osso('spine.003').getWorldPosition(new THREE.Vector3());               // no chão, levantando: "Malditos! Eles me acharam!"
-      const u = P.suave(15.4, 19.5, t), de = new THREE.Vector3(P.lerp(.45, .95, u), P.lerp(1.5, 1.62, u), P.lerp(.25, 1.45, u));
+      const u = P.suave(16.4, 19.5, t), de = new THREE.Vector3(P.lerp(.45, .95, u), P.lerp(1.5, 1.62, u), P.lerp(.25, 1.45, u));
       S.camera.fov = 46; S.camera.position.copy(de); S.camera.lookAt(h.x, P.lerp(.3, h.y + .2, u), h.z); }
     S.camera.updateProjectionMatrix();
   };

@@ -33,6 +33,9 @@ window.SETUP = async () => {
   const Ig = await T.igor({ anim: true }); cena.add(Ig.obj);
   const Ad = await E4.ator('adryan'), Gu = await E4.ator('gusta'); cena.add(Ad.obj, Gu.obj); T.poses(Ad.modelo); T.poses(Gu.modelo);
   const porta = E.portaBunker(cena, { x: -.7, z: 3.6 });
+  const luminaria = new THREE.Group(); luminaria.position.set(-.7, 2.42, 3.33); cena.add(luminaria);                 // luminária de grade sobre a porta
+  luminaria.add(P.caixa(.32, .1, .14, P.mat({ cor: '#2b312e' })), P.caixa(.26, .06, .08, P.mat({ cor: '#ffe9b8', semLuz: true }), { pos: [0, -.05, -.02] }));
+  const cone = P.malha(new THREE.ConeGeometry(.9, 2.3, 8, 1, true), P.mat({ cor: '#ffe2a8', opac: .06, aditivo: true, semLuz: true, lados: THREE.DoubleSide }), { pos: [-.7, 1.25, 3.2] }); cena.add(cone);
   const botao = E.botaoVermelho(); botao.position.set(-.48, Y, .2); botao.rotation.y = .4; cena.add(botao);
   const itens = cena.children.filter(o => o.position.x > .8 && o.position.x < 2.4 && Math.abs(o.position.z + 1.43) < .03);
   const secreta = E.salaSecreta(cena, itens);
@@ -88,17 +91,17 @@ window.SETUP = async () => {
     const abre = P.suave(19.0, 21.0, t), verde = P.suave(19.2, 21.5, t); secreta.abrir(abre); secreta.atualizar(t, verde);
     // luz: sirene vermelha (da cena 67) → o verde da sala secreta vence
     const pis = .5 + .5 * Math.sin(t * 9.4), red = new THREE.Color('#ff2a12').multiplyScalar(.3 + .8 * pis * (1 - verde * .7)), grn = new THREE.Color('#39ff6a').multiplyScalar(1.4 * verde);
-    P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + red.getHexString(), fillDir: [-.4, .25, 1], fillCor: '#' + new THREE.Color('#2a0805').lerp(grn, verde).getHexString(), amb: '#' + new THREE.Color('#3e0d08').lerp(new THREE.Color('#0f3a1c'), verde).getHexString() });
+    P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + red.getHexString(), fillDir: [.15, .55, -1], fillCor: '#' + new THREE.Color('#6a4a2a').lerp(grn, verde).getHexString(), amb: '#' + new THREE.Color('#3e0d08').lerp(new THREE.Color('#0f3a1c'), verde).getHexString() });
     // ── câmeras (POV do Adryan = logo à frente do rosto dele)
     const olhoA = Ad.osso('spine.005').getWorldPosition(v3()).add(v3(0, .08, 0)).addScaledVector(frente(Ad.obj.rotation.y), .13);
     const rostoI = Ig.cabeca.getWorldPosition(v3()), rostoA = Ad.osso('spine.005').getWorldPosition(v3()).add(v3(0, .1, 0)), rostoG = Gu.osso('spine.005').getWorldPosition(v3()).add(v3(0, .1, 0));
     if (camQ) cam(camQ.slice(0, 3), camQ.slice(3, 6), camQ[6]);
     else if (t < 2.85) cam(olhoA.toArray(), rostoI.clone().add(v3(0, -.1, 0)).toArray(), 50);                         // POV: o Igor aponta a porta: "Fecha essa porta imediatamente!"
-    else if (t < 5.25) { const de = rostoA.clone().add(frente(Ad.obj.rotation.y).multiplyScalar(.95)).add(direita(Ad.obj.rotation.y).multiplyScalar(-.3)); cam(de.toArray(), rostoA.toArray(), 38); }   // Adryan: "Mas é o Nicolas, ele tá só!"
+    else if (t < 5.25) cam(olhoA.toArray(), rostoI.clone().add(v3(0, -.05, 0)).toArray(), 46);                       // POV (manual: sem corte pra fora no meio do diálogo): ouvimos o Adryan, o Igor reage
     else if (t < 9.6) cam(olhoA.toArray(), rostoI.toArray(), 42);                                                     // POV: "Ele vai ficar bem..."
     else if (t < 11.0) cam([.75, 1.55, 2.3], [P.lerp(Ad.obj.position.x, -.6, .5), 1.3, Ad.obj.position.z], 46);     // ele vai pra porta; o Gusta vem por trás
-    else if (t < 15.0) cam([.1, 1.55, 3.3], [(rostoA.x + rostoG.x) / 2, 1.5, (rostoA.z + rostoG.z) / 2], 40);        // o Gusta segurando o Adryan pelos ombros
-    else if (t < 17.55) cam([.75, 1.7, 1.1], [-.75, 1.1, 3.25], 44);                                                  // fecham a porta juntos
+    else if (t < 15.0) cam([.55, 1.55, 3.05], [rostoG.x * .65 + rostoA.x * .35, 1.5, rostoG.z * .65 + rostoA.z * .35], 38);   // o Gusta segurando o Adryan pelos ombros (rosto do Gusta à vista)
+    else if (t < 17.55) cam([.85, 1.45, 2.05], [-.85, 1.05, 3.35], 50);                                               // fecham a porta juntos (a folha e o vão no quadro, com a luz da porta)
     else if (t < 18.35) { const b = botao.topo(); cam([b.x + .25, b.y + .3, b.z + .3], b.toArray(), 40); }           // o BOTÃO VERMELHO
     else if (t < 19.6) { const w = porta.volanteW(); cam([w.x + .55, w.y + .15, w.z - .75], w.toArray(), 42); }      // tranca: o volante girando
     else cam([.2, 1.75, 2.8], [1.6, 1.25, -1.9], 46);                                                                  // a estante desliza: a sala secreta, verde
