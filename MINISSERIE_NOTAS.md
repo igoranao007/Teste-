@@ -180,3 +180,7 @@
   filme inteiro sem pedido; a montagem é só uma emenda dos planos, sem a edição do v4, com o som recortado do vídeo antigo e falas só em legenda.
 - **Decisão**: o episódio é REFEITO a partir deste ramo (`claude/mp4-animation-threejs-remotion-xyh5wp`), cena por cena, com aprovação
   em imagem de cada etapa. O ramo da outra sessão fica guardado no GitHub, sem uso; dele só se aproveita o que for conferido antes.
+- **Avaliação do diretor sobre aquele episódio: NOTA 0.** "Cheio de bugs", visual das bases feio, execução ruim, sem voz.
+  Pedido: **REFORMULAÇÃO GERAL** (visual E execução). Da versão da outra sessão **só se aproveita a parte do FRENTISTA**
+  (ir até o alojamento, abrir a porta, entrar, a porta bater, sentar lá dentro) — o resto (bases, sala secreta, casa do Phantom,
+  câmeras, montagem) é refeito do zero, com aprovação em imagem de cada cena e **voz com atuação junto de cada cena** (nada de legenda no lugar da voz).

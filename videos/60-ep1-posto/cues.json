@@ -1,0 +1,383 @@
+{
+ "dur": 40,
+ "bpm": 120,
+ "fps": 30,
+ "music": {
+  "style": "nenhum"
+ },
+ "cues": [
+  {
+   "type": "motor",
+   "t": 0,
+   "d": 4.5,
+   "gain": -4
+  },
+  {
+   "type": "pneus",
+   "t": 0,
+   "d": 4.2,
+   "gain": -4
+  },
+  {
+   "type": "lampada",
+   "t": 0,
+   "d": 40,
+   "rede": 60,
+   "pisca": 0,
+   "gain": -12
+  },
+  {
+   "type": "grilos",
+   "t": 0,
+   "d": 40,
+   "gain": -8
+  },
+  {
+   "type": "click",
+   "t": 5.0,
+   "gain": -2
+  },
+  {
+   "type": "click",
+   "t": 13.15,
+   "gain": -4
+  },
+  {
+   "type": "click",
+   "t": 15.3,
+   "gain": -3
+  },
+  {
+   "type": "click",
+   "t": 18.32,
+   "gain": -5
+  },
+  {
+   "type": "click",
+   "t": 20.55,
+   "gain": -4
+  },
+  {
+   "type": "turbina",
+   "t": 5.1,
+   "d": 0.9,
+   "gain": -16
+  },
+  {
+   "type": "tick",
+   "t": 14.65,
+   "gain": -4
+  },
+  {
+   "type": "turbina",
+   "t": 15.4,
+   "d": 2.9,
+   "gain": -10
+  },
+  {
+   "type": "tick",
+   "t": 18.95,
+   "gain": -4
+  },
+  {
+   "type": "pisada",
+   "t": 5.578,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 1,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 6.165,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 2,
+   "gain": 2.8,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 6.723,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 3,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 10.108,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 4,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 10.553,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 5,
+   "gain": 2.8,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 10.969,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 6,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 11.413,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 7,
+   "gain": 2.8,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 14.254,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 8,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 19.722,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 9,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 21.325,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 10,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 21.741,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 11,
+   "gain": 2.8,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 22.129,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 12,
+   "gain": 1.2999999999999998,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 22.545,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 13,
+   "gain": 2.8,
+   "pan": 0.06
+  },
+  {
+   "type": "paper",
+   "t": 23.4,
+   "gain": -6
+  },
+  {
+   "type": "pisada",
+   "t": 25.006,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 14,
+   "gain": -5.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 25.427,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 15,
+   "gain": -4.2,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 25.818,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 16,
+   "gain": -5.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 26.237,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 17,
+   "gain": -4.2,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 26.628,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 18,
+   "gain": -5.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 27.047,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 19,
+   "gain": -4.2,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 27.445,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 20,
+   "gain": -5.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 29.375,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 21,
+   "gain": -6.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 29.636,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 22,
+   "gain": -5.2,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 29.879,
+   "sup": "concreto",
+   "peso": 1.0,
+   "seed": 23,
+   "gain": -6.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 31.391,
+   "sup": "madeira",
+   "peso": 1.0,
+   "seed": 24,
+   "gain": -20.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 31.703,
+   "sup": "madeira",
+   "peso": 1.0,
+   "seed": 25,
+   "gain": -19.2,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 31.994,
+   "sup": "madeira",
+   "peso": 1.0,
+   "seed": 26,
+   "gain": -20.7,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 32.305,
+   "sup": "madeira",
+   "peso": 1.0,
+   "seed": 27,
+   "gain": -19.2,
+   "pan": 0.06
+  },
+  {
+   "type": "pisada",
+   "t": 32.596,
+   "sup": "madeira",
+   "peso": 1.0,
+   "seed": 28,
+   "gain": -20.7,
+   "pan": -0.06
+  },
+  {
+   "type": "swoosh",
+   "t": 31.25,
+   "gain": -20
+  },
+  {
+   "type": "drone",
+   "t": 31.6,
+   "d": 8.4,
+   "root": 29,
+   "gain": -6
+  },
+  {
+   "type": "sobe",
+   "t": 37.6,
+   "d": 2.4,
+   "root": 29,
+   "sem": 3,
+   "gain": -10
+  },
+  {
+   "type": "carro_abre",
+   "t": 33.3,
+   "gain": -4
+  },
+  {
+   "type": "pisada",
+   "t": 35.908,
+   "sup": "concreto",
+   "peso": 0.9,
+   "seed": 29,
+   "gain": -0.7000000000000002,
+   "pan": -0.06
+  },
+  {
+   "type": "pisada",
+   "t": 36.445,
+   "sup": "concreto",
+   "peso": 0.9,
+   "seed": 30,
+   "gain": 0.7999999999999998,
+   "pan": 0.06
+  }
+ ]
+}
