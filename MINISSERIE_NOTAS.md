@@ -192,7 +192,7 @@ Ordem: 41 estrada · 42 Nicolas no carro · **60 posto** · **61 Metalis** · (t
 (mão na arma)** · 50 elevador (Gusta com "ARG-14": regravar) · 51 sala do Igor · **63 entrega (POV Adryan)** · **64 fita ARG-14 (POV)** ·
 **65 computador novo + Wallen** · **66 tela ARG-14** · **67 Dom na tela + queda + sirene + "Malditos"** · **68 porta-bunker, Gusta, botão, sala
 secreta** · 69 Kessinburgh · 70 base do Dom · 71 casa do Phantom (fim).
-- Feitas e com som: 60–68 (`entrega/ep1/*.mp4`). Aprovadas: 60, 61, 62.
+- Feitas e com som: 60–68 (`entrega/ep1/*.mp4`). Aprovadas: 60, 61, 62. Versão atual da sala do Igor: 63_v2 · 64_v2 · 65_v2 · 66_v2 · 67_v3 · 68_v3 (+ `sequencia_sala_do_igor_v2.mp4`).
 - Vozes novas: Chatterbox local com atuação (`tools/falas_ep1.py`), cada tomada CONFERIDA por transcrição local (`tools/conferir_falas.py`
   → `audio/voz/ep1/CONFERENCIA.txt`), escolhidas em `audio/voz/ep1/ESCOLHIDAS.txt`. O modelo não grita: o susto do Igor é um "Ah..." + o som da queda.
 - Oliveira = voz livre **Cadu** (mais grave, 133 Hz) · Luan = **Faber** (166 Hz) — provisório até o diretor escolher.

@@ -34,5 +34,11 @@ relógio de parede e lâmpada pendurada (presos), telas da sala secreta (pendura
 - **65 · computador** — APROVADO COM PENDÊNCIAS (65-INT-001 da auditoria anterior: o mouse aparece pouco).
 - **66 · tela ARG-14** — APROVADO.
 - **67 · Dom, queda e sirene** — APROVADO COM PENDÊNCIAS (67-ATU-006, P2).
-- **68 · porta, botão, katana (v3)** — ver o fim deste arquivo após o re-render.
+- **68 · porta, botão, katana (v3)** — APROVADO COM PENDÊNCIAS (P2: no plano do chão, 25,4–30 s, a lâmina ainda é fina na tela —
+  lê como lâmina amarela cravada, mas pequena; P3: o rosto do Igor fica pequeno no fundo nos primeiros 11 s).
+  Re-render conferido: porta legível (18–21 s), katana com faíscas e vibração (24,3–24,7 s), esquiva em 3 tempos (24,3–25,35 s).
+
+## Entregas (versões novas; as antigas ficam)
+`63-sala_v2.mp4` · `64-fita_v2.mp4` · `65-computador_v2.mp4` · `66-tela_v2.mp4` · `67-dom_v3.mp4` · `68-porta_v3.mp4` ·
+`sequencia_sala_do_igor_v2.mp4` (63→68 emendadas, 1 min 42 s).
 Aprovação final é do diretor.
