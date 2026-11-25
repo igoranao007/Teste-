@@ -1,0 +1,108 @@
+{
+ "segments": [
+  {
+   "file": "audio/voz/ep1/mix/68_00.wav",
+   "start": 0,
+   "dur": 12.0,
+   "ganho": -10
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_01.wav",
+   "start": 0.6,
+   "dur": 3.32
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_02.wav",
+   "start": 2.9,
+   "dur": 2.6
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_03.wav",
+   "start": 5.3,
+   "dur": 4.64
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_04.wav",
+   "start": 10.9,
+   "dur": 4.32
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_05.wav",
+   "start": 17.45,
+   "dur": 0.3,
+   "ganho": 2
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_06.wav",
+   "start": 17.95,
+   "dur": 0.55,
+   "ganho": -6
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_07.wav",
+   "start": 18.2,
+   "dur": 0.53,
+   "ganho": -10
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_08.wav",
+   "start": 19.25,
+   "dur": 0.43,
+   "ganho": -2
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_09.wav",
+   "start": 17.65,
+   "dur": 0.53,
+   "ganho": -4
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_10.wav",
+   "start": 17.9,
+   "dur": 0.41,
+   "ganho": -12
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_11.wav",
+   "start": 18.45,
+   "dur": 0.41,
+   "ganho": -12
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_12.wav",
+   "start": 19.0,
+   "dur": 0.41,
+   "ganho": -12
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_13.wav",
+   "start": 19.55,
+   "dur": 0.41,
+   "ganho": -12
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_14.wav",
+   "start": 20.1,
+   "dur": 0.41,
+   "ganho": -12
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_15.wav",
+   "start": 20.65,
+   "dur": 0.41,
+   "ganho": -12
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_16.wav",
+   "start": 19.0,
+   "dur": 1.74,
+   "ganho": -6
+  },
+  {
+   "file": "audio/voz/ep1/mix/68_17.wav",
+   "start": 19.6,
+   "dur": 3.2,
+   "ganho": -14
+  }
+ ]
+}

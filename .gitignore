@@ -45,3 +45,5 @@ audio/7*-ep1-*.wav
 
 # vozes livres (Piper, CC0): modelos .onnx são grandes — baixar de huggingface.co/rhasspy/piper-voices (ver MODEL_CARD_*.txt)
 material/vozes_livres/*.onnx
+# junção das cenas pra assistir (regerável a partir dos vídeos de cada cena)
+entrega/ep1/sequencia_*.mp4

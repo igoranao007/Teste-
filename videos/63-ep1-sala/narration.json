@@ -1,0 +1,19 @@
+{
+ "segments": [
+  {
+   "file": "audio/voz/ep1/mix/63_00.wav",
+   "start": 2.2,
+   "dur": 1.63
+  },
+  {
+   "file": "audio/voz/ep1/mix/63_01.wav",
+   "start": 7.2,
+   "dur": 3.82
+  },
+  {
+   "file": "audio/voz/ep1/mix/63_02.wav",
+   "start": 11.4,
+   "dur": 1.84
+  }
+ ]
+}

@@ -202,7 +202,7 @@ def cena68():
     for t, quem, id_, txt in ((.6, 'igor', 'i71c', 'Fecha essa porta imediatamente!'), (2.9, 'adryan', 'a71', 'Mas é o Nicolas, ele tá só!'),
                               (5.3, 'igor', 'i71b', 'Ele vai ficar bem. O Nicolas conhece os procedimentos de sobrevivência.'),
                               (10.9, 'gusta', 'g71', 'Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer.')):
-        f = escolhida(quem, id_) or (escolhida(quem, 'i71a') if id_ == 'i71c' else None)
+        f = (escolhida(quem, 'i71a') if id_ == 'i71c' else None) or escolhida(quem, id_)
         if f: c.fala(f, t, quem, txt)
     c.passos(9.6, 10.9, 1.25, 'adryan', 'carpete', gain=-2); c.passos(9.9, 10.7, .6, 'gusta', 'carpete', gain=-3)
     c.passos(15.0, 16.0, .5, 'adryan', 'carpete', gain=-4); c.passos(15.0, 16.0, .9, 'gusta', 'carpete', gain=-5)

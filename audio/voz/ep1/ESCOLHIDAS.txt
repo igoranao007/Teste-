@@ -3,3 +3,9 @@ i66 2   # "Preciso apagar imediatamente os experimentos que o Wallen fez." — t
 i67 1   # "Então... o ARG-14."
 i69 3   # susto (o modelo não grita: fica o "Ah..." de susto + o barulho da queda)
 i70 3   # "Malditos! Eles me acharam!" — texto exato, mais curta e urgente
+i64 2   # "Então é isso. O ARG-14." — texto exato
+i71a 3  # "Fecha essa porta imediatamente!" — texto exato (as outras viraram "Deixa...")
+i71b 3  # "Ele vai ficar bem. O Nicolas conhece o(s) procedimento(s)..." — 4,6 s: cabe antes do Adryan sair andando (a 2 tem 6,2 s)
+a71 2   # "Mas é o Nicolas, ele tá só!"
+g71 3   # "Ele vai ficar bem. Mas se ficar na rebeldia, iremos morrer." — a mais firme e curta
+g10b 3  # elevador (plano 50): "Porque o ARG-14 é importante demais..."
