@@ -159,7 +159,7 @@ window.SETUP = async () => {
     mal.pulsar(t); lamp.visible = true;
     // luz: sirene vermelha girando + o verde da sala secreta (no chão a sirene fica abafada, a luz continua)
     const pis = .5 + .5 * Math.sin(t * 9.4), red = new THREE.Color('#ff2a12').multiplyScalar(.35 + .85 * pis * (1 - verde * .45)), grn = new THREE.Color('#39ff6a').multiplyScalar(1.1 * verde);
-    P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + red.getHexString(), fillDir: [.15, .55, -1], fillCor: '#' + new THREE.Color('#8a3a1c').lerp(grn, verde * .7).getHexString(), amb: '#' + new THREE.Color('#5c1a10').lerp(new THREE.Color('#0f3a1c'), verde * .6).getHexString() });
+    P.luz({ keyDir: [Math.sin(t * 4.7), .4, Math.cos(t * 4.7)], keyCor: '#' + red.getHexString(), fillDir: [.15, .55, -1], fillCor: '#' + new THREE.Color('#8a3a1c').lerp(new THREE.Color('#d2925e'), .75 * env(t, 17.4, 18.1, 22.6, 23.0)).lerp(grn, verde * .7).getHexString(), amb: '#' + new THREE.Color('#5c1a10').lerp(new THREE.Color('#0f3a1c'), verde * .6).getHexString() });
     // ═══ CÂMERA = olhos do Adryan ═══
     if (camQ) { S.camera.fov = camQ[6]; S.camera.position.set(...camQ.slice(0, 3)); S.camera.lookAt(...camQ.slice(3, 6)); S.camera.up.set(0, 1, 0); S.camera.updateProjectionMatrix(); return; }
     if (t < T_KAT) { Ad.obj.visible = true; S.camera.up.set(0, 1, 0);
@@ -173,11 +173,11 @@ window.SETUP = async () => {
     const pos = E0.clone().lerp(K1, s1).lerp(K2, s2 * s2).lerp(K3, s3 * s3);
     const impacto = t > T_CAI ? Math.exp(-(t - T_CAI) * 9) * Math.sin((t - T_CAI) * 60) : 0, resp = t > T_CAI ? Math.sin((t - T_CAI) * 2 * Math.PI * 1.55) * (1 - .3 * P.suave(T_CAI, 30, t)) : 0;
     pos.y += .03 * impacto + .012 * resp;
-    const alvo = LAM.clone().lerp(v3(-.55, .25, 2.95), .55 * env(t, T_KAT + .3, 24.85, 25.25, 25.9));   // na cedência o olhar despenca pro chão e volta pra lâmina
+    const LAMm = LAM.clone().add(v3(.02, -.03, .1)), alvo = LAMm.clone().lerp(v3(-.55, .25, 2.95), .55 * env(t, T_KAT + .3, 24.85, 25.25, 25.9));   // na cedência o olhar despenca pro chão e volta pra lâmina
     alvo.y += .02 * resp; alvo.x += .01 * Math.sin(t * .9) * P.suave(26, 27, t);
     const roll = .22 * s2 * (1 - .4 * s3) + .02 * impacto;                                            // o corpo deitado de lado: o horizonte inclina
     S.camera.position.copy(pos); S.camera.up.set(Math.sin(roll), Math.cos(roll), 0); S.camera.lookAt(alvo);
-    S.camera.fov = 50 + 8 * s1 * (1 - s3) + 6 * s3; S.camera.updateProjectionMatrix();
+    S.camera.fov = (50 + 8 * s1 * (1 - s3) + 6 * s3) * (1 - .4 * P.suave(25.6, 27.4, t));   // no chão o olhar FIXA na lâmina (aproxima) S.camera.updateProjectionMatrix();
   };
 };
 </script></body></html>
